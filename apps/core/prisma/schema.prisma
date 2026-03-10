@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CampaignStatus {
+  DRAFT
+  ACTIVE
+  FUNDED
+  PAUSED
+  CLOSED
+}
+
+model Campaign {
+  id              String         @id @default(cuid())
+  name            String
+  description     String?
+  status          CampaignStatus @default(DRAFT)
+  issuerAddress   String
+  escrowId        String
+  poolSize        Decimal
+  loanDuration    Int
+  expectedReturn  Decimal
+  loanSize        Decimal
+  vaultId         String?
+  tokenSaleId     String?
+  tokenFactoryId  String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  investments Investment[]
+
+  @@map("campaigns")
+}
+
+model Investment {
+  id              String   @id @default(cuid())
+  campaignId      String
+  investorAddress String
+  usdcAmount      Decimal
+  tokenAmount     Decimal
+  txHash          String   @unique
+  createdAt       DateTime @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+
+  @@map("investments")
+}
