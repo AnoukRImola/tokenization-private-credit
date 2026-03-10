@@ -1,0 +1,102 @@
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateCampaignDto } from './dto/create-campaign.dto';
+import { UpdateCampaignDto } from './dto/update-campaign.dto';
+export declare class CampaignsService {
+    private readonly prisma;
+    constructor(prisma: PrismaService);
+    findAll(): import("@prisma/client").Prisma.PrismaPromise<{
+        name: string;
+        description: string | null;
+        issuerAddress: string;
+        escrowId: string;
+        poolSize: import("@prisma/client/runtime/library").Decimal;
+        loanDuration: number;
+        expectedReturn: import("@prisma/client/runtime/library").Decimal;
+        loanSize: import("@prisma/client/runtime/library").Decimal;
+        status: import("@prisma/client").$Enums.CampaignStatus;
+        vaultId: string | null;
+        tokenSaleId: string | null;
+        tokenFactoryId: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }[]>;
+    findOne(id: string): Promise<{
+        investments: {
+            id: string;
+            createdAt: Date;
+            campaignId: string;
+            investorAddress: string;
+            usdcAmount: import("@prisma/client/runtime/library").Decimal;
+            tokenAmount: import("@prisma/client/runtime/library").Decimal;
+            txHash: string;
+        }[];
+    } & {
+        name: string;
+        description: string | null;
+        issuerAddress: string;
+        escrowId: string;
+        poolSize: import("@prisma/client/runtime/library").Decimal;
+        loanDuration: number;
+        expectedReturn: import("@prisma/client/runtime/library").Decimal;
+        loanSize: import("@prisma/client/runtime/library").Decimal;
+        status: import("@prisma/client").$Enums.CampaignStatus;
+        vaultId: string | null;
+        tokenSaleId: string | null;
+        tokenFactoryId: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    create(dto: CreateCampaignDto): import("@prisma/client").Prisma.Prisma__CampaignClient<{
+        name: string;
+        description: string | null;
+        issuerAddress: string;
+        escrowId: string;
+        poolSize: import("@prisma/client/runtime/library").Decimal;
+        loanDuration: number;
+        expectedReturn: import("@prisma/client/runtime/library").Decimal;
+        loanSize: import("@prisma/client/runtime/library").Decimal;
+        status: import("@prisma/client").$Enums.CampaignStatus;
+        vaultId: string | null;
+        tokenSaleId: string | null;
+        tokenFactoryId: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    update(id: string, dto: UpdateCampaignDto): Promise<{
+        name: string;
+        description: string | null;
+        issuerAddress: string;
+        escrowId: string;
+        poolSize: import("@prisma/client/runtime/library").Decimal;
+        loanDuration: number;
+        expectedReturn: import("@prisma/client/runtime/library").Decimal;
+        loanSize: import("@prisma/client/runtime/library").Decimal;
+        status: import("@prisma/client").$Enums.CampaignStatus;
+        vaultId: string | null;
+        tokenSaleId: string | null;
+        tokenFactoryId: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    remove(id: string): Promise<{
+        name: string;
+        description: string | null;
+        issuerAddress: string;
+        escrowId: string;
+        poolSize: import("@prisma/client/runtime/library").Decimal;
+        loanDuration: number;
+        expectedReturn: import("@prisma/client/runtime/library").Decimal;
+        loanSize: import("@prisma/client/runtime/library").Decimal;
+        status: import("@prisma/client").$Enums.CampaignStatus;
+        vaultId: string | null;
+        tokenSaleId: string | null;
+        tokenFactoryId: string | null;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+}

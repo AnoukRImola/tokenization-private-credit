@@ -1,0 +1,45 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateCampaignDto } from './dto/create-campaign.dto';
+import { UpdateCampaignDto } from './dto/update-campaign.dto';
+
+@Injectable()
+export class CampaignsService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  findAll() {
+    return this.prisma.campaign.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async findOne(id: string) {
+    const campaign = await this.prisma.campaign.findUnique({
+      where: { id },
+      include: { investments: true },
+    });
+
+    if (!campaign) throw new NotFoundException(`Campaign ${id} not found`);
+
+    return campaign;
+  }
+
+  create(dto: CreateCampaignDto) {
+    return this.prisma.campaign.create({ data: dto });
+  }
+
+  async update(id: string, dto: UpdateCampaignDto) {
+    await this.findOne(id);
+
+    return this.prisma.campaign.update({
+      where: { id },
+      data: dto,
+    });
+  }
+
+  async remove(id: string) {
+    await this.findOne(id);
+
+    return this.prisma.campaign.delete({ where: { id } });
+  }
+}
