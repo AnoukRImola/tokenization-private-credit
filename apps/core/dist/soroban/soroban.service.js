@@ -36,7 +36,7 @@ let SorobanService = class SorobanService {
             networkPassphrase: this.networkPassphrase,
             publicKey: callerPublicKey,
         });
-        const tx = await client[method](args);
+        const tx = await (client)[method](args);
         return tx.toXDR();
     }
 };

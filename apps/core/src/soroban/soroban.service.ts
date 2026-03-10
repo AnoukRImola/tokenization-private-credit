@@ -40,7 +40,7 @@ export class SorobanService {
       publicKey: callerPublicKey,
     });
 
-    const tx = await (client as any)[method](args);
+    const tx = await (client)[method](args);
 
     return tx.toXDR();
   }
