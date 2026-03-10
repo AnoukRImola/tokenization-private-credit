@@ -1,0 +1,62 @@
+---
+description: Unit test patterns and conventions for core-api
+globs: apps/core-api/src/**/*.spec.ts
+alwaysApply: false
+---
+
+# Unit Test Conventions
+
+Tests use **Jest** with **@nestjs/testing**. See `docs/UNIT_TESTS.md` for full reference.
+
+## File Location
+
+Tests live next to the file they test: `{feature}.service.spec.ts`, `{feature}.controller.spec.ts`.
+
+## Test Structure
+
+```typescript
+describe('FeatureService', () => {
+  let service: FeatureService;
+
+  const mockPrismaService = {
+    model: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn() },
+  };
+  const mockEventEmitter = { emit: jest.fn() };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        FeatureService,
+        { provide: PrismaService, useValue: mockPrismaService },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
+      ],
+    }).compile();
+
+    service = module.get<FeatureService>(FeatureService);
+  });
+
+  afterEach(() => jest.clearAllMocks());
+});
+```
+
+## Controller Tests vs Service Tests
+
+- **Controller tests**: verify delegation to service, correct params, no business logic
+- **Service tests**: verify full business logic — happy path + every exception path
+
+## Key Patterns
+
+- Mock ALL dependencies — never use real DB or external services
+- Test every exception: `NotFoundException`, `ForbiddenException`, `BadRequestException`
+- Verify `eventEmitter.emit` calls for notifications/audit
+- Verify Prisma methods called with correct `where`/`data`
+- Use `mockResolvedValue` / `mockRejectedValue` for async mocks
+- Test idempotency: calling the same operation twice should not duplicate
+
+## Naming
+
+```typescript
+it('should throw NotFoundException when user does not exist', ...)
+it('should create application with AWAITING_ASSIGNMENT status', ...)
+it('should skip if PR already processed (idempotency)', ...)
+```
