@@ -25,7 +25,7 @@ This document maps the current tokenize escrow flow, identifying all components,
 
 ### Smart Contracts
 - **Token Contract (Token Factory)**: `apps/smart-contracts/contracts/token-factory/src/contract.rs`
-- **Token Sale Contract**: `apps/smart-contracts/contracts/token-sale/src/sale.rs`
+- **Token Sale Contract**: `apps/smart-contracts/contracts/participation-token/src/sale.rs` (WASM deployed as Token Sale)
 - **Token Metadata Module**: `apps/smart-contracts/contracts/token-factory/src/metadata.rs` (standard metadata + immutable escrow_id and mint_authority)
 
 ## Form Fields
@@ -99,7 +99,7 @@ User (Browser)
 ### Current Flow
 1. **Token Sale is deployed first** with a placeholder `sale_token` (deployer address) and `admin` (deployer). This yields `tokenSaleAddress` needed for the Token Factory constructor.
    - **Location**: `apps/backoffice-tokenization/src/lib/tokenDeploymentService.ts` (Token Sale creation, lines 49-56)
-   - **Contract**: `apps/smart-contracts/contracts/token-sale/src/sale.rs:__constructor(env, escrow_contract, sale_token, admin)`
+   - **Contract**: `apps/smart-contracts/contracts/participation-token/src/sale.rs:__constructor(env, escrow_contract, sale_token, admin)`
 
 2. **Token Factory is deployed with immutable mint_authority**: The Token Factory constructor receives `mint_authority: tokenSaleAddress` directly. There is no admin role and no `set_admin`; mint authority is set once at deployment and cannot be changed.
    - **Location**: `apps/backoffice-tokenization/src/lib/tokenDeploymentService.ts` (Token Factory creation, lines 64-71)
@@ -108,7 +108,7 @@ User (Browser)
 
 3. **Token Sale is updated with the real token address** via `set_token(tokenFactoryAddress)` (admin-only), so the sale contract can call `mint` on the token.
    - **Location**: `apps/backoffice-tokenization/src/lib/tokenDeploymentService.ts` (lines 77-82)
-   - **Contract**: `apps/smart-contracts/contracts/token-sale/src/sale.rs:set_token(env, new_token)`
+   - **Contract**: `apps/smart-contracts/contracts/participation-token/src/sale.rs:set_token(env, new_token)`
 
 ### Key Code Locations
 
@@ -163,7 +163,7 @@ mint_authority.require_auth();
    - **Token Factory**: constructor receives `client.nativeString(tokenName)`, `client.nativeString(tokenSymbol)`, `client.nativeString(escrowContractId)` (escrow_id), decimal 7, and `client.nativeAddress(tokenSaleAddress)` (mint_authority)
 
 6. **Token Sale Contract**:
-   - **File**: `apps/smart-contracts/contracts/token-sale/src/sale.rs`
+   - **File**: `apps/smart-contracts/contracts/participation-token/src/sale.rs`
    - **Constructor**: `__constructor(env, escrow_contract, sale_token, admin)` — stores escrow and token in config, admin for `set_token`
    - **buy()**: Uses `read_config()` to get `escrow_contract` and transfers USDC to escrow
 
@@ -184,7 +184,7 @@ const tokenSaleAddress = await client.createContract(
 );
 ```
 
-**Contract Implementation**: `apps/smart-contracts/contracts/token-sale/src/sale.rs:__constructor(env, escrow_contract, sale_token, admin)` (line 55)
+**Contract Implementation**: `apps/smart-contracts/contracts/participation-token/src/sale.rs:__constructor(env, escrow_contract, sale_token, admin)`
 - Parameters: `escrow_contract: Address, sale_token: Address, admin: Address`
 - Stores config via `write_config(&env, &escrow_contract, &sale_token)` and `write_admin(&env, &admin)`
 
@@ -366,7 +366,7 @@ Implemented in `impl Token` block:
 Per master instructions, the following **MUST NOT** be modified:
 
 1. **Token Sale Contract Logic** ❌ **DO NOT MODIFY**
-   - File: `apps/smart-contracts/contracts/token-sale/src/sale.rs`
+   - File: `apps/smart-contracts/contracts/participation-token/src/sale.rs`
    - The `buy()` function and contract structure must remain unchanged
 
 2. **Mint Authority and Deployment Order** ❌ **DO NOT MODIFY**

@@ -10,22 +10,31 @@ The token balance system allows users to view their token holdings across differ
 
 ### Components
 
-1. **API Endpoints** (`/app/api/`)
-   - `/api/token-balance` - Reads token balance from contract storage
-   - `/api/token-metadata` - Fetches token metadata (name, symbol, decimals)
+All paths below are relative to `apps/investor-tokenization/`.
 
-2. **Services** (`/features/investments/services/`)
-   - `InvestmentService` - Client-side service for API communication
+1. **API Endpoints** (`src/app/api/`)
+   - `src/app/api/token-balance/route.ts` — Reads token balance (simulation first, then storage fallback)
+   - `src/app/api/token-metadata/route.ts` — Fetches token metadata (name, symbol, decimals) via simulation
 
-3. **Hooks** (`/features/investments/hooks/`)
-   - `useUserInvestments` - Fetches user's investments with balances
-   - `useProjectTokenBalances` - Fetches balances for all projects
+2. **Services** (`src/features/investments/services/`)
+   - `InvestmentService` — Client-side service for API communication (`investment.service.ts`)
 
-4. **Components** (`/features/investments/components/`)
-   - `InvestmentCard` - Displays individual investment with token balance
-   - `InvestmentsView` - Main view showing all user investments
+3. **Hooks** (`src/features/investments/hooks/`)
+   - `useUserInvestments` — Fetches user's investments with balance > 0
+   - `useProjectTokenBalances` — Fetches balances for all projects (used by carousel/home)
+
+4. **Components**
+   - `src/features/investments/components/` — `InvestmentCard`, `InvestmentsView`
+   - `src/features/transparency/` — `ProjectList`, `Carousel` (use `useProjectTokenBalances` for balances on cards)
 
 ## How Token Balance Reading Works
+
+The API uses a **two-step strategy**:
+
+1. **Preferred: contract function call** — Simulate the standard `balance(address)` call (TokenInterface). If the contract exposes `balance()` and the simulation succeeds, the result is returned.
+2. **Fallback: direct storage read** — If the function call fails (e.g. non-existent function or simulation error), the handler reads the balance from the contract’s persistent storage using the same key structure as Stellar Expert.
+
+This way the system works with both Stellar Asset Contracts (SAC) and custom Token Factory contracts that store balances under `DataKey::Balance(address)`.
 
 ### Storage Structure
 
@@ -58,7 +67,7 @@ For `DataKey::Balance(address)`, the encoding is:
 ]
 ```
 
-### Reading Process
+### Reading Process (fallback when balance() is not used)
 
 1. **Construct Storage Key**
    ```typescript
@@ -123,10 +132,11 @@ Reads token balance from contract storage.
 ```
 
 **Implementation Details:**
-- Uses Soroban RPC: `https://soroban-testnet.stellar.org`
-- Reads directly from persistent storage
-- Returns `"0"` if no storage entry exists (user has no balance)
-- Handles errors gracefully
+- Tries **simulation** of `balance(address)` first (works for SAC and contracts that expose `balance()`).
+- If simulation fails, **fallback**: reads from persistent storage (key `DataKey::Balance(address)`).
+- Uses Soroban RPC: `https://soroban-testnet.stellar.org` (hardcoded in route; can be switched to env for production).
+- Returns `"0"` when no entry exists or on error (graceful degradation).
+- File: `apps/investor-tokenization/src/app/api/token-balance/route.ts`
 
 ### POST `/api/token-metadata`
 
@@ -150,9 +160,10 @@ Fetches token metadata (name, symbol, decimals) by simulating contract calls.
 ```
 
 **Implementation Details:**
-- Simulates calls to `name()`, `symbol()`, and `decimals()` functions
-- Uses transaction simulation (no actual transaction needed)
-- Returns defaults if metadata cannot be fetched
+- Simulates calls to `name()`, `symbol()`, and `decimals()` in parallel (no on-chain transaction).
+- Uses a dummy account for simulation; RPC: `https://soroban-testnet.stellar.org`.
+- Returns defaults (`name: "Unknown Token"`, `symbol: "TOKEN"`, `decimals: 7`) on failure.
+- File: `apps/investor-tokenization/src/app/api/token-metadata/route.ts`
 
 ## Services
 
@@ -275,14 +286,21 @@ formattedBalance.toLocaleString(undefined, {
 
 ## Project Data Structure
 
-Projects are defined in `ProjectList.tsx` and hooks:
+The list of projects used for **balance checks** is defined in the hooks (duplicated in each hook that needs it):
+
+- `useProjectTokenBalances.hook.ts` — `PROJECT_DATA` (used for carousel/home balances)
+- `useUserInvestments.hook.ts` — same `PROJECT_DATA` (used for investments view)
+
+The **carousel UI** gets project cards from `ProjectList.tsx` (`data` array with `escrowId`, `tokenSale`, `tokenFactory`, and optional `src`/`content`). The balances shown on each card come from `useProjectTokenBalances()`, which calls the token-balance API for each project in `PROJECT_DATA`.
+
+**Example PROJECT_DATA (in hooks):**
 
 ```typescript
 const PROJECT_DATA = [
   {
-    escrowId: "CBDLIY7HAJ73E6SPAOOKZFCJH3C4H6YBWATWQTON5Z7MY5JRVIIW7LQW",
-    tokenSale: "CAL7JK6HOQOW5KU7VKASIZ2RF4GFVQTZJAI7EHCX7VXTAXQ2B27QIEZL",
-    tokenFactory: "CDARBSD3OVSVUJWZV4W5HA66QDHY6A3YEH5EQGZPYFGS4DPDYW2UXWX3",
+    escrowId: "CCZHTYVLK6R2QMIFBTEN65ZVCSFBD3L5TXYCZJT5WTXE63ABYXBBCSEB",
+    tokenSale: "CC2AGB3AW5IITDIPEZGVX6XT5RTDIVINRZL7F6KZPIHEWN2GRXL5CRCT",
+    tokenFactory: "CDJTII2GR2FY6Q4NDJGZI7NW2SHQ7GR5Y2H7B7Q253PTZZAZZ25TFYYU",
   },
   // ... more projects
 ];
@@ -291,25 +309,19 @@ const PROJECT_DATA = [
 **Fields:**
 - `escrowId`: Escrow contract address
 - `tokenSale`: Token sale contract address
-- `tokenFactory`: Token factory contract address (used for balance reading)
+- `tokenFactory`: Token factory contract address (used for balance and metadata API calls)
 
-## Why Direct Storage Reading?
+## Balance Reading Strategy
 
-### Problem with Function Calls
+### Current Behavior
 
-The token contract doesn't expose a public `balance()` function that can be called directly. Attempting to call it results in:
-```
-Error: trying to invoke non-existent contract function: balance
-```
+1. **Try contract call first** — The handler simulates `balance(address)`. Our Token Factory implements the standard Soroban TokenInterface and exposes `balance()`, so this works for deployed token contracts. It also works for Stellar Asset Contracts (SAC).
+2. **Fallback: direct storage** — If the simulation fails (e.g. different contract type or RPC issue), the code reads the balance from persistent storage using `DataKey::Balance(address)`, matching Stellar Expert’s approach.
 
-### Solution: Direct Storage Access
+### Why Support Both?
 
-By reading directly from contract storage:
-- ✅ No function calls needed
-- ✅ Works even if functions aren't public
-- ✅ Faster (no simulation overhead)
-- ✅ Same approach as Stellar Expert
-- ✅ More reliable
+- **Function call:** Uses the public API; works for any contract that implements `balance()` (including SAC).
+- **Storage read:** Covers contracts that don’t expose `balance()` or when simulation is unavailable; same key layout as Stellar Expert.
 
 ## Comparison with Stellar Expert
 
@@ -426,10 +438,10 @@ Our implementation:
 
 ### Balance shows as 0 but user has tokens
 
-1. Check token factory address is correct
-2. Verify user address is correct
-3. Check if storage entry exists using Stellar Expert
-4. Verify enum variant encoding (should be `[1, address]`)
+1. Check token factory address is correct (must match the contract that holds the balance).
+2. Verify user address is correct (wallet that holds the tokens).
+3. The API tries `balance(address)` simulation first; if it fails, it falls back to storage. Check network/RPC and that the contract implements `balance()` (TokenInterface).
+4. For storage fallback: verify enum variant encoding (should be `[1, address]`) and that the entry exists on Stellar Expert.
 
 ### Metadata shows "Unknown Token"
 
