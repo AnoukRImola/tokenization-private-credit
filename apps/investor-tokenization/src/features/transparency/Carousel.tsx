@@ -40,7 +40,7 @@ export const DummyContent = ({
     <div className="space-y-6">
       {/* User Token Balance - Stellar Expert Style Display */}
       {formattedBalance > 0 && (
-        <div className="rounded-2xl bg-gradient-to-br from-green-500/10 via-green-500/5 to-transparent border-2 border-green-500/20 p-6">
+        <div className="rounded-2xl bg-linear-to-br from-green-500/10 via-green-500/5 to-transparent border-2 border-green-500/20 p-6">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-3 flex-1">
               <div className="p-2 rounded-lg bg-green-500/20">
