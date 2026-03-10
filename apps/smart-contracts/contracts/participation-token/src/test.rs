@@ -1,7 +1,7 @@
 #![cfg(test)]
 extern crate std;
 
-use crate::sale::{ParticipationTokenContract, ParticipationTokenContractClient};
+use crate::contract::{ParticipationTokenContract, ParticipationTokenContractClient};
 use escrow::{Escrow, EscrowContract, EscrowContractClient, Flags, Milestone, Roles, Trustline};
 use soroban_sdk::{testutils::Address as _, token, vec, Address, Env, String};
 use token::Client as TokenClient;
@@ -34,8 +34,16 @@ fn create_token_factory<'a>(e: &Env, mint_authority: &Address) -> FactoryTokenCl
     FactoryTokenClient::new(e, &token_contract)
 }
 
-fn create_participation_token<'a>(e: &Env, escrow_addr: &Address, sale_token_addr: &Address) -> ParticipationTokenContractClient<'a> {
-    let contract_id = e.register(ParticipationTokenContract, (escrow_addr.clone(), sale_token_addr.clone()));
+fn create_participation_token<'a>(
+    e: &Env,
+    escrow_addr: &Address,
+    sale_token_addr: &Address,
+    admin: &Address,
+) -> ParticipationTokenContractClient<'a> {
+    let contract_id = e.register(
+        ParticipationTokenContract,
+        (escrow_addr.clone(), sale_token_addr.clone(), admin.clone()),
+    );
     ParticipationTokenContractClient::new(e, &contract_id)
 }
 
@@ -105,8 +113,9 @@ fn test_buy_transfers_usdc_and_mints_sale_token() {
     let temp_admin = Address::generate(&env);
     let sale_token = create_token_factory(&env, &temp_admin);
 
-    // 4) Create ParticipationToken passing the escrow and token-factory addresses
-    let participation_token_client = create_participation_token(&env, &escrow_client.address, &sale_token.address);
+    // 4) Create ParticipationToken passing the escrow, token-factory, and admin addresses
+    let participation_token_client =
+        create_participation_token(&env, &escrow_client.address, &sale_token.address, &admin);
 
     // 5) Transfer mint authority of token-factory to the ParticipationToken contract
     sale_token.set_admin(&participation_token_client.address);
