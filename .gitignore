@@ -7,6 +7,10 @@ target
 
 # dependencies
 /node_modules
+**/node_modules
+
+# IDE
+.idea
 /.pnp
 .pnp.*
 .yarn/*
