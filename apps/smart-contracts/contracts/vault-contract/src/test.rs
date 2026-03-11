@@ -524,7 +524,7 @@ fn test_claim_emits_event() {
 
     // Verify event was emitted
     let events = env.events().all();
-    assert!(!events.is_empty(), "Expected claim event to be emitted");
+    assert!(!events.events().is_empty(), "Expected claim event to be emitted");
 }
 
 #[test]
@@ -545,7 +545,7 @@ fn test_availability_change_emits_event() {
     // Verify event was emitted
     let events = env.events().all();
     assert!(
-        !events.is_empty(),
+        !events.events().is_empty(),
         "Expected availability changed event to be emitted"
     );
 }
