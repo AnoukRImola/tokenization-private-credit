@@ -29,6 +29,8 @@
 
 ```bash
 $ npm install
+$ npm run prisma:generate
+$ npm run prisma:migrate -- --name init
 ```
 
 ## Compile and run the project

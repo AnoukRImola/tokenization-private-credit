@@ -11,7 +11,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CampaignsService = void 0;
 const common_1 = require("@nestjs/common");
+const client_1 = require("@prisma/client");
 const prisma_service_1 = require("../prisma/prisma.service");
+const ALLOWED_TRANSITIONS = {
+    [client_1.CampaignStatus.DRAFT]: [client_1.CampaignStatus.FUNDRAISING, client_1.CampaignStatus.PAUSED],
+    [client_1.CampaignStatus.FUNDRAISING]: [client_1.CampaignStatus.ACTIVE, client_1.CampaignStatus.PAUSED],
+    [client_1.CampaignStatus.ACTIVE]: [client_1.CampaignStatus.REPAYMENT, client_1.CampaignStatus.PAUSED],
+    [client_1.CampaignStatus.REPAYMENT]: [
+        client_1.CampaignStatus.CLAIMABLE,
+        client_1.CampaignStatus.PAUSED,
+    ],
+    [client_1.CampaignStatus.CLAIMABLE]: [client_1.CampaignStatus.CLOSED, client_1.CampaignStatus.PAUSED],
+    [client_1.CampaignStatus.CLOSED]: [],
+    [client_1.CampaignStatus.PAUSED]: [],
+};
 let CampaignsService = class CampaignsService {
     prisma;
     constructor(prisma) {
@@ -44,6 +57,63 @@ let CampaignsService = class CampaignsService {
     async remove(id) {
         await this.findOne(id);
         return this.prisma.campaign.delete({ where: { id } });
+    }
+    async updateStatus(id, dto) {
+        const campaign = await this.findOne(id);
+        const currentStatus = campaign.status;
+        const newStatus = dto.status;
+        this.validateStatusTransition(currentStatus, newStatus, campaign.previousStatus);
+        this.validatePrerequisites(campaign, newStatus);
+        const data = {
+            status: newStatus,
+        };
+        if (newStatus === client_1.CampaignStatus.PAUSED) {
+            data.previousStatus = currentStatus;
+        }
+        else if (currentStatus === client_1.CampaignStatus.PAUSED) {
+            data.previousStatus = null;
+        }
+        return this.prisma.campaign.update({
+            where: { id },
+            data,
+        });
+    }
+    validateStatusTransition(current, next, previousStatus) {
+        if (current === next) {
+            throw new common_1.BadRequestException(`Campaign is already in status ${current}`);
+        }
+        if (current === client_1.CampaignStatus.PAUSED) {
+            if (!previousStatus) {
+                throw new common_1.BadRequestException('Cannot resume: no previous status recorded');
+            }
+            if (next !== previousStatus) {
+                throw new common_1.BadRequestException(`Can only resume to previous status ${previousStatus}, not ${next}`);
+            }
+            return;
+        }
+        const allowed = ALLOWED_TRANSITIONS[current];
+        if (!allowed.includes(next)) {
+            throw new common_1.BadRequestException(`Invalid status transition from ${current} to ${next}`);
+        }
+    }
+    validatePrerequisites(campaign, newStatus) {
+        if (newStatus === client_1.CampaignStatus.FUNDRAISING) {
+            const missing = [];
+            if (!campaign.escrowId)
+                missing.push('escrowId');
+            if (!campaign.tokenSaleId)
+                missing.push('tokenSaleId');
+            if (!campaign.tokenFactoryId)
+                missing.push('tokenFactoryId');
+            if (missing.length > 0) {
+                throw new common_1.BadRequestException(`Cannot transition to FUNDRAISING: missing ${missing.join(', ')}`);
+            }
+        }
+        if (newStatus === client_1.CampaignStatus.CLAIMABLE) {
+            if (!campaign.vaultId) {
+                throw new common_1.BadRequestException('Cannot transition to CLAIMABLE: missing vaultId');
+            }
+        }
     }
 };
 exports.CampaignsService = CampaignsService;

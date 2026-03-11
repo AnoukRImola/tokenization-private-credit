@@ -11,11 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateCampaignDto = void 0;
 const class_validator_1 = require("class-validator");
-const client_1 = require("@prisma/client");
 class UpdateCampaignDto {
     name;
     description;
-    status;
     poolSize;
     loanDuration;
     expectedReturn;
@@ -35,11 +33,6 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateCampaignDto.prototype, "description", void 0);
-__decorate([
-    (0, class_validator_1.IsEnum)(client_1.CampaignStatus),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], UpdateCampaignDto.prototype, "status", void 0);
 __decorate([
     (0, class_validator_1.IsNumber)(),
     (0, class_validator_1.IsPositive)(),
