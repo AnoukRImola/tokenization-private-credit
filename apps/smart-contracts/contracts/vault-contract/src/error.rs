@@ -12,6 +12,11 @@ pub enum ContractError {
     TokenAndUsdcCannotBeSame = 6,
     InvalidAddressConfiguration = 7,
     AlreadyInitialized = 8,
+    InvalidRoiPercentage = 9,
+    EnabledFlagNotFound = 10,
+    RoiPercentageNotFound = 11,
+    TokenAddressNotFound = 12,
+    UsdcAddressNotFound = 13,
 }
 
 impl fmt::Display for ContractError {
@@ -38,6 +43,21 @@ impl fmt::Display for ContractError {
             }
             ContractError::AlreadyInitialized => {
                 write!(f, "Contract has already been initialized")
+            }
+            ContractError::InvalidRoiPercentage => {
+                write!(f, "ROI percentage must be non-negative")
+            }
+            ContractError::EnabledFlagNotFound => {
+                write!(f, "Enabled flag not found in storage")
+            }
+            ContractError::RoiPercentageNotFound => {
+                write!(f, "ROI percentage not found in storage")
+            }
+            ContractError::TokenAddressNotFound => {
+                write!(f, "Token address not found in storage")
+            }
+            ContractError::UsdcAddressNotFound => {
+                write!(f, "USDC address not found in storage")
             }
         }
     }

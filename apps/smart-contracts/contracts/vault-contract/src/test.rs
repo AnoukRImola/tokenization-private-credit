@@ -616,6 +616,40 @@ fn test_constructor_accepts_valid_distinct_addresses() {
     assert_eq!(vault.get_usdc_address(), usdc_client.address);
 }
 
+// ============ Input Validation Tests ============
+
+#[test]
+#[should_panic(expected = "Error(Contract, #9)")]
+fn test_constructor_rejects_negative_roi() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // Negative ROI should panic
+    create_vault(&env, &admin, true, -5, &token.address, &usdc_client.address);
+}
+
+#[test]
+fn test_constructor_accepts_zero_roi() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // Zero ROI is valid (no profit, just principal return)
+    let vault = create_vault(&env, &admin, true, 0, &token.address, &usdc_client.address);
+    assert_eq!(vault.get_roi_percentage(), 0);
+}
+
 // ============ Re-initialization Protection Tests ============
 
 #[test]
