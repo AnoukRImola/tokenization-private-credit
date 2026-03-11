@@ -65,6 +65,9 @@ impl VaultContract {
         token: Address,
         usdc: Address,
     ) {
+        if roi_percentage < 0 {
+            panic!("ROI percentage must be non-negative");
+        }
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::Enabled, &enabled);
         env.storage()
@@ -161,7 +164,14 @@ impl VaultContract {
             return Err(ContractError::BeneficiaryHasNoTokensToClaim);
         }
 
-        let usdc_amount = (token_balance * (100 + roi_percentage)) / 100;
+        let rate = 100_i128
+            .checked_add(roi_percentage)
+            .expect("ROI rate overflow");
+        let usdc_amount = token_balance
+            .checked_mul(rate)
+            .expect("USDC amount overflow")
+            .checked_div(100)
+            .expect("USDC amount division error");
 
         let usdc_address: Address = env
             .storage()
@@ -279,7 +289,7 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::RoiPercentage)
-            .unwrap_or(0);
+            .expect("ROI percentage not found");
 
         let token_address: Address = env
             .storage()
@@ -291,12 +301,19 @@ impl VaultContract {
         let token_balance = token_client.balance(&beneficiary);
 
         let usdc_amount = if token_balance > 0 {
-            (token_balance * (100 + roi_percentage)) / 100
+            let rate = 100_i128
+                .checked_add(roi_percentage)
+                .unwrap_or(0);
+            token_balance
+                .checked_mul(rate)
+                .unwrap_or(0)
+                .checked_div(100)
+                .unwrap_or(0)
         } else {
             0
         };
 
-        let roi_amount = usdc_amount - token_balance;
+        let roi_amount = usdc_amount.checked_sub(token_balance).unwrap_or(0);
 
         let usdc_address: Address = env
             .storage()
