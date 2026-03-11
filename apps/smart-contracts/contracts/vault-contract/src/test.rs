@@ -611,3 +611,87 @@ fn test_high_roi_percentage() {
     vault.claim(&beneficiary);
     assert_eq!(usdc_client.balance(&beneficiary), 200);
 }
+
+// ============ Security Tests (#33) ============
+
+#[test]
+#[should_panic(expected = "USDC amount overflow")]
+fn test_claim_overflow_in_formula() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // Use an extremely high ROI so that token_balance * (100 + roi) overflows i128
+    let extreme_roi: i128 = i128::MAX - 100;
+    let vault = create_vault(&env, &admin, true, extreme_roi, &token.address, &usdc_client.address);
+
+    token.mint(&beneficiary, &2);
+
+    // claim() will compute: 2 * (100 + extreme_roi) which overflows i128
+    vault.claim(&beneficiary);
+}
+
+#[test]
+#[should_panic(expected = "ROI percentage must be non-negative")]
+fn test_constructor_rejects_negative_roi() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    create_vault(&env, &admin, false, -1, &token.address, &usdc_client.address);
+}
+
+#[test]
+fn test_double_claim_same_beneficiary() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    let vault = create_vault(&env, &admin, true, 10, &token.address, &usdc_client.address);
+
+    token.mint(&beneficiary, &100);
+    usdc_admin.mint(&vault.address, &500);
+
+    // First claim succeeds
+    vault.claim(&beneficiary);
+    assert_eq!(usdc_client.balance(&beneficiary), 110);
+    assert_eq!(token.balance(&beneficiary), 0);
+
+    // Second claim fails — tokens already burned
+    let result = vault.try_claim(&beneficiary);
+    assert_eq!(result, Err(Ok(ContractError::BeneficiaryHasNoTokensToClaim)));
+}
+
+#[test]
+#[should_panic]
+fn test_non_admin_cannot_change_availability() {
+    let env = Env::default();
+    // Do NOT mock_all_auths — we want auth to fail for non-admin
+
+    let admin = Address::generate(&env);
+    let _non_admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    let vault = create_vault(&env, &admin, false, 10, &token.address, &usdc_client.address);
+
+    // Non-admin tries to enable — should fail auth
+    vault.availability_for_exchange(&true);
+}
