@@ -1,26 +1,3 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
@@ -29,9 +6,98 @@
 
 ```bash
 $ npm install
-$ npm run prisma:generate
-$ npm run prisma:migrate -- --name init
 ```
+
+## Variables de entorno
+
+Copia el archivo de ejemplo y configura la URL de la base de datos:
+
+```bash
+$ cp .env.example .env
+```
+
+Edita el `.env` con las credenciales de la base de datos proporcionadas por el equipo:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
+```
+
+---
+
+## 🗄️ Base de datos y Prisma
+
+Este proyecto usa una base de datos PostgreSQL compartida en la nube. Todo el equipo apunta a la misma instancia.
+
+### Comandos disponibles
+
+```bash
+# Genera el Prisma Client (tipos y métodos ORM) a partir del schema.prisma
+$ npm run prisma:generate
+
+# Crea una nueva migración Y la aplica en la DB (solo quien hace el cambio)
+$ npm run prisma:migrate -- --name nombre_descriptivo
+
+# Aplica migraciones pendientes sin generar ni resetear nada (todos los demás)
+$ npm run prisma:deploy
+```
+
+---
+
+### 🟢 Soy nuevo en el proyecto
+
+Estos son los únicos comandos que debes correr para dejar la DB lista:
+
+```bash
+$ npm run prisma:deploy    # aplica todas las migraciones existentes en la DB
+$ npm run prisma:generate  # genera el cliente con los tipos actuales
+```
+
+> ⚠️ **Nunca corras `prisma:migrate` si no hiciste un cambio al schema, y nunca corras `prisma migrate reset` — eso borra todos los datos de la base de datos compartida.**
+
+---
+
+### 🔵 Hice pull y alguien modificó el schema
+
+Cuando hagas `git pull` y veas cambios en `prisma/schema.prisma` o en `prisma/migrations/`, ejecuta:
+
+```bash
+$ npm run prisma:deploy    # sincroniza las migraciones nuevas con la DB
+$ npm run prisma:generate  # regenera el cliente con los nuevos tipos
+```
+
+---
+
+### 🟡 Necesito modificar el schema de la base de datos
+
+1. Edita `prisma/schema.prisma` con tus cambios
+2. Crea y aplica la migración en la DB:
+
+```bash
+$ npm run prisma:migrate -- --name descripcion_del_cambio
+```
+
+3. Commitea **ambos** archivos, esto es obligatorio:
+
+```bash
+$ git add prisma/schema.prisma
+$ git add prisma/migrations/
+$ git commit -m "feat: descripcion del cambio"
+$ git push
+```
+
+> El resto del equipo solo necesita hacer `git pull` y luego correr `prisma:deploy` + `prisma:generate`.
+
+---
+
+### Resumen del flujo
+
+| Situación | Comandos |
+|---|---|
+| Soy nuevo en el proyecto | `prisma:deploy` → `prisma:generate` |
+| Hice pull con cambios de otro | `prisma:deploy` → `prisma:generate` |
+| Modifiqué el schema | `prisma:migrate -- --name <nombre>` → commit y push |
+
+---
 
 ## Compile and run the project
 

@@ -7,6 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum LoanStatus {
+  PENDING
+  DISBURSED
+  REPAID
+  DEFAULTED
+}
+
 enum CampaignStatus {
   DRAFT
   FUNDRAISING
@@ -36,6 +43,7 @@ model Campaign {
   updatedAt       DateTime       @updatedAt
 
   investments Investment[]
+  loans       Loan[]
 
   @@map("campaigns")
 }
@@ -52,4 +60,22 @@ model Investment {
   campaign Campaign @relation(fields: [campaignId], references: [id])
 
   @@map("investments")
+}
+
+model Loan {
+  id              String     @id @default(cuid())
+  campaignId      String
+  description     String
+  amount          Decimal
+  receiver        String
+  milestoneIndex  Int?
+  status          LoanStatus @default(PENDING)
+  disbursedAt     DateTime?
+  repaidAt        DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+
+  @@map("loans")
 }

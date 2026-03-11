@@ -17,11 +17,13 @@ let DeployService = class DeployService {
     soroban;
     participationTokenWasmHash;
     tokenFactoryWasmHash;
+    vaultWasmHash;
     constructor(soroban) {
         this.soroban = soroban;
         this.participationTokenWasmHash =
             process.env.PARTICIPATION_TOKEN_WASM_HASH;
         this.tokenFactoryWasmHash = process.env.TOKEN_FACTORY_WASM_HASH;
+        this.vaultWasmHash = process.env.VAULT_WASM_HASH;
     }
     deployParticipationToken(dto) {
         return this.soroban.buildDeployTransaction(this.participationTokenWasmHash, {
@@ -37,6 +39,15 @@ let DeployService = class DeployService {
             escrow_id: dto.escrowContractId,
             decimal: TOKEN_DECIMAL,
             mint_authority: dto.mintAuthority,
+        }, dto.callerPublicKey);
+    }
+    deployVault(dto) {
+        return this.soroban.buildDeployTransaction(this.vaultWasmHash, {
+            admin: dto.admin,
+            enabled: dto.enabled,
+            roi_percentage: dto.roiPercentage,
+            token: dto.token,
+            usdc: dto.usdc,
         }, dto.callerPublicKey);
     }
 };
