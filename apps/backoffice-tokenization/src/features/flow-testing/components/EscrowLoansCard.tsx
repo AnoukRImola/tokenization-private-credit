@@ -15,7 +15,7 @@ interface EscrowLoansCardProps {
   changeStatusForm: UseFormReturn<{
     milestoneIndex: string;
     status: string;
-    evidence: string;
+    evidence?: string;
   }>;
   changeStatusSubmit: (e?: React.BaseSyntheticEvent) => void;
   changeStatusSubmitting: boolean;
