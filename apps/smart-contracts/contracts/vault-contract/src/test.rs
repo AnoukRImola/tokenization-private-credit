@@ -67,9 +67,9 @@ fn test_vault_deployment_and_availability() {
 
     let vault = create_vault(&env, &admin, false, 10, &token.address, &usdc_client.address);
 
-    vault.availability_for_exchange(&admin, &true);
+    vault.availability_for_exchange(&true);
 
-    vault.availability_for_exchange(&admin, &false);
+    vault.availability_for_exchange(&false);
 }
 
 #[test]
@@ -237,7 +237,7 @@ fn test_is_enabled() {
     assert_eq!(vault_enabled.is_enabled(), true);
 
     // Test toggling
-    vault_disabled.availability_for_exchange(&admin, &true);
+    vault_disabled.availability_for_exchange(&true);
     assert_eq!(vault_disabled.is_enabled(), true);
 }
 
@@ -540,7 +540,7 @@ fn test_availability_change_emits_event() {
 
     let vault = create_vault(&env, &admin, false, 10, &token.address, &usdc_client.address);
 
-    vault.availability_for_exchange(&admin, &true);
+    vault.availability_for_exchange(&true);
 
     // Verify event was emitted
     let events = env.events().all();
