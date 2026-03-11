@@ -138,9 +138,14 @@ impl VaultContract {
     /// * `beneficiary` - The address claiming their ROI (must have tokens)
     ///
     /// # Errors
+    /// * `EnabledNotFound` - If enabled flag is not set in storage
     /// * `ExchangeIsCurrentlyDisabled` - If vault is disabled
+    /// * `RoiPercentageNotFound` - If ROI percentage is not set in storage
+    /// * `TokenAddressNotFound` - If token address is not set in storage
     /// * `BeneficiaryHasNoTokensToClaim` - If beneficiary has zero tokens
+    /// * `UsdcAddressNotFound` - If USDC address is not set in storage
     /// * `VaultDoesNotHaveEnoughUSDC` - If vault cannot cover the claim
+    /// * `ArithmeticOverflow` - If total tokens redeemed overflows
     pub fn claim(env: Env, beneficiary: Address) -> Result<(), ContractError> {
         beneficiary.require_auth();
 
@@ -202,7 +207,7 @@ impl VaultContract {
         token_client.burn(&beneficiary, &token_balance);
         usdc_client.transfer(&env.current_contract_address(), &beneficiary, &usdc_amount);
 
-        // Update total tokens redeemed
+        // Update total tokens redeemed (checked arithmetic — #26)
         let total_redeemed: i128 = env
             .storage()
             .instance()
