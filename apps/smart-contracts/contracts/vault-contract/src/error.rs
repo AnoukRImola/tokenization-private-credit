@@ -17,6 +17,7 @@ pub enum ContractError {
     RoiPercentageNotFound = 11,
     TokenAddressNotFound = 12,
     UsdcAddressNotFound = 13,
+    ArithmeticOverflow = 14,
 }
 
 impl fmt::Display for ContractError {
@@ -59,6 +60,7 @@ impl fmt::Display for ContractError {
             ContractError::UsdcAddressNotFound => {
                 write!(f, "USDC address not found in storage")
             }
+            ContractError::ArithmeticOverflow => write!(f, "Arithmetic overflow"),
         }
     }
 }
