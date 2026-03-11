@@ -7,6 +7,12 @@ import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { useCampaignFlow } from "../hooks/useCampaignFlow";
 import { CheckCircle2, XCircle, Loader2, Circle } from "lucide-react";
+import {
+  rpc,
+  TransactionBuilder,
+  Address,
+  Networks,
+} from "@stellar/stellar-sdk";
 
 type PhaseStatus = "idle" | "loading" | "success" | "error";
 
@@ -36,6 +42,36 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     throw new Error(err.message ?? `Error ${res.status} en ${path}`);
   }
   return res.json() as Promise<T>;
+}
+
+async function submitToSoroban(signedXdr: string): Promise<string | null> {
+  const server = new rpc.Server("https://soroban-testnet.stellar.org");
+  const tx = TransactionBuilder.fromXDR(signedXdr, Networks.TESTNET);
+
+  const send = await server.sendTransaction(tx);
+  if (send.status === "ERROR") {
+    throw new Error(`Soroban error: ${JSON.stringify(send.errorResult)}`);
+  }
+
+  let result: rpc.Api.GetTransactionResponse | undefined;
+  for (let i = 0; i < 30; i++) {
+    await new Promise((r) => setTimeout(r, 2000));
+    result = await server.getTransaction(send.hash);
+    if (result.status !== rpc.Api.GetTransactionStatus.NOT_FOUND) break;
+  }
+
+  if (!result || result.status !== rpc.Api.GetTransactionStatus.SUCCESS) {
+    throw new Error(`Transaction ${result?.status ?? "TIMEOUT"}`);
+  }
+
+  const success = result as rpc.Api.GetSuccessfulTransactionResponse;
+  try {
+    return success.returnValue
+      ? Address.fromScVal(success.returnValue).toString()
+      : null;
+  } catch {
+    return null;
+  }
 }
 
 function slugToSymbol(name: string): string {
@@ -94,17 +130,14 @@ export function StepTokenizeEscrow() {
           unsignedTransaction: tfXdr,
           address: walletAddress,
         });
-        const tfResult = await post<{ contractId: string | null }>(
-          "/soroban/submit-transaction",
-          { signedXdr: signedTfXdr },
-        );
-        if (!tfResult.contractId) {
+        const tfContractId = await submitToSoroban(signedTfXdr);
+        if (!tfContractId) {
           throw new Error(
             "El despliegue del Token Factory no retornó un contract ID",
           );
         }
-        tokenFactoryIdRef.current = tfResult.contractId;
-        saveTokenFactoryId(tfResult.contractId);
+        tokenFactoryIdRef.current = tfContractId;
+        saveTokenFactoryId(tfContractId);
         setPhaseStatus(0, "success");
       }
 
@@ -119,17 +152,14 @@ export function StepTokenizeEscrow() {
           unsignedTransaction: ptXdr,
           address: walletAddress,
         });
-        const ptResult = await post<{ contractId: string | null }>(
-          "/soroban/submit-transaction",
-          { signedXdr: signedPtXdr },
-        );
-        if (!ptResult.contractId) {
+        const ptContractId = await submitToSoroban(signedPtXdr);
+        if (!ptContractId) {
           throw new Error(
             "El despliegue del Token de Participación no retornó un contract ID",
           );
         }
-        tokenSaleIdRef.current = ptResult.contractId;
-        saveTokenSaleId(ptResult.contractId);
+        tokenSaleIdRef.current = ptContractId;
+        saveTokenSaleId(ptContractId);
         setPhaseStatus(1, "success");
       }
 
@@ -148,7 +178,7 @@ export function StepTokenizeEscrow() {
           unsignedTransaction: saXdr,
           address: walletAddress,
         });
-        await post("/soroban/submit-transaction", { signedXdr: signedSaXdr });
+        await submitToSoroban(signedSaXdr);
         setPhaseStatus(2, "success");
       }
 
