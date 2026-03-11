@@ -54,7 +54,7 @@ fn create_vault<'a>(
 // ============ Constructor Validation Tests ============
 
 #[test]
-#[should_panic(expected = "roi_percentage must be between 0 and 1000")]
+#[should_panic(expected = "Error(Contract, #9)")]
 fn test_constructor_rejects_negative_roi_percentage() {
     let env = Env::default();
     env.mock_all_auths();
@@ -68,7 +68,7 @@ fn test_constructor_rejects_negative_roi_percentage() {
 }
 
 #[test]
-#[should_panic(expected = "roi_percentage must be between 0 and 1000")]
+#[should_panic(expected = "Error(Contract, #9)")]
 fn test_constructor_rejects_roi_percentage_over_max() {
     let env = Env::default();
     env.mock_all_auths();
@@ -762,4 +762,37 @@ fn test_high_roi_percentage() {
 
     vault.claim(&beneficiary);
     assert_eq!(usdc_client.balance(&beneficiary), 200);
+}
+
+// ============ Constructor Validation Tests (CoKeFish #24) ============
+
+#[test]
+#[should_panic(expected = "Error(Contract, #9)")]
+fn test_constructor_rejects_excessive_roi() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // ROI_MAX is 1000, so 1001 should fail
+    create_vault(&env, &admin, true, 1001, &token.address, &usdc_client.address);
+}
+
+#[test]
+fn test_constructor_accepts_max_roi() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    let vault = create_vault(&env, &admin, true, 1000, &token.address, &usdc_client.address);
+    assert_eq!(vault.get_roi_percentage(), 1000);
 }

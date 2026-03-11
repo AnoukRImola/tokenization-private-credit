@@ -29,13 +29,13 @@ impl VaultContract {
     /// # Arguments
     /// * `admin` - The address that will control vault availability
     /// * `enabled` - Initial state of whether claiming is enabled
-    /// * `roi_percentage` - The ROI percentage (e.g., 5 for 5% return)
+    /// * `roi_percentage` - The ROI percentage (e.g., 5 for 5% return). Must be 0..=1000.
     /// * `token` - The participation token contract address (must be trusted)
     /// * `usdc` - The USDC stablecoin contract address (must be trusted)
     ///
     /// # Panics
     /// * `AlreadyInitialized` - If the contract has already been initialized
-    /// * `InvalidRoiPercentage` - If roi_percentage is negative
+    /// * `InvalidRoiPercentage` - If roi_percentage is negative or > 1000
     /// * `TokenAndUsdcCannotBeSame` - If token and USDC addresses are identical
     /// * `InvalidAddressConfiguration` - If admin equals token or USDC address
     pub fn __constructor(
