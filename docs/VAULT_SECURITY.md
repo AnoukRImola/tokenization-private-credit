@@ -47,11 +47,29 @@ The constructor enforces the following checks:
 
 | Check | Error Code | Description |
 |-------|-----------|-------------|
+| Not already initialized | `AlreadyInitialized (8)` | Prevents constructor re-invocation on upgrade/redeploy |
 | `token != usdc` | `TokenAndUsdcCannotBeSame (6)` | Prevents deploying with the same address for both token and USDC |
 | `admin != token` | `InvalidAddressConfiguration (7)` | Prevents admin from being a token contract |
 | `admin != usdc` | `InvalidAddressConfiguration (7)` | Prevents admin from being the USDC contract |
 
 These are **basic sanity checks**, not a substitute for deployer diligence. They catch obvious misconfigurations but cannot verify that an address implements the correct interface or is the "right" contract.
+
+## Initialization & Upgrade Behavior
+
+The vault contract uses an `Initialized` storage flag as defense-in-depth against constructor re-invocation.
+
+**How it works:**
+1. On first deployment, `Initialized` is `false` (default). The constructor runs normally and sets it to `true`.
+2. Any subsequent attempt to call the constructor will find `Initialized = true` and panic with `AlreadyInitialized (8)`.
+
+**On WASM upgrades (`update_current_contract_wasm`):**
+- Soroban does NOT re-call `__constructor` during WASM upgrades — storage is preserved.
+- The `Initialized` flag remains `true`, so even if a future SDK version changes this behavior, the contract is protected.
+- All existing storage (admin, token, usdc, etc.) persists through the upgrade.
+
+**When re-deployment is needed:**
+- If you need to change immutable parameters (token, usdc, admin), you must deploy a **new contract instance**. There is no migration path for these values.
+- The old vault should be drained of USDC and disabled before deploying a replacement.
 
 ## Deployment Checklist
 

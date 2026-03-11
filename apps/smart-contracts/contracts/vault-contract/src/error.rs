@@ -11,6 +11,7 @@ pub enum ContractError {
     VaultDoesNotHaveEnoughUSDC = 5,
     TokenAndUsdcCannotBeSame = 6,
     InvalidAddressConfiguration = 7,
+    AlreadyInitialized = 8,
 }
 
 impl fmt::Display for ContractError {
@@ -34,6 +35,9 @@ impl fmt::Display for ContractError {
             }
             ContractError::InvalidAddressConfiguration => {
                 write!(f, "Invalid address configuration: admin cannot be token or USDC address")
+            }
+            ContractError::AlreadyInitialized => {
+                write!(f, "Contract has already been initialized")
             }
         }
     }

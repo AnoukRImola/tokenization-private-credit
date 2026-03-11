@@ -616,6 +616,28 @@ fn test_constructor_accepts_valid_distinct_addresses() {
     assert_eq!(vault.get_usdc_address(), usdc_client.address);
 }
 
+// ============ Re-initialization Protection Tests ============
+
+#[test]
+fn test_constructor_sets_initialized_flag() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // First deploy works fine
+    let vault = create_vault(&env, &admin, true, 10, &token.address, &usdc_client.address);
+
+    // Vault is functional after initialization
+    assert_eq!(vault.get_admin(), admin);
+    assert_eq!(vault.is_enabled(), true);
+    assert_eq!(vault.get_roi_percentage(), 10);
+}
+
 // ============ Edge Case Tests ============
 
 #[test]

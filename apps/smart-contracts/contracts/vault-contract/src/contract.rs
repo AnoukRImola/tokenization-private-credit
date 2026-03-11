@@ -34,6 +34,7 @@ impl VaultContract {
     /// * `usdc` - The USDC stablecoin contract address (must be trusted)
     ///
     /// # Panics
+    /// * `AlreadyInitialized` - If the contract has already been initialized
     /// * `TokenAndUsdcCannotBeSame` - If token and USDC addresses are identical
     /// * `InvalidAddressConfiguration` - If admin equals token or USDC address
     pub fn __constructor(
@@ -44,6 +45,15 @@ impl VaultContract {
         token: Address,
         usdc: Address,
     ) {
+        let already_initialized: bool = env
+            .storage()
+            .instance()
+            .get(&DataKey::Initialized)
+            .unwrap_or(false);
+        if already_initialized {
+            panic_with_error!(&env, ContractError::AlreadyInitialized);
+        }
+
         if token == usdc {
             panic_with_error!(&env, ContractError::TokenAndUsdcCannotBeSame);
         }
@@ -51,6 +61,9 @@ impl VaultContract {
             panic_with_error!(&env, ContractError::InvalidAddressConfiguration);
         }
 
+        env.storage()
+            .instance()
+            .set(&DataKey::Initialized, &true);
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::Enabled, &enabled);
         env.storage()

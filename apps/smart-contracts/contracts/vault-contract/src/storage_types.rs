@@ -17,4 +17,6 @@ pub enum DataKey {
     UsdcAddress,
     /// Total tokens that have been redeemed through the vault
     TotalTokensRedeemed,
+    /// Flag to prevent constructor re-invocation
+    Initialized,
 }
