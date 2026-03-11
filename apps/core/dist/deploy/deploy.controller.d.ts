@@ -1,9 +1,13 @@
 import { DeployService } from './deploy.service';
 import { DeployParticipationTokenDto } from './dto/deploy-participation-token.dto';
+import { DeployTokenFactoryDto } from './dto/deploy-token-factory.dto';
 export declare class DeployController {
     private readonly deployService;
     constructor(deployService: DeployService);
     deployParticipationToken(dto: DeployParticipationTokenDto): Promise<{
+        unsignedXdr: string;
+    }>;
+    deployTokenFactory(dto: DeployTokenFactoryDto): Promise<{
         unsignedXdr: string;
     }>;
 }

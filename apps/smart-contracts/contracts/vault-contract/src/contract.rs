@@ -1,46 +1,10 @@
-use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env};
+use soroban_sdk::{contract, contractimpl, panic_with_error, token, Address, Env};
 use token::Client as TokenClient;
 
 use crate::error::ContractError;
 use crate::events::{events, AvailabilityChangedEvent, ClaimEvent};
 use crate::storage_types::DataKey;
-
-/// A complete snapshot of the vault's current state.
-/// Useful for dashboards, analytics, and indexer integrations.
-#[derive(Clone, Debug)]
-#[contracttype]
-pub struct VaultOverview {
-    /// The admin address that controls the vault
-    pub admin: Address,
-    /// Whether claiming is currently enabled
-    pub enabled: bool,
-    /// The ROI percentage (e.g., 5 = 5% return on investment)
-    pub roi_percentage: i128,
-    /// The participation token contract address
-    pub token_address: Address,
-    /// The USDC stablecoin contract address
-    pub usdc_address: Address,
-    /// Current USDC balance available in the vault
-    pub vault_usdc_balance: i128,
-    /// Total participation tokens that have been redeemed
-    pub total_tokens_redeemed: i128,
-}
-
-/// Information about a beneficiary's claimable ROI.
-#[derive(Clone, Debug)]
-#[contracttype]
-pub struct ClaimPreview {
-    /// The beneficiary's current token balance
-    pub token_balance: i128,
-    /// The amount of USDC the beneficiary would receive
-    pub usdc_amount: i128,
-    /// The ROI portion of the USDC amount (profit)
-    pub roi_amount: i128,
-    /// Whether the vault has enough USDC to fulfill this claim
-    pub vault_has_sufficient_balance: bool,
-    /// Whether claiming is currently enabled
-    pub claim_enabled: bool,
-}
+use crate::types::{ClaimPreview, VaultOverview};
 
 #[contract]
 pub struct VaultContract;
@@ -51,12 +15,29 @@ impl VaultContract {
 
     /// Initializes the vault contract with the given parameters.
     ///
+    /// # Trust Assumptions
+    /// The deployer is responsible for providing correct and trusted addresses.
+    /// These addresses are **immutable** after deployment — there are no setters.
+    ///
+    /// * `token` must be the participation token contract deployed by the token factory.
+    /// * `usdc` must be the canonical USDC Stellar Asset Contract on the target network.
+    /// * `admin` must be a secure, controlled address (ideally a multisig).
+    ///
+    /// Providing incorrect addresses will render the vault permanently non-functional.
+    /// See `docs/VAULT_SECURITY.md` for the full deployment checklist.
+    ///
     /// # Arguments
     /// * `admin` - The address that will control vault availability
     /// * `enabled` - Initial state of whether claiming is enabled
     /// * `roi_percentage` - The ROI percentage (e.g., 5 for 5% return)
-    /// * `token` - The token factory address
-    /// * `usdc` - The USDC stablecoin contract address
+    /// * `token` - The participation token contract address (must be trusted)
+    /// * `usdc` - The USDC stablecoin contract address (must be trusted)
+    ///
+    /// # Panics
+    /// * `AlreadyInitialized` - If the contract has already been initialized
+    /// * `InvalidRoiPercentage` - If roi_percentage is negative
+    /// * `TokenAndUsdcCannotBeSame` - If token and USDC addresses are identical
+    /// * `InvalidAddressConfiguration` - If admin equals token or USDC address
     pub fn __constructor(
         env: Env,
         admin: Address,
@@ -65,6 +46,28 @@ impl VaultContract {
         token: Address,
         usdc: Address,
     ) {
+        let already_initialized: bool = env
+            .storage()
+            .instance()
+            .get(&DataKey::Initialized)
+            .unwrap_or(false);
+        if already_initialized {
+            panic_with_error!(&env, ContractError::AlreadyInitialized);
+        }
+
+        if roi_percentage < 0 {
+            panic_with_error!(&env, ContractError::InvalidRoiPercentage);
+        }
+        if token == usdc {
+            panic_with_error!(&env, ContractError::TokenAndUsdcCannotBeSame);
+        }
+        if admin == token || admin == usdc {
+            panic_with_error!(&env, ContractError::InvalidAddressConfiguration);
+        }
+
+        env.storage()
+            .instance()
+            .set(&DataKey::Initialized, &true);
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::Enabled, &enabled);
         env.storage()
@@ -143,7 +146,7 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::Enabled)
-            .expect("Enabled flag not found");
+            .ok_or(ContractError::EnabledFlagNotFound)?;
 
         if !enabled {
             return Err(ContractError::ExchangeIsCurrentlyDisabled);
@@ -153,13 +156,13 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::RoiPercentage)
-            .expect("ROI percentage not found");
+            .ok_or(ContractError::RoiPercentageNotFound)?;
 
         let token_address: Address = env
             .storage()
             .instance()
             .get(&DataKey::TokenAddress)
-            .expect("Token address not found");
+            .ok_or(ContractError::TokenAddressNotFound)?;
 
         let token_client = TokenClient::new(&env, &token_address);
         let token_balance = token_client.balance(&beneficiary);
@@ -174,7 +177,7 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found");
+            .ok_or(ContractError::UsdcAddressNotFound)?;
 
         let usdc_client = TokenClient::new(&env, &usdc_address);
         let vault_usdc_balance = usdc_client.balance(&env.current_contract_address());
@@ -214,55 +217,55 @@ impl VaultContract {
     // ============ View/Getter Functions ============
 
     /// Returns the admin address.
-    pub fn get_admin(env: Env) -> Address {
+    pub fn get_admin(env: Env) -> Result<Address, ContractError> {
         env.storage()
             .instance()
             .get(&DataKey::Admin)
-            .expect("Admin not found")
+            .ok_or(ContractError::AdminNotFound)
     }
 
     /// Returns whether claiming is currently enabled.
-    pub fn is_enabled(env: Env) -> bool {
+    pub fn is_enabled(env: Env) -> Result<bool, ContractError> {
         env.storage()
             .instance()
             .get(&DataKey::Enabled)
-            .unwrap_or(false)
+            .ok_or(ContractError::EnabledFlagNotFound)
     }
 
     /// Returns the ROI percentage (e.g., 5 means 5% return).
-    pub fn get_roi_percentage(env: Env) -> i128 {
+    pub fn get_roi_percentage(env: Env) -> Result<i128, ContractError> {
         env.storage()
             .instance()
             .get(&DataKey::RoiPercentage)
-            .expect("ROI percentage not found")
+            .ok_or(ContractError::RoiPercentageNotFound)
     }
 
     /// Returns the participation token contract address.
-    pub fn get_token_address(env: Env) -> Address {
+    pub fn get_token_address(env: Env) -> Result<Address, ContractError> {
         env.storage()
             .instance()
             .get(&DataKey::TokenAddress)
-            .expect("Token address not found")
+            .ok_or(ContractError::TokenAddressNotFound)
     }
 
     /// Returns the USDC stablecoin contract address.
-    pub fn get_usdc_address(env: Env) -> Address {
+    pub fn get_usdc_address(env: Env) -> Result<Address, ContractError> {
         env.storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found")
+            .ok_or(ContractError::UsdcAddressNotFound)
     }
 
     /// Returns the current USDC balance held by the vault.
-    pub fn get_vault_usdc_balance(env: Env) -> i128 {
+    pub fn get_vault_usdc_balance(env: Env) -> Result<i128, ContractError> {
         let usdc_address: Address = env
             .storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found");
+            .ok_or(ContractError::UsdcAddressNotFound)?;
 
         let usdc_client = TokenClient::new(&env, &usdc_address);
-        usdc_client.balance(&env.current_contract_address())
+        Ok(usdc_client.balance(&env.current_contract_address()))
     }
 
     /// Returns the total amount of participation tokens that have been redeemed.
@@ -282,19 +285,19 @@ impl VaultContract {
     /// * `beneficiary` - The address to preview the claim for
     ///
     /// # Returns
-    /// A `ClaimPreview` struct with all relevant claim information
-    pub fn preview_claim(env: Env, beneficiary: Address) -> ClaimPreview {
+    /// A `Result<ClaimPreview, ContractError>` with all relevant claim information
+    pub fn preview_claim(env: Env, beneficiary: Address) -> Result<ClaimPreview, ContractError> {
         let roi_percentage: i128 = env
             .storage()
             .instance()
             .get(&DataKey::RoiPercentage)
-            .unwrap_or(0);
+            .ok_or(ContractError::RoiPercentageNotFound)?;
 
         let token_address: Address = env
             .storage()
             .instance()
             .get(&DataKey::TokenAddress)
-            .expect("Token address not found");
+            .ok_or(ContractError::TokenAddressNotFound)?;
 
         let token_client = TokenClient::new(&env, &token_address);
         let token_balance = token_client.balance(&beneficiary);
@@ -311,7 +314,7 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found");
+            .ok_or(ContractError::UsdcAddressNotFound)?;
 
         let usdc_client = TokenClient::new(&env, &usdc_address);
         let vault_usdc_balance = usdc_client.balance(&env.current_contract_address());
@@ -320,51 +323,51 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::Enabled)
-            .unwrap_or(false);
+            .ok_or(ContractError::EnabledFlagNotFound)?;
 
-        ClaimPreview {
+        Ok(ClaimPreview {
             token_balance,
             usdc_amount,
             roi_amount,
             vault_has_sufficient_balance: vault_usdc_balance >= usdc_amount,
             claim_enabled: enabled,
-        }
+        })
     }
 
     // ============ Overview Functions ============
 
     /// Returns a complete snapshot of the vault's current state.
     /// Useful for dashboards and analytics integrations.
-    pub fn get_vault_overview(env: Env) -> VaultOverview {
+    pub fn get_vault_overview(env: Env) -> Result<VaultOverview, ContractError> {
         let admin: Address = env
             .storage()
             .instance()
             .get(&DataKey::Admin)
-            .expect("Admin not found");
+            .ok_or(ContractError::AdminNotFound)?;
 
         let enabled: bool = env
             .storage()
             .instance()
             .get(&DataKey::Enabled)
-            .unwrap_or(false);
+            .ok_or(ContractError::EnabledFlagNotFound)?;
 
         let roi_percentage: i128 = env
             .storage()
             .instance()
             .get(&DataKey::RoiPercentage)
-            .unwrap_or(0);
+            .ok_or(ContractError::RoiPercentageNotFound)?;
 
         let token_address: Address = env
             .storage()
             .instance()
             .get(&DataKey::TokenAddress)
-            .expect("Token address not found");
+            .ok_or(ContractError::TokenAddressNotFound)?;
 
         let usdc_address: Address = env
             .storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found");
+            .ok_or(ContractError::UsdcAddressNotFound)?;
 
         let usdc_client = TokenClient::new(&env, &usdc_address);
         let vault_usdc_balance = usdc_client.balance(&env.current_contract_address());
@@ -375,7 +378,7 @@ impl VaultContract {
             .get(&DataKey::TotalTokensRedeemed)
             .unwrap_or(0);
 
-        VaultOverview {
+        Ok(VaultOverview {
             admin,
             enabled,
             roi_percentage,
@@ -383,6 +386,6 @@ impl VaultContract {
             usdc_address,
             vault_usdc_balance,
             total_tokens_redeemed,
-        }
+        })
     }
 }
