@@ -21,7 +21,7 @@ import {
 } from "@tokenization/ui/form";
 import { Input } from "@tokenization/ui/input";
 import { Button } from "@tokenization/ui/button";
-import { RainbowButton } from "@tokenization/ui/rainbow-button";
+import { Rocket } from "lucide-react";
 import {
   TokenService,
   type BuyTokenPayload,
@@ -182,7 +182,10 @@ export function InvestDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <RainbowButton variant="outline">{triggerLabel}</RainbowButton>
+        <Button className="bg-orange-500 text-white hover:bg-orange-600 cursor-pointer">
+          <Rocket className="h-4 w-4" />
+          {triggerLabel}
+        </Button>
       </DialogTrigger>
       <DialogContent
         className={`${successMessage ? "sm:max-w-4xl" : "sm:max-w-md"} max-h-[80vh] overflow-y-auto`}

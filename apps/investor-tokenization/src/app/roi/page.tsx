@@ -1,10 +1,18 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useMemo } from "react";
 import { RoiHeader } from "@/features/roi/components/roi-header";
-import { CampaignToolbar } from "@/features/roi/components/campaign-toolbar";
 import { CampaignList } from "@/features/roi/components/campaign-list";
 import { mockCampaigns } from "@/features/roi/data/mock-campaigns";
+
+const CampaignToolbar = dynamic(
+  () =>
+    import("@/features/roi/components/campaign-toolbar").then(
+      (m) => m.CampaignToolbar
+    ),
+  { ssr: false }
+);
 
 export default function RoiPage() {
   const [search, setSearch] = useState("");
