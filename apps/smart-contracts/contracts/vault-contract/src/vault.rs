@@ -2,7 +2,7 @@ use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env};
 use token::Client as TokenClient;
 
 use crate::error::ContractError;
-use crate::events::{events, AvailabilityChangedEvent, ClaimEvent};
+use crate::events::{AvailabilityChangedEvent, ClaimEvent};
 use crate::storage_types::DataKey;
 
 /// A complete snapshot of the vault's current state.
@@ -106,13 +106,11 @@ impl VaultContract {
         env.storage().instance().set(&DataKey::Enabled, &enabled);
 
         // Emit availability changed event
-        events::emit_availability_changed(
-            &env,
-            AvailabilityChangedEvent {
-                admin: stored_admin.clone(),
-                enabled,
-            },
-        );
+        AvailabilityChangedEvent {
+            admin: stored_admin.clone(),
+            enabled,
+        }
+        .publish(&env);
 
         Ok(())
     }
@@ -193,15 +191,13 @@ impl VaultContract {
             .set(&DataKey::TotalTokensRedeemed, &(total_redeemed + token_balance));
 
         // Emit claim event for indexers and explorers
-        events::emit_claim(
-            &env,
-            ClaimEvent {
-                beneficiary: beneficiary.clone(),
-                tokens_redeemed: token_balance,
-                usdc_received: usdc_amount,
-                roi_percentage,
-            },
-        );
+        ClaimEvent {
+            beneficiary: beneficiary.clone(),
+            tokens_redeemed: token_balance,
+            usdc_received: usdc_amount,
+            roi_percentage,
+        }
+        .publish(&env);
 
         Ok(())
     }
