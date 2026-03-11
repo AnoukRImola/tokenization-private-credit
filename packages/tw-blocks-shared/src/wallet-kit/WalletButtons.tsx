@@ -3,9 +3,8 @@
 import * as React from "react";
 import { useWallet } from "./useWallet";
 import { useWalletContext } from "./WalletProvider";
-import { Button } from "@tokenization/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@tokenization/ui/popover";
-import { Check, Copy, LogOut, ChevronDown, Wallet } from "lucide-react";
+import { Check, Copy, LogOut, ChevronRight, Wallet } from "lucide-react";
 
 /**
  * Wallet connection/disconnection button component
@@ -40,91 +39,92 @@ export const WalletButton = () => {
 
   if (!mounted) {
     return (
-      <Button className="h-10 px-6 gap-2 font-medium cursor-pointer" type="button">
-        <Wallet className="h-4 w-4" />
-        <span className="hidden sm:inline">Connect Wallet</span>
-      </Button>
-    );
-  }
-
-  if (walletAddress) {
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            className="h-10 px-4 gap-2 font-medium bg-transparent cursor-pointer"
-          >
-            <Wallet className="h-4 w-4" />
-            <span className="hidden sm:inline">{walletName}</span>
-            <span className="font-mono text-sm text-muted-foreground">
-              {shortAddress}
-            </span>
-            <ChevronDown className="h-4 w-4 ml-1" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-80 p-0" align="end">
-          <div className="p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Wallet className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{walletName}</span>
-              </div>
-              <span className="text-xs px-2 py-1 rounded-md bg-muted text-muted-foreground">
-                Testnet
-              </span>
-            </div>
-
-            <div className="p-3 rounded-lg bg-muted/50 border">
-              <p className="text-xs text-muted-foreground mb-1">Address</p>
-              <p className="font-mono text-sm break-all">{walletAddress}</p>
-            </div>
-          </div>
-
-          <div className="border-t p-4">
-            <div className="flex gap-2">
-              <Button
-                onClick={copyAddress}
-                variant="ghost"
-                size="sm"
-                className="flex-1 cursor-pointer"
-                disabled={copied}
-              >
-                {copied ? (
-                  <>
-                    <Check className="h-4 w-4 mr-2" />
-                    Copied
-                  </>
-                ) : (
-                  <>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy
-                  </>
-                )}
-              </Button>
-              <Button
-                onClick={handleDisconnect}
-                variant="outline"
-                size="sm"
-                className="flex-1 text-destructive hover:text-destructive bg-transparent cursor-pointer"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Disconnect
-              </Button>
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
+      <button
+        type="button"
+        onClick={mounted ? handleConnect : undefined}
+        className="flex w-full items-center gap-2 rounded-xl px-3 h-12 bg-primary text-primary-foreground hover:bg-brand-primary-hover transition-colors font-medium text-sm cursor-pointer"
+      >
+        <Wallet className="size-5 shrink-0" />
+        <span>Conectar Billetera</span>
+      </button>
     );
   }
 
   return (
-    <Button
-      className="h-10 px-6 gap-2 font-medium cursor-pointer"
-      onClick={handleConnect}
-    >
-      <Wallet className="h-4 w-4" />
-      Connect Wallet
-    </Button>
+    <Popover>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="flex w-full items-center gap-2 rounded-xl px-3 h-12 bg-sidebar-accent text-sidebar-accent-foreground hover:bg-accent transition-colors text-sm cursor-pointer"
+        >
+          <Wallet className="size-5 shrink-0" />
+          <div className="flex flex-col items-start min-w-0 flex-1 text-left">
+            <span className="text-xs font-semibold leading-none truncate">
+              {walletName}
+            </span>
+            <span className="font-mono text-xs text-text-secondary leading-tight mt-0.5">
+              {shortAddress}
+            </span>
+          </div>
+          <ChevronRight className="size-4 shrink-0 text-text-muted" />
+        </button>
+      </PopoverTrigger>
+
+      <PopoverContent className="w-72 p-0 overflow-hidden" side="right" align="end" sideOffset={8}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center size-8 rounded-lg bg-accent">
+              <Wallet className="size-4 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold leading-none">{walletName}</p>
+              <p className="text-xs text-text-muted mt-0.5">Testnet</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Address block */}
+        <div className="px-4 py-3">
+          <p className="text-xs text-text-muted mb-1.5">Dirección</p>
+          <div className="rounded-lg bg-secondary px-3 py-2 border border-border">
+            <p className="font-mono text-xs break-all leading-relaxed">
+              {walletAddress}
+            </p>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 px-4 pb-4">
+          <button
+            type="button"
+            onClick={copyAddress}
+            disabled={copied}
+            className="flex flex-1 items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-medium bg-secondary text-secondary-foreground hover:bg-secondary/70 transition-colors cursor-pointer disabled:cursor-default"
+          >
+            {copied ? (
+              <>
+                <Check className="size-3.5" />
+                Copiado
+              </>
+            ) : (
+              <>
+                <Copy className="size-3.5" />
+                Copiar
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDisconnect}
+            className="flex flex-1 items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-medium border border-border bg-transparent text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
+          >
+            <LogOut className="size-3.5" />
+            Desconectar
+          </button>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };
