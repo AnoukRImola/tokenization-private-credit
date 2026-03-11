@@ -9,6 +9,8 @@ pub enum ContractError {
     ExchangeIsCurrentlyDisabled = 3,
     BeneficiaryHasNoTokensToClaim = 4,
     VaultDoesNotHaveEnoughUSDC = 5,
+    InvalidRoiPercentage = 6,
+    TokenAndUsdcMustDiffer = 7,
 }
 
 impl fmt::Display for ContractError {
@@ -26,6 +28,12 @@ impl fmt::Display for ContractError {
             }
             ContractError::VaultDoesNotHaveEnoughUSDC => {
                 write!(f, "Vault does not have enough USDC")
+            }
+            ContractError::InvalidRoiPercentage => {
+                write!(f, "ROI percentage must be between 0 and 10000")
+            }
+            ContractError::TokenAndUsdcMustDiffer => {
+                write!(f, "Token and USDC addresses must be different")
             }
         }
     }

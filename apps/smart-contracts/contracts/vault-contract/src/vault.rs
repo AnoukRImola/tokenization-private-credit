@@ -1,4 +1,4 @@
-use soroban_sdk::{contract, contractimpl, contracttype, token, Address, Env};
+use soroban_sdk::{contract, contractimpl, contracttype, panic_with_error, token, Address, Env};
 use token::Client as TokenClient;
 
 use crate::error::ContractError;
@@ -45,6 +45,9 @@ pub struct ClaimPreview {
 #[contract]
 pub struct VaultContract;
 
+/// Maximum allowed ROI percentage (10000 = 10000%)
+const ROI_MAX: i128 = 10_000;
+
 #[contractimpl]
 impl VaultContract {
     // ============ Constructor ============
@@ -54,9 +57,13 @@ impl VaultContract {
     /// # Arguments
     /// * `admin` - The address that will control vault availability
     /// * `enabled` - Initial state of whether claiming is enabled
-    /// * `roi_percentage` - The ROI percentage (e.g., 5 for 5% return)
-    /// * `token` - The token factory address
-    /// * `usdc` - The USDC stablecoin contract address
+    /// * `roi_percentage` - The ROI percentage (e.g., 5 for 5% return). Must be 0..=10000.
+    /// * `token` - The token factory address (must differ from `usdc`)
+    /// * `usdc` - The USDC stablecoin contract address (must differ from `token`)
+    ///
+    /// # Panics
+    /// * If `roi_percentage` is negative or greater than `ROI_MAX`
+    /// * If `token` and `usdc` are the same address
     pub fn __constructor(
         env: Env,
         admin: Address,
@@ -65,6 +72,14 @@ impl VaultContract {
         token: Address,
         usdc: Address,
     ) {
+        if roi_percentage < 0 || roi_percentage > ROI_MAX {
+            panic_with_error!(&env, ContractError::InvalidRoiPercentage);
+        }
+
+        if token == usdc {
+            panic_with_error!(&env, ContractError::TokenAndUsdcMustDiffer);
+        }
+
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::Enabled, &enabled);
         env.storage()

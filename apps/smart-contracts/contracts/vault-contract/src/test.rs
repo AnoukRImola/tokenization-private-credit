@@ -611,3 +611,76 @@ fn test_high_roi_percentage() {
     vault.claim(&beneficiary);
     assert_eq!(usdc_client.balance(&beneficiary), 200);
 }
+
+// ============ Constructor Validation Tests (#24) ============
+
+#[test]
+#[should_panic(expected = "Error(Contract, #6)")]
+fn test_constructor_rejects_negative_roi() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    create_vault(&env, &admin, false, -1, &token.address, &usdc_client.address);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #6)")]
+fn test_constructor_rejects_excessive_roi() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // ROI_MAX is 10_000, so 10_001 should fail
+    create_vault(&env, &admin, false, 10_001, &token.address, &usdc_client.address);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #7)")]
+fn test_constructor_rejects_token_equals_usdc() {
+    let env = Env::default();
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    // Use the same address for both token and usdc
+    let _ = create_token_factory(&env, &token_admin);
+
+    create_vault(&env, &admin, false, 10, &usdc_client.address, &usdc_client.address);
+}
+
+#[test]
+fn test_constructor_accepts_zero_roi() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    let vault = create_vault(&env, &admin, true, 0, &token.address, &usdc_client.address);
+    assert_eq!(vault.get_roi_percentage(), 0);
+}
+
+#[test]
+fn test_constructor_accepts_max_roi() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    let vault = create_vault(&env, &admin, true, 10_000, &token.address, &usdc_client.address);
+    assert_eq!(vault.get_roi_percentage(), 10_000);
+}
