@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const deploy_service_1 = require("./deploy.service");
 const deploy_participation_token_dto_1 = require("./dto/deploy-participation-token.dto");
 const deploy_token_factory_dto_1 = require("./dto/deploy-token-factory.dto");
+const deploy_vault_dto_1 = require("./dto/deploy-vault.dto");
 let DeployController = class DeployController {
     deployService;
     constructor(deployService) {
@@ -28,6 +29,10 @@ let DeployController = class DeployController {
     }
     async deployTokenFactory(dto) {
         const unsignedXdr = await this.deployService.deployTokenFactory(dto);
+        return { unsignedXdr };
+    }
+    async deployVault(dto) {
+        const unsignedXdr = await this.deployService.deployVault(dto);
         return { unsignedXdr };
     }
 };
@@ -46,6 +51,13 @@ __decorate([
     __metadata("design:paramtypes", [deploy_token_factory_dto_1.DeployTokenFactoryDto]),
     __metadata("design:returntype", Promise)
 ], DeployController.prototype, "deployTokenFactory", null);
+__decorate([
+    (0, common_1.Post)('vault'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [deploy_vault_dto_1.DeployVaultDto]),
+    __metadata("design:returntype", Promise)
+], DeployController.prototype, "deployVault", null);
 exports.DeployController = DeployController = __decorate([
     (0, common_1.Controller)('deploy'),
     __metadata("design:paramtypes", [deploy_service_1.DeployService])
