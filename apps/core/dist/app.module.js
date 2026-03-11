@@ -15,12 +15,13 @@ const soroban_module_1 = require("./soroban/soroban.module");
 const campaigns_module_1 = require("./campaigns/campaigns.module");
 const investments_module_1 = require("./investments/investments.module");
 const deploy_module_1 = require("./deploy/deploy.module");
+const loans_module_1 = require("./loans/loans.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [prisma_module_1.PrismaModule, soroban_module_1.SorobanModule, campaigns_module_1.CampaignsModule, investments_module_1.InvestmentsModule, deploy_module_1.DeployModule],
+        imports: [prisma_module_1.PrismaModule, soroban_module_1.SorobanModule, campaigns_module_1.CampaignsModule, investments_module_1.InvestmentsModule, deploy_module_1.DeployModule, loans_module_1.LoansModule],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
     })

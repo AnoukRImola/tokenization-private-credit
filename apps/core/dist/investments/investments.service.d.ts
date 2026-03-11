@@ -13,10 +13,10 @@ export declare class InvestmentsService {
             loanDuration: number;
             expectedReturn: import("@prisma/client/runtime/library").Decimal;
             loanSize: import("@prisma/client/runtime/library").Decimal;
-            status: import("@prisma/client").$Enums.CampaignStatus;
             vaultId: string | null;
             tokenSaleId: string | null;
             tokenFactoryId: string | null;
+            status: import("@prisma/client").$Enums.CampaignStatus;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -40,10 +40,10 @@ export declare class InvestmentsService {
             loanDuration: number;
             expectedReturn: import("@prisma/client/runtime/library").Decimal;
             loanSize: import("@prisma/client/runtime/library").Decimal;
-            status: import("@prisma/client").$Enums.CampaignStatus;
             vaultId: string | null;
             tokenSaleId: string | null;
             tokenFactoryId: string | null;
+            status: import("@prisma/client").$Enums.CampaignStatus;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -76,10 +76,10 @@ export declare class InvestmentsService {
             loanDuration: number;
             expectedReturn: import("@prisma/client/runtime/library").Decimal;
             loanSize: import("@prisma/client/runtime/library").Decimal;
-            status: import("@prisma/client").$Enums.CampaignStatus;
             vaultId: string | null;
             tokenSaleId: string | null;
             tokenFactoryId: string | null;
+            status: import("@prisma/client").$Enums.CampaignStatus;
             id: string;
             createdAt: Date;
             updatedAt: Date;

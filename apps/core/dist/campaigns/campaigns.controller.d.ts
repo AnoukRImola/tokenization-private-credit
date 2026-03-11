@@ -1,6 +1,7 @@
 import { CampaignsService } from './campaigns.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
+import { UpdateCampaignStatusDto } from './dto/update-campaign-status.dto';
 export declare class CampaignsController {
     private readonly campaignsService;
     constructor(campaignsService: CampaignsService);
@@ -13,10 +14,10 @@ export declare class CampaignsController {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -40,10 +41,10 @@ export declare class CampaignsController {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -57,14 +58,31 @@ export declare class CampaignsController {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
         createdAt: Date;
         updatedAt: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    updateStatus(id: string, dto: UpdateCampaignStatusDto): Promise<{
+        name: string;
+        description: string | null;
+        issuerAddress: string;
+        escrowId: string;
+        poolSize: import("@prisma/client/runtime/library").Decimal;
+        loanDuration: number;
+        expectedReturn: import("@prisma/client/runtime/library").Decimal;
+        loanSize: import("@prisma/client/runtime/library").Decimal;
+        vaultId: string | null;
+        tokenSaleId: string | null;
+        tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
     update(id: string, dto: UpdateCampaignDto): Promise<{
         name: string;
         description: string | null;
@@ -74,10 +92,10 @@ export declare class CampaignsController {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
         createdAt: Date;
         updatedAt: Date;
@@ -91,10 +109,10 @@ export declare class CampaignsController {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
         createdAt: Date;
         updatedAt: Date;
