@@ -6,9 +6,10 @@ import { SorobanModule } from './soroban/soroban.module';
 import { CampaignsModule } from './campaigns/campaigns.module';
 import { InvestmentsModule } from './investments/investments.module';
 import { DeployModule } from './deploy/deploy.module';
+import { LoansModule } from './loans/loans.module';
 
 @Module({
-  imports: [PrismaModule, SorobanModule, CampaignsModule, InvestmentsModule, DeployModule],
+  imports: [PrismaModule, SorobanModule, CampaignsModule, InvestmentsModule, DeployModule, LoansModule],
   controllers: [AppController],
   providers: [AppService],
 })
