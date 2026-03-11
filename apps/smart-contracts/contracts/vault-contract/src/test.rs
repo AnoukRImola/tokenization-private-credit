@@ -550,6 +550,72 @@ fn test_availability_change_emits_event() {
     );
 }
 
+// ============ Constructor Validation Tests ============
+
+#[test]
+#[should_panic(expected = "Error(Contract, #6)")]
+fn test_constructor_rejects_same_token_and_usdc() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let token = create_token_factory(&env, &token_admin);
+
+    // Pass the same address for both token and usdc — should panic
+    create_vault(&env, &admin, true, 10, &token.address, &token.address);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #7)")]
+fn test_constructor_rejects_admin_equals_token() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &token_admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // Pass token address as admin — should panic
+    create_vault(&env, &token.address, true, 10, &token.address, &usdc_client.address);
+}
+
+#[test]
+#[should_panic(expected = "Error(Contract, #7)")]
+fn test_constructor_rejects_admin_equals_usdc() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &token_admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // Pass usdc address as admin — should panic
+    create_vault(&env, &usdc_client.address, true, 10, &token.address, &usdc_client.address);
+}
+
+#[test]
+fn test_constructor_accepts_valid_distinct_addresses() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // All distinct addresses — should succeed
+    let vault = create_vault(&env, &admin, true, 10, &token.address, &usdc_client.address);
+
+    assert_eq!(vault.get_admin(), admin);
+    assert_eq!(vault.get_token_address(), token.address);
+    assert_eq!(vault.get_usdc_address(), usdc_client.address);
+}
+
 // ============ Edge Case Tests ============
 
 #[test]

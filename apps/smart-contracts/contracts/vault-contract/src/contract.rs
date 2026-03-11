@@ -1,4 +1,4 @@
-use soroban_sdk::{contract, contractimpl, token, Address, Env};
+use soroban_sdk::{contract, contractimpl, panic_with_error, token, Address, Env};
 use token::Client as TokenClient;
 
 use crate::error::ContractError;
@@ -15,12 +15,27 @@ impl VaultContract {
 
     /// Initializes the vault contract with the given parameters.
     ///
+    /// # Trust Assumptions
+    /// The deployer is responsible for providing correct and trusted addresses.
+    /// These addresses are **immutable** after deployment — there are no setters.
+    ///
+    /// * `token` must be the participation token contract deployed by the token factory.
+    /// * `usdc` must be the canonical USDC Stellar Asset Contract on the target network.
+    /// * `admin` must be a secure, controlled address (ideally a multisig).
+    ///
+    /// Providing incorrect addresses will render the vault permanently non-functional.
+    /// See `docs/VAULT_SECURITY.md` for the full deployment checklist.
+    ///
     /// # Arguments
     /// * `admin` - The address that will control vault availability
     /// * `enabled` - Initial state of whether claiming is enabled
     /// * `roi_percentage` - The ROI percentage (e.g., 5 for 5% return)
-    /// * `token` - The token factory address
-    /// * `usdc` - The USDC stablecoin contract address
+    /// * `token` - The participation token contract address (must be trusted)
+    /// * `usdc` - The USDC stablecoin contract address (must be trusted)
+    ///
+    /// # Panics
+    /// * `TokenAndUsdcCannotBeSame` - If token and USDC addresses are identical
+    /// * `InvalidAddressConfiguration` - If admin equals token or USDC address
     pub fn __constructor(
         env: Env,
         admin: Address,
@@ -29,6 +44,13 @@ impl VaultContract {
         token: Address,
         usdc: Address,
     ) {
+        if token == usdc {
+            panic_with_error!(&env, ContractError::TokenAndUsdcCannotBeSame);
+        }
+        if admin == token || admin == usdc {
+            panic_with_error!(&env, ContractError::InvalidAddressConfiguration);
+        }
+
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::Enabled, &enabled);
         env.storage()

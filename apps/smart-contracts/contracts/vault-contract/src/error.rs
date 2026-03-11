@@ -9,6 +9,8 @@ pub enum ContractError {
     ExchangeIsCurrentlyDisabled = 3,
     BeneficiaryHasNoTokensToClaim = 4,
     VaultDoesNotHaveEnoughUSDC = 5,
+    TokenAndUsdcCannotBeSame = 6,
+    InvalidAddressConfiguration = 7,
 }
 
 impl fmt::Display for ContractError {
@@ -26,6 +28,12 @@ impl fmt::Display for ContractError {
             }
             ContractError::VaultDoesNotHaveEnoughUSDC => {
                 write!(f, "Vault does not have enough USDC")
+            }
+            ContractError::TokenAndUsdcCannotBeSame => {
+                write!(f, "Token and USDC addresses cannot be the same")
+            }
+            ContractError::InvalidAddressConfiguration => {
+                write!(f, "Invalid address configuration: admin cannot be token or USDC address")
             }
         }
     }
