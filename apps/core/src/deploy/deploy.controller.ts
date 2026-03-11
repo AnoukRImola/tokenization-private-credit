@@ -3,6 +3,7 @@ import { DeployService } from './deploy.service';
 import { DeployParticipationTokenDto } from './dto/deploy-participation-token.dto';
 import { DeployTokenFactoryDto } from './dto/deploy-token-factory.dto';
 import { DeployVaultDto } from './dto/deploy-vault.dto';
+import { SetAdminDto } from './dto/set-admin.dto';
 
 @Controller('deploy')
 export class DeployController {
@@ -23,6 +24,12 @@ export class DeployController {
   @Post('vault')
   async deployVault(@Body() dto: DeployVaultDto) {
     const unsignedXdr = await this.deployService.deployVault(dto);
+    return { unsignedXdr };
+  }
+
+  @Post('set-admin')
+  async setAdmin(@Body() dto: SetAdminDto) {
+    const unsignedXdr = await this.deployService.buildSetAdminTransaction(dto);
     return { unsignedXdr };
   }
 }

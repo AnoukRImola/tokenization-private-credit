@@ -3,6 +3,7 @@ import { SorobanService } from '../soroban/soroban.service';
 import { DeployParticipationTokenDto } from './dto/deploy-participation-token.dto';
 import { DeployTokenFactoryDto } from './dto/deploy-token-factory.dto';
 import { DeployVaultDto } from './dto/deploy-vault.dto';
+import { SetAdminDto } from './dto/set-admin.dto';
 
 const TOKEN_DECIMAL = 7;
 
@@ -55,6 +56,15 @@ export class DeployService {
         token: dto.token,
         usdc: dto.usdc,
       },
+      dto.callerPublicKey,
+    );
+  }
+
+  buildSetAdminTransaction(dto: SetAdminDto): Promise<string> {
+    return this.soroban.buildContractCallTransaction(
+      dto.tokenFactoryContractId,
+      'set_admin',
+      { new_admin: dto.newAdmin },
       dto.callerPublicKey,
     );
   }

@@ -6,13 +6,6 @@ import { Button } from "@tokenization/ui/button";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { useCampaignFlow } from "../hooks/useCampaignFlow";
-import {
-  deployTokenFactory,
-  deployParticipationToken,
-  buildSetAdmin,
-  submitTransaction,
-} from "../services/deploy.service";
-import { createCampaign } from "../services/campaign.service";
 import { CheckCircle2, XCircle, Loader2, Circle } from "lucide-react";
 
 type PhaseStatus = "idle" | "loading" | "success" | "error";
@@ -28,6 +21,22 @@ const PHASE_LABELS = [
   "Configurar Administrador",
   "Crear Campaña",
 ];
+
+const CORE_API =
+  process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:4000";
+
+async function post<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${CORE_API}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message ?? `Error ${res.status} en ${path}`);
+  }
+  return res.json() as Promise<T>;
+}
 
 function slugToSymbol(name: string): string {
   return name.replace(/[^a-zA-Z]/g, "").slice(0, 4).toUpperCase() || "TKN";
@@ -65,25 +74,30 @@ export function StepTokenizeEscrow() {
     if (!campaign || !escrowId || !walletAddress) return;
 
     setFailedAt(null);
-
     let currentPhase = startFrom;
 
     try {
       if (startFrom <= 0) {
         currentPhase = 0;
         setPhaseStatus(0, "loading");
-        const { unsignedXdr: tfXdr } = await deployTokenFactory({
-          name: campaign.name,
-          symbol: slugToSymbol(campaign.name),
-          escrowContractId: escrowId,
-          mintAuthority: walletAddress,
-          callerPublicKey: walletAddress,
-        });
+        const { unsignedXdr: tfXdr } = await post<{ unsignedXdr: string }>(
+          "/deploy/token-factory",
+          {
+            name: campaign.name,
+            symbol: slugToSymbol(campaign.name),
+            escrowContractId: escrowId,
+            mintAuthority: walletAddress,
+            callerPublicKey: walletAddress,
+          },
+        );
         const signedTfXdr = await signTransaction({
           unsignedTransaction: tfXdr,
           address: walletAddress,
         });
-        const tfResult = await submitTransaction(signedTfXdr);
+        const tfResult = await post<{ contractId: string | null }>(
+          "/soroban/submit-transaction",
+          { signedXdr: signedTfXdr },
+        );
         if (!tfResult.contractId) {
           throw new Error(
             "El despliegue del Token Factory no retornó un contract ID",
@@ -97,15 +111,18 @@ export function StepTokenizeEscrow() {
       if (startFrom <= 1) {
         currentPhase = 1;
         setPhaseStatus(1, "loading");
-        const { unsignedXdr: ptXdr } = await deployParticipationToken({
-          escrowContractId: escrowId,
-          callerPublicKey: walletAddress,
-        });
+        const { unsignedXdr: ptXdr } = await post<{ unsignedXdr: string }>(
+          "/deploy/participation-token",
+          { escrowContractId: escrowId, callerPublicKey: walletAddress },
+        );
         const signedPtXdr = await signTransaction({
           unsignedTransaction: ptXdr,
           address: walletAddress,
         });
-        const ptResult = await submitTransaction(signedPtXdr);
+        const ptResult = await post<{ contractId: string | null }>(
+          "/soroban/submit-transaction",
+          { signedXdr: signedPtXdr },
+        );
         if (!ptResult.contractId) {
           throw new Error(
             "El despliegue del Token de Participación no retornó un contract ID",
@@ -119,34 +136,40 @@ export function StepTokenizeEscrow() {
       if (startFrom <= 2) {
         currentPhase = 2;
         setPhaseStatus(2, "loading");
-        const { unsignedXdr: saXdr } = await buildSetAdmin({
-          tokenFactoryContractId: tokenFactoryIdRef.current!,
-          newAdmin: tokenSaleIdRef.current!,
-          callerPublicKey: walletAddress,
-        });
+        const { unsignedXdr: saXdr } = await post<{ unsignedXdr: string }>(
+          "/deploy/set-admin",
+          {
+            tokenFactoryContractId: tokenFactoryIdRef.current!,
+            newAdmin: tokenSaleIdRef.current!,
+            callerPublicKey: walletAddress,
+          },
+        );
         const signedSaXdr = await signTransaction({
           unsignedTransaction: saXdr,
           address: walletAddress,
         });
-        await submitTransaction(signedSaXdr);
+        await post("/soroban/submit-transaction", { signedXdr: signedSaXdr });
         setPhaseStatus(2, "success");
       }
 
       if (startFrom <= 3) {
         currentPhase = 3;
         setPhaseStatus(3, "loading");
-        const created = await createCampaign({
-          name: campaign.name,
-          description: campaign.description,
-          issuerAddress: walletAddress,
-          escrowId,
-          poolSize: campaign.poolSize,
-          loanDuration: campaign.loanDuration,
-          expectedReturn: campaign.expectedReturn,
-          loanSize: campaign.loanSize,
-          tokenFactoryId: tokenFactoryIdRef.current!,
-          tokenSaleId: tokenSaleIdRef.current!,
-        });
+        const created = await post<{ id: string }>(
+          "/campaigns",
+          {
+            name: campaign.name,
+            description: campaign.description,
+            issuerAddress: walletAddress,
+            escrowId,
+            poolSize: campaign.poolSize,
+            loanDuration: campaign.loanDuration,
+            expectedReturn: campaign.expectedReturn,
+            loanSize: campaign.loanSize,
+            tokenFactoryId: tokenFactoryIdRef.current!,
+            tokenSaleId: tokenSaleIdRef.current!,
+          },
+        );
         saveCampaignDbId(created.id);
         setPhaseStatus(3, "success");
 
@@ -155,8 +178,7 @@ export function StepTokenizeEscrow() {
         }, 1500);
       }
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Error desconocido";
+      const message = err instanceof Error ? err.message : "Error desconocido";
       setPhaseStatus(currentPhase, "error", message);
       setFailedAt(currentPhase);
     }
