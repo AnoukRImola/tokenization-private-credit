@@ -115,13 +115,13 @@ fn test_buy_transfers_usdc_and_mints_sale_token() {
     usdc_admin.mint(&payer, &amount);
 
     // 7) Execute buy
-    participation_token_client.buy(&usdc_client.address, &payer, &beneficiary, &amount);
+    participation_token_client.buy(&usdc_client.address, &payer, &amount);
 
     // 8) Verify that the escrow received the USDC
     let escrow_balance = usdc_client.balance(&escrow_client.address);
     assert_eq!(escrow_balance, amount);
 
-    // 9) Verify that the beneficiary received the minted sale tokens
-    let sale_token_balance = sale_token.balance(&beneficiary);
+    // 9) Verify that the payer received the minted sale tokens
+    let sale_token_balance = sale_token.balance(&payer);
     assert_eq!(sale_token_balance, amount);
 }
