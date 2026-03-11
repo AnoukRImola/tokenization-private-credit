@@ -348,3 +348,147 @@ fn test_metadata_immutability() {
         write_escrow_id(&e, &new_escrow_id); // This should panic
     });
 }
+
+// ============ Edge Case Tests ============
+
+#[test]
+fn test_mint_zero_tokens() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let mint_authority = Address::generate(&e);
+    let user = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, "escrow_zero");
+
+    // Minting zero should succeed (no-op)
+    token.mint(&user, &0);
+    assert_eq!(token.balance(&user), 0);
+}
+
+#[test]
+fn test_transfer_zero_amount() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let mint_authority = Address::generate(&e);
+    let user1 = Address::generate(&e);
+    let user2 = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, "escrow_zero_transfer");
+
+    token.mint(&user1, &100);
+
+    // Transfer zero should succeed
+    token.transfer(&user1, &user2, &0);
+    assert_eq!(token.balance(&user1), 100);
+    assert_eq!(token.balance(&user2), 0);
+}
+
+#[test]
+#[should_panic(expected = "insufficient balance")]
+fn test_burn_more_than_balance() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let mint_authority = Address::generate(&e);
+    let user = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, "escrow_burn_excess");
+
+    token.mint(&user, &100);
+    token.burn(&user, &101); // should panic
+}
+
+#[test]
+fn test_burn_entire_balance() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let mint_authority = Address::generate(&e);
+    let user = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, "escrow_burn_all");
+
+    token.mint(&user, &500);
+    token.burn(&user, &500);
+    assert_eq!(token.balance(&user), 0);
+}
+
+#[test]
+fn test_transfer_to_self() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let mint_authority = Address::generate(&e);
+    let user = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, "escrow_self_transfer");
+
+    token.mint(&user, &100);
+
+    // Self-transfer should work and balance remains the same
+    token.transfer(&user, &user, &50);
+    assert_eq!(token.balance(&user), 100);
+}
+
+#[test]
+fn test_multiple_mints_accumulate() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let mint_authority = Address::generate(&e);
+    let user = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, "escrow_multi_mint");
+
+    token.mint(&user, &100);
+    token.mint(&user, &200);
+    token.mint(&user, &300);
+
+    assert_eq!(token.balance(&user), 600);
+}
+
+#[test]
+#[should_panic(expected = "negative amount is not allowed")]
+fn test_mint_negative_amount() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let mint_authority = Address::generate(&e);
+    let user = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, "escrow_neg_mint");
+
+    token.mint(&user, &(-100));
+}
+
+#[test]
+#[should_panic(expected = "negative amount is not allowed")]
+fn test_transfer_negative_amount() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let mint_authority = Address::generate(&e);
+    let user1 = Address::generate(&e);
+    let user2 = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, "escrow_neg_transfer");
+
+    token.mint(&user1, &100);
+    token.transfer(&user1, &user2, &(-50));
+}
+
+#[test]
+fn test_set_admin_transfers_authority() {
+    let e = Env::default();
+    e.mock_all_auths();
+
+    let mint_authority = Address::generate(&e);
+    let new_authority = Address::generate(&e);
+    let user = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, "escrow_admin_transfer");
+
+    // Original authority mints
+    token.mint(&user, &100);
+    assert_eq!(token.balance(&user), 100);
+
+    // Transfer authority
+    token.set_admin(&new_authority);
+
+    // New authority should be able to mint
+    token.mint(&user, &200);
+    assert_eq!(token.balance(&user), 300);
+}

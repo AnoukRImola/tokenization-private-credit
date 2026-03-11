@@ -1,6 +1,6 @@
-use soroban_sdk::{contracttype, Address, Env};
+use soroban_sdk::{contractevent, Address, Env};
 
-#[contracttype]
+#[contractevent(topics = ["pt_buy"], data_format = "vec")]
 #[derive(Clone, Debug)]
 pub struct BuyEvent {
     pub payer: Address,
@@ -10,5 +10,5 @@ pub struct BuyEvent {
 }
 
 pub fn emit_buy(env: &Env, event: BuyEvent) {
-    env.events().publish(("ParticipationToken", "buy"), event);
+    event.publish(env);
 }

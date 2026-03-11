@@ -9,6 +9,34 @@ use crate::types::{ClaimPreview, VaultOverview};
 #[contract]
 pub struct VaultContract;
 
+/// Calculates USDC payout: token_balance * (100 + roi_percentage) / 100
+/// Returns Err on overflow.
+fn calculate_usdc_amount(
+    token_balance: i128,
+    roi_percentage: i128,
+) -> Result<i128, ContractError> {
+    let rate = 100_i128
+        .checked_add(roi_percentage)
+        .ok_or(ContractError::ArithmeticOverflow)?;
+    let numerator = token_balance
+        .checked_mul(rate)
+        .ok_or(ContractError::ArithmeticOverflow)?;
+    numerator
+        .checked_div(100)
+        .ok_or(ContractError::ArithmeticOverflow)
+}
+
+/// Helper to read a required value from instance storage.
+fn get_required<T: soroban_sdk::TryFromVal<Env, soroban_sdk::Val>>(
+    env: &Env,
+    key: &DataKey,
+) -> Result<T, ContractError> {
+    env.storage()
+        .instance()
+        .get(key)
+        .ok_or(ContractError::NotInitialized)
+}
+
 #[contractimpl]
 impl VaultContract {
     // ============ Constructor ============
@@ -89,16 +117,6 @@ impl VaultContract {
 
     // ============ Admin Functions ============
 
-    /// Enables or disables the vault for ROI claiming.
-    /// Only the admin can call this function.
-    ///
-    /// # Arguments
-    /// * `admin` - Must be the contract admin address
-    /// * `enabled` - The new availability state
-    ///
-    /// # Errors
-    /// * `AdminNotFound` - If admin is not set in storage
-    /// * `OnlyAdminCanChangeAvailability` - If caller is not the admin
     pub fn availability_for_exchange(
         env: Env,
         enabled: bool,
@@ -107,11 +125,7 @@ impl VaultContract {
             .instance()
             .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
 
-        let stored_admin: Address = env
-            .storage()
-            .instance()
-            .get(&DataKey::Admin)
-            .ok_or(ContractError::AdminNotFound)?;
+        let stored_admin: Address = get_required(&env, &DataKey::Admin)?;
 
         stored_admin.require_auth();
 
@@ -182,13 +196,7 @@ impl VaultContract {
             return Err(ContractError::BeneficiaryHasNoTokensToClaim);
         }
 
-        let rate = 100i128
-            .checked_add(roi_percentage)
-            .ok_or(ContractError::ArithmeticOverflow)?;
-        let usdc_amount = token_balance
-            .checked_mul(rate)
-            .and_then(|v| v.checked_div(100))
-            .ok_or(ContractError::ArithmeticOverflow)?;
+        let usdc_amount = calculate_usdc_amount(token_balance, roi_percentage)?;
 
         let usdc_address: Address = env
             .storage()
@@ -304,7 +312,6 @@ impl VaultContract {
         Ok(usdc_client.balance(&env.current_contract_address()))
     }
 
-    /// Returns the total amount of participation tokens that have been redeemed.
     pub fn get_total_tokens_redeemed(env: Env) -> i128 {
         env.storage()
             .instance()
@@ -345,13 +352,7 @@ impl VaultContract {
         let token_balance = token_client.balance(&beneficiary);
 
         let (usdc_amount, roi_amount) = if token_balance > 0 {
-            let rate = 100i128
-                .checked_add(roi_percentage)
-                .ok_or(ContractError::ArithmeticOverflow)?;
-            let usdc = token_balance
-                .checked_mul(rate)
-                .and_then(|v| v.checked_div(100))
-                .ok_or(ContractError::ArithmeticOverflow)?;
+            let usdc = calculate_usdc_amount(token_balance, roi_percentage)?;
             let roi = usdc
                 .checked_sub(token_balance)
                 .ok_or(ContractError::ArithmeticOverflow)?;
@@ -359,6 +360,7 @@ impl VaultContract {
         } else {
             (0, 0)
         };
+
         let usdc_address: Address = env
             .storage()
             .instance()

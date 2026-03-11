@@ -10,4 +10,5 @@ pub enum ContractError {
     OnlyAdminCanSetToken = 4,
     HardCapExceeded = 5,
     InvestorCapExceeded = 6,
+    AmountMustBePositive = 7,
 }

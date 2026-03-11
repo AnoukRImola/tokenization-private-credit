@@ -72,6 +72,9 @@ impl ParticipationTokenContract {
         beneficiary: Address,
         amount: i128,
     ) -> Result<(), ContractError> {
+        if amount <= 0 {
+            return Err(ContractError::AmountMustBePositive);
+        }
         payer.require_auth();
 
         let cfg = read_config(&env)?;
