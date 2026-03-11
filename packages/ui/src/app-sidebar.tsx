@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 
 import {
@@ -64,8 +65,8 @@ export function AppSidebar({
         <Link href={logoHref} className="flex items-center">
           {logo.element ?? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={logo.src}
+            <Image
+            src={logo.src ?? "/logo.png"}
               alt={logo.alt ?? "logo"}
               width={logo.width}
               height={logo.height}
