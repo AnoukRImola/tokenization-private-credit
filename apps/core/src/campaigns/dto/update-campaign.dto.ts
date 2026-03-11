@@ -3,10 +3,8 @@ import {
   IsOptional,
   IsNumber,
   IsPositive,
-  IsEnum,
   Min,
 } from 'class-validator';
-import { CampaignStatus } from '@prisma/client';
 
 export class UpdateCampaignDto {
   @IsString()
@@ -16,10 +14,6 @@ export class UpdateCampaignDto {
   @IsString()
   @IsOptional()
   description?: string;
-
-  @IsEnum(CampaignStatus)
-  @IsOptional()
-  status?: CampaignStatus;
 
   @IsNumber()
   @IsPositive()
