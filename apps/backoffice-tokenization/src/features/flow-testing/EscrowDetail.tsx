@@ -9,15 +9,19 @@ import {
   GetEscrowsFromIndexerResponse,
   MultiReleaseMilestone,
   MultiReleaseReleaseFundsPayload,
-  ChangeMilestoneStatusPayload,
+  ApproveMilestonePayload,
 } from "@trustless-work/escrow/types";
 import {
   ErrorResponse,
   handleError,
 } from "@tokenization/tw-blocks-shared/src/handle-errors/handle";
+import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
+import { useChangeMilestoneStatus } from "@tokenization/tw-blocks-shared/src/escrows/single-multi-release/change-milestone-status/dialog/useChangeMilestoneStatus";
 import { toast } from "sonner";
 import { Loader2, ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { EscrowHeader } from "./components/EscrowHeader";
+import { EscrowLoansCard } from "./components/EscrowLoansCard";
 import { AddLoanDialog } from "./AddLoanDialog";
 
 interface EscrowDetailProps {
@@ -26,17 +30,18 @@ interface EscrowDetailProps {
 
 export function EscrowDetail({ contractId }: EscrowDetailProps) {
   const { walletAddress } = useWalletContext();
-  const { releaseFunds, changeMilestoneStatus } = useEscrowsMutations();
+  const { releaseFunds, approveMilestone } = useEscrowsMutations();
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
+  const { selectedEscrow, setSelectedEscrow } = useEscrowContext();
   const router = useRouter();
 
-  const [escrow, setEscrow] = useState<GetEscrowsFromIndexerResponse | null>(
-    null,
-  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [releasingIndex, setReleasingIndex] = useState<number | null>(null);
+  const [approvingIndex, setApprovingIndex] = useState<number | null>(null);
   const [addLoanOpen, setAddLoanOpen] = useState(false);
+
+  const changeMilestoneStatusHook = useChangeMilestoneStatus();
 
   const fetchEscrow = useCallback(async () => {
     setLoading(true);
@@ -51,7 +56,7 @@ export function EscrowDetail({ contractId }: EscrowDetailProps) {
       if (!data || !data[0]) {
         throw new Error("Escrow no encontrado");
       }
-      setEscrow(data[0]);
+      setSelectedEscrow(data[0]);
     } catch (err) {
       const { message } = handleError(err as ErrorResponse);
       setError(message);
@@ -65,55 +70,63 @@ export function EscrowDetail({ contractId }: EscrowDetailProps) {
     fetchEscrow();
   }, [fetchEscrow]);
 
-  const handleComplete = async (milestoneIndex: number) => {
-    if (!walletAddress || !escrow?.contractId) return;
+  const handleRelease = async (milestoneIndex: number) => {
+    if (!walletAddress || !selectedEscrow?.contractId) return;
 
     setReleasingIndex(milestoneIndex);
     try {
-      // Step 1: Change milestone status to COMPLETED
-      const statusPayload: ChangeMilestoneStatusPayload = {
-        contractId: escrow.contractId,
+      const payload: MultiReleaseReleaseFundsPayload = {
+        contractId: selectedEscrow.contractId,
+        releaseSigner: walletAddress,
         milestoneIndex: String(milestoneIndex),
-        newStatus: "completed",
-        serviceProvider: walletAddress,
       };
 
-      await changeMilestoneStatus.mutateAsync({
-        payload: statusPayload,
+      await releaseFunds.mutateAsync({
+        payload,
         type: "multi-release",
         address: walletAddress,
       });
 
-      toast.success(`Prestamo ${milestoneIndex + 1} marcado como completado`);
-
-      // Step 2: Release funds if escrow has balance
-      const balance = Number(escrow.balance || 0);
-      const milestoneAmount = Number(
-        (escrow.milestones[milestoneIndex] as MultiReleaseMilestone)?.amount || 0,
-      );
-
-      if (balance >= milestoneAmount) {
-        const releasePayload: MultiReleaseReleaseFundsPayload = {
-          contractId: escrow.contractId,
-          releaseSigner: walletAddress,
-          milestoneIndex: String(milestoneIndex),
-        };
-
-        await releaseFunds.mutateAsync({
-          payload: releasePayload,
-          type: "multi-release",
-          address: walletAddress,
-        });
-
-        toast.success(`Fondos del prestamo ${milestoneIndex + 1} liberados`);
-      }
-
+      toast.success(`Fondos del prestamo ${milestoneIndex + 1} liberados`);
       await fetchEscrow();
     } catch (err) {
       toast.error(handleError(err as ErrorResponse).message);
     } finally {
       setReleasingIndex(null);
     }
+  };
+
+  const handleApprove = async (milestoneIndex: number) => {
+    if (!walletAddress || !selectedEscrow?.contractId) return;
+
+    setApprovingIndex(milestoneIndex);
+    try {
+      const payload: ApproveMilestonePayload = {
+        contractId: selectedEscrow.contractId,
+        milestoneIndex: String(milestoneIndex),
+        approver: walletAddress,
+      };
+
+      await approveMilestone.mutateAsync({
+        payload,
+        type: "multi-release",
+        address: walletAddress,
+      });
+
+      toast.success(`Prestamo ${milestoneIndex + 1} aprobado`);
+      await fetchEscrow();
+    } catch (err) {
+      toast.error(handleError(err as ErrorResponse).message);
+    } finally {
+      setApprovingIndex(null);
+    }
+  };
+
+  const handleChangeStatusClick = (milestoneIndex: number) => {
+    changeMilestoneStatusHook.form.setValue(
+      "milestoneIndex",
+      String(milestoneIndex),
+    );
   };
 
   if (!walletAddress) {
@@ -137,10 +150,12 @@ export function EscrowDetail({ contractId }: EscrowDetailProps) {
     );
   }
 
-  if (error || !escrow) {
+  if (error || !selectedEscrow) {
     return (
       <main className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
-        <p className="text-lg text-destructive">{error || "Escrow no encontrado"}</p>
+        <p className="text-lg text-destructive">
+          {error || "Escrow no encontrado"}
+        </p>
         <Button
           onClick={() => router.push("/flow-testing")}
           variant="outline"
@@ -153,114 +168,37 @@ export function EscrowDetail({ contractId }: EscrowDetailProps) {
     );
   }
 
-  const milestones = (escrow.milestones || []) as MultiReleaseMilestone[];
-  const escrowBalance = Number(escrow.balance || 0);
+  const milestones = (selectedEscrow.milestones ||
+    []) as MultiReleaseMilestone[];
+  const escrowBalance = Number(selectedEscrow.balance || 0);
 
   return (
     <main className="flex flex-col gap-8 items-center sm:items-start">
       <div className="container py-8">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-2">
-          <Button
-            onClick={() => router.push("/flow-testing")}
-            variant="ghost"
-            size="icon"
-            className="cursor-pointer"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="text-3xl font-bold">Campanas</h1>
-        </div>
+        <EscrowHeader
+          title={selectedEscrow.title}
+          contractId={selectedEscrow.contractId || ""}
+          onBack={() => router.push("/flow-testing")}
+        />
 
-        {/* Escrow Info */}
-        <div className="mb-6 ml-14">
-          <p className="text-sm text-muted-foreground">
-            {escrow.title} &mdash;{" "}
-            <code className="text-xs">{escrow.contractId}</code>
-          </p>
-        </div>
-
-        {/* Manage Loans Card */}
-        <div className="max-w-3xl mx-auto">
-          <div className="border rounded-lg p-6">
-            <h2 className="text-xl font-semibold mb-2 text-center">
-              Gestionar Prestamos
-            </h2>
-            <p className="text-sm text-muted-foreground text-center mb-6">
-              Balance: <span className="font-semibold">USDC {escrowBalance}</span>
-            </p>
-
-            {/* Milestones List */}
-            <div className="flex flex-col gap-4 mb-6">
-              {milestones.length === 0 && (
-                <p className="text-center text-muted-foreground py-4">
-                  No hay prestamos todavia
-                </p>
-              )}
-              {milestones.map((milestone, index) => {
-                const isReleased = milestone.flags?.released === true;
-                const milestoneAmount = Number(milestone.amount || 0);
-                const insufficientFunds = escrowBalance < milestoneAmount;
-
-                return (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between border rounded-lg px-4 py-3"
-                  >
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
-                      <span className="font-medium truncate">
-                        {milestone.description}
-                      </span>
-                      <span className="text-xs text-muted-foreground truncate">
-                        {milestone.receiver}
-                      </span>
-                    </div>
-                    <span className="font-semibold mx-4 whitespace-nowrap">
-                      USDC {milestone.amount}
-                    </span>
-                    <Button
-                      onClick={() => handleComplete(index)}
-                      disabled={
-                        isReleased ||
-                        releasingIndex !== null ||
-                        insufficientFunds
-                      }
-                      variant={isReleased ? "secondary" : "outline"}
-                      size="sm"
-                      className="cursor-pointer whitespace-nowrap"
-                      title={
-                        insufficientFunds && !isReleased
-                          ? "Fondos insuficientes en el escrow"
-                          : undefined
-                      }
-                    >
-                      {releasingIndex === index ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : isReleased ? (
-                        "Completado"
-                      ) : (
-                        "Completar"
-                      )}
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Add Loan Button */}
-            <Button
-              onClick={() => setAddLoanOpen(true)}
-              className="cursor-pointer w-full"
-            >
-              Nuevo Prestamo
-            </Button>
-          </div>
-        </div>
+        <EscrowLoansCard
+          milestones={milestones}
+          escrowBalance={escrowBalance}
+          approvingIndex={approvingIndex}
+          releasingIndex={releasingIndex}
+          onApprove={handleApprove}
+          onRelease={handleRelease}
+          onChangeStatusClick={handleChangeStatusClick}
+          onAddLoan={() => setAddLoanOpen(true)}
+          changeStatusForm={changeMilestoneStatusHook.form}
+          changeStatusSubmit={changeMilestoneStatusHook.handleSubmit}
+          changeStatusSubmitting={changeMilestoneStatusHook.isSubmitting}
+        />
 
         <AddLoanDialog
           open={addLoanOpen}
           onOpenChange={setAddLoanOpen}
-          escrow={escrow}
+          escrow={selectedEscrow as GetEscrowsFromIndexerResponse}
           onSuccess={fetchEscrow}
         />
       </div>
