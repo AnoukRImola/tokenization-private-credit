@@ -93,20 +93,15 @@ impl VaultContract {
     /// * `OnlyAdminCanChangeAvailability` - If caller is not the admin
     pub fn availability_for_exchange(
         env: Env,
-        admin: Address,
         enabled: bool,
     ) -> Result<(), ContractError> {
-        admin.require_auth();
-
         let stored_admin: Address = env
             .storage()
             .instance()
             .get(&DataKey::Admin)
             .ok_or(ContractError::AdminNotFound)?;
 
-        if admin != stored_admin {
-            return Err(ContractError::OnlyAdminCanChangeAvailability);
-        }
+        stored_admin.require_auth();
 
         env.storage().instance().set(&DataKey::Enabled, &enabled);
 
@@ -114,7 +109,7 @@ impl VaultContract {
         events::emit_availability_changed(
             &env,
             AvailabilityChangedEvent {
-                admin: admin.clone(),
+                admin: stored_admin.clone(),
                 enabled,
             },
         );
