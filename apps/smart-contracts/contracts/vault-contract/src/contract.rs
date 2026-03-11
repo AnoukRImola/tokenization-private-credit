@@ -2,7 +2,7 @@ use soroban_sdk::{contract, contractimpl, panic_with_error, token, Address, Env}
 use token::Client as TokenClient;
 
 use crate::error::ContractError;
-use crate::events::{events, AvailabilityChangedEvent, ClaimEvent};
+use crate::events::{AvailabilityChangedEvent, ClaimEvent};
 use crate::storage_types::{DataKey, INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD};
 use crate::types::{ClaimPreview, VaultOverview};
 
@@ -101,11 +101,8 @@ impl VaultContract {
     /// * `OnlyAdminCanChangeAvailability` - If caller is not the admin
     pub fn availability_for_exchange(
         env: Env,
-        admin: Address,
         enabled: bool,
     ) -> Result<(), ContractError> {
-        admin.require_auth();
-
         env.storage()
             .instance()
             .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
@@ -116,20 +113,16 @@ impl VaultContract {
             .get(&DataKey::Admin)
             .ok_or(ContractError::AdminNotFound)?;
 
-        if admin != stored_admin {
-            return Err(ContractError::OnlyAdminCanChangeAvailability);
-        }
+        stored_admin.require_auth();
 
         env.storage().instance().set(&DataKey::Enabled, &enabled);
 
         // Emit availability changed event
-        events::emit_availability_changed(
-            &env,
-            AvailabilityChangedEvent {
-                admin: admin.clone(),
-                enabled,
-            },
-        );
+        AvailabilityChangedEvent {
+            admin: stored_admin.clone(),
+            enabled,
+        }
+        .publish(&env);
 
         Ok(())
     }
@@ -223,15 +216,13 @@ impl VaultContract {
             .set(&DataKey::TotalTokensRedeemed, &new_total);
 
         // Emit claim event for indexers and explorers
-        events::emit_claim(
-            &env,
-            ClaimEvent {
-                beneficiary: beneficiary.clone(),
-                tokens_redeemed: token_balance,
-                usdc_received: usdc_amount,
-                roi_percentage,
-            },
-        );
+        ClaimEvent {
+            beneficiary: beneficiary.clone(),
+            tokens_redeemed: token_balance,
+            usdc_received: usdc_amount,
+            roi_percentage,
+        }
+        .publish(&env);
 
         Ok(())
     }
@@ -363,7 +354,6 @@ impl VaultContract {
         } else {
             (0, 0)
         };
-
         let usdc_address: Address = env
             .storage()
             .instance()

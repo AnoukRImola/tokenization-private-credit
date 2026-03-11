@@ -97,9 +97,9 @@ fn test_vault_deployment_and_availability() {
 
     let vault = create_vault(&env, &admin, false, 10, &token.address, &usdc_client.address);
 
-    vault.availability_for_exchange(&admin, &true);
+    vault.availability_for_exchange(&true);
 
-    vault.availability_for_exchange(&admin, &false);
+    vault.availability_for_exchange(&false);
 }
 
 #[test]
@@ -267,7 +267,7 @@ fn test_is_enabled() {
     assert_eq!(vault_enabled.is_enabled(), true);
 
     // Test toggling
-    vault_disabled.availability_for_exchange(&admin, &true);
+    vault_disabled.availability_for_exchange(&true);
     assert_eq!(vault_disabled.is_enabled(), true);
 }
 
@@ -554,7 +554,7 @@ fn test_claim_emits_event() {
 
     // Verify event was emitted
     let events = env.events().all();
-    assert!(!events.is_empty(), "Expected claim event to be emitted");
+    assert!(!events.events().is_empty(), "Expected claim event to be emitted");
 }
 
 #[test]
@@ -570,12 +570,12 @@ fn test_availability_change_emits_event() {
 
     let vault = create_vault(&env, &admin, false, 10, &token.address, &usdc_client.address);
 
-    vault.availability_for_exchange(&admin, &true);
+    vault.availability_for_exchange(&true);
 
     // Verify event was emitted
     let events = env.events().all();
     assert!(
-        !events.is_empty(),
+        !events.events().is_empty(),
         "Expected availability changed event to be emitted"
     );
 }
@@ -795,4 +795,76 @@ fn test_constructor_accepts_max_roi() {
 
     let vault = create_vault(&env, &admin, true, 1000, &token.address, &usdc_client.address);
     assert_eq!(vault.get_roi_percentage(), 1000);
+}
+
+// ============ Security Tests (#33) ============
+
+#[test]
+fn test_claim_overflow_in_formula() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    // Use max ROI (1000) and a token balance that causes overflow: token_balance * (100 + roi) overflows i128
+    // token_balance * 1100 > i128::MAX when token_balance > i128::MAX / 1100
+    let overflow_balance: i128 = i128::MAX / 1100 + 1;
+    let vault = create_vault(&env, &admin, true, 1000, &token.address, &usdc_client.address);
+
+    token.mint(&beneficiary, &overflow_balance);
+
+    // claim() will compute: overflow_balance * (100 + 1000) / 100 which overflows i128 -> returns ArithmeticOverflow
+    let result = vault.try_claim(&beneficiary);
+    assert_eq!(result, Err(Ok(ContractError::ArithmeticOverflow)));
+}
+
+#[test]
+fn test_double_claim_same_beneficiary() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    let vault = create_vault(&env, &admin, true, 10, &token.address, &usdc_client.address);
+
+    token.mint(&beneficiary, &100);
+    usdc_admin.mint(&vault.address, &500);
+
+    // First claim succeeds
+    vault.claim(&beneficiary);
+    assert_eq!(usdc_client.balance(&beneficiary), 110);
+    assert_eq!(token.balance(&beneficiary), 0);
+
+    // Second claim fails — tokens already burned
+    let result = vault.try_claim(&beneficiary);
+    assert_eq!(result, Err(Ok(ContractError::BeneficiaryHasNoTokensToClaim)));
+}
+
+#[test]
+#[should_panic]
+fn test_non_admin_cannot_change_availability() {
+    let env = Env::default();
+    // Do NOT mock_all_auths — we want auth to fail for non-admin
+
+    let admin = Address::generate(&env);
+    let _non_admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+
+    let (usdc_client, _) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    let vault = create_vault(&env, &admin, false, 10, &token.address, &usdc_client.address);
+
+    // Non-admin tries to enable — should fail auth
+    vault.availability_for_exchange(&true);
 }
