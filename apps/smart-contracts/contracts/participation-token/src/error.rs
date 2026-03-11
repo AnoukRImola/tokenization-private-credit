@@ -8,4 +8,6 @@ pub enum ContractError {
     ParticipationTokenNotFound = 2,
     AdminNotFound = 3,
     OnlyAdminCanSetToken = 4,
+    HardCapExceeded = 5,
+    InvestorCapExceeded = 6,
 }

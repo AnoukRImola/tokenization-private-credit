@@ -51,9 +51,18 @@ impl ParticipationTokenContract {
         escrow_contract: Address,
         participation_token: Address,
         admin: Address,
+        hard_cap: i128,
+        max_per_investor: i128,
     ) {
         write_config(&env, &escrow_contract, &participation_token);
         write_admin(&env, &admin);
+        env.storage().instance().set(&DataKey::HardCap, &hard_cap);
+        env.storage()
+            .instance()
+            .set(&DataKey::MaxPerInvestor, &max_per_investor);
+        env.storage()
+            .instance()
+            .set(&DataKey::TotalMinted, &0_i128);
     }
 
     pub fn buy(
@@ -67,13 +76,54 @@ impl ParticipationTokenContract {
 
         let cfg = read_config(&env)?;
 
+        // Read caps and current state
+        let hard_cap: i128 = env
+            .storage()
+            .instance()
+            .get(&DataKey::HardCap)
+            .unwrap_or(0);
+        let max_per_investor: i128 = env
+            .storage()
+            .instance()
+            .get(&DataKey::MaxPerInvestor)
+            .unwrap_or(0);
+        let total_minted: i128 = env
+            .storage()
+            .instance()
+            .get(&DataKey::TotalMinted)
+            .unwrap_or(0);
+        let investor_balance: i128 = env
+            .storage()
+            .persistent()
+            .get(&DataKey::InvestorBalance(beneficiary.clone()))
+            .unwrap_or(0);
+
+        // Validate hard cap
+        if total_minted + amount > hard_cap {
+            return Err(ContractError::HardCapExceeded);
+        }
+
+        // Validate per-investor cap (0 means no limit)
+        if max_per_investor > 0 && investor_balance + amount > max_per_investor {
+            return Err(ContractError::InvestorCapExceeded);
+        }
+
+        // Transfer USDC to escrow
         let usdc_client = TokenClient::new(&env, &usdc);
         usdc_client.transfer(&payer, &cfg.escrow_contract, &amount);
 
+        // Mint participation tokens
         let mint_sym = Symbol::new(&env, "mint");
         let args_vec = vec![&env, beneficiary.into_val(&env), amount.into_val(&env)];
-
         let _: () = env.invoke_contract(&cfg.participation_token, &mint_sym, args_vec);
+
+        // Update counters after successful mint
+        env.storage()
+            .instance()
+            .set(&DataKey::TotalMinted, &(total_minted + amount));
+        env.storage()
+            .persistent()
+            .set(&DataKey::InvestorBalance(beneficiary.clone()), &(investor_balance + amount));
 
         emit_buy(
             &env,
