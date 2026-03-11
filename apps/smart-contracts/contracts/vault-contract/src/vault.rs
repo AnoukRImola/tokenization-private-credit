@@ -185,8 +185,11 @@ impl VaultContract {
             return Err(ContractError::BeneficiaryHasNoTokensToClaim);
         }
 
+        let rate = 100i128
+            .checked_add(roi_percentage)
+            .ok_or(ContractError::ArithmeticOverflow)?;
         let usdc_amount = token_balance
-            .checked_mul(100 + roi_percentage)
+            .checked_mul(rate)
             .and_then(|v| v.checked_div(100))
             .ok_or(ContractError::ArithmeticOverflow)?;
 
@@ -213,9 +216,12 @@ impl VaultContract {
             .instance()
             .get(&DataKey::TotalTokensRedeemed)
             .unwrap_or(0);
+        let new_total = total_redeemed
+            .checked_add(token_balance)
+            .ok_or(ContractError::ArithmeticOverflow)?;
         env.storage()
             .instance()
-            .set(&DataKey::TotalTokensRedeemed, &(total_redeemed + token_balance));
+            .set(&DataKey::TotalTokensRedeemed, &new_total);
 
         // Emit claim event for indexers and explorers
         events::emit_claim(
@@ -345,8 +351,11 @@ impl VaultContract {
         let token_balance = token_client.balance(&beneficiary);
 
         let (usdc_amount, roi_amount) = if token_balance > 0 {
+            let rate = 100i128
+                .checked_add(roi_percentage)
+                .ok_or(ContractError::ArithmeticOverflow)?;
             let usdc = token_balance
-                .checked_mul(100 + roi_percentage)
+                .checked_mul(rate)
                 .and_then(|v| v.checked_div(100))
                 .ok_or(ContractError::ArithmeticOverflow)?;
             let roi = usdc
