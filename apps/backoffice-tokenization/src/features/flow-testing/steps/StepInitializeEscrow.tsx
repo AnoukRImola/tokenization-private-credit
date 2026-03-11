@@ -22,7 +22,7 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-export function StepInitializeEscrow() {
+export function StepInitializeEscrow({ onNext }: { onNext?: () => void }) {
   const { walletAddress } = useWalletContext();
   const { deployEscrow } = useEscrowsMutations();
   const { getCampaign, saveContractId } = useCampaignFlow();
@@ -135,6 +135,11 @@ export function StepInitializeEscrow() {
             {contractId}
           </code>
         </div>
+      )}
+      {onNext && (
+        <Button onClick={onNext} className="cursor-pointer mt-4">
+          Continuar
+        </Button>
       )}
     </div>
   );

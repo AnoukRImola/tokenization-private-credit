@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { StepCampaignForm } from "./steps/StepCampaignForm";
 import { StepInitializeEscrow } from "./steps/StepInitializeEscrow";
+import { StepTokenizeEscrow } from "./steps/StepTokenizeEscrow";
 import { Check } from "lucide-react";
 
 const steps = [
   { label: "Nueva campaña" },
   { label: "Inicializar Escrow" },
-  { label: "Proximamente" },
+  { label: "Tokenizar" },
 ];
 
 export function CreateCampaignFlow() {
@@ -34,7 +35,6 @@ export function CreateCampaignFlow() {
           {steps.map((step, index) => {
             const isCompleted = index < currentStep;
             const isActive = index === currentStep;
-            const isDisabled = index > 1;
 
             return (
               <div key={step.label} className="flex items-center">
@@ -60,9 +60,7 @@ export function CreateCampaignFlow() {
                         ? "font-bold text-foreground"
                         : isCompleted
                           ? "font-medium text-foreground"
-                          : isDisabled
-                            ? "text-muted-foreground/30"
-                            : "text-muted-foreground"
+                          : "text-muted-foreground/30"
                     }`}
                   >
                     {step.label}
@@ -84,7 +82,10 @@ export function CreateCampaignFlow() {
         {currentStep === 0 && (
           <StepCampaignForm onNext={() => setCurrentStep(1)} />
         )}
-        {currentStep === 1 && <StepInitializeEscrow />}
+        {currentStep === 1 && (
+          <StepInitializeEscrow onNext={() => setCurrentStep(2)} />
+        )}
+        {currentStep === 2 && <StepTokenizeEscrow />}
       </div>
     </main>
   );
