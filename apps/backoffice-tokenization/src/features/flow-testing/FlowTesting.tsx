@@ -1,20 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
-import { StepCampaignForm } from "./steps/StepCampaignForm";
-import { StepInitializeEscrow } from "./steps/StepInitializeEscrow";
-import { Check } from "lucide-react";
-
-const steps = [
-  { label: "Nueva campaña" },
-  { label: "Inicializar Escrow" },
-  { label: "Proximamente" },
-];
+import { Button } from "@tokenization/ui/button";
+import { Input } from "@tokenization/ui/input";
+import { Search, Plus } from "lucide-react";
 
 export function FlowTesting() {
-  const [currentStep, setCurrentStep] = useState(0);
   const { walletAddress } = useWalletContext();
+  const router = useRouter();
+  const [searchId, setSearchId] = useState("");
 
   if (!walletAddress) {
     return (
@@ -26,65 +22,49 @@ export function FlowTesting() {
     );
   }
 
+  const handleSearch = () => {
+    const trimmed = searchId.trim();
+    if (!trimmed) return;
+    router.push(`/flow-testing/${trimmed}`);
+  };
+
   return (
     <main className="flex flex-col gap-8 items-center sm:items-start">
       <div className="container py-8">
-        {/* Stepper */}
-        <nav className="flex items-center justify-center mb-12">
-          {steps.map((step, index) => {
-            const isCompleted = index < currentStep;
-            const isActive = index === currentStep;
-            const isDisabled = index > 1;
+        <h1 className="text-3xl font-bold mb-8">campañas</h1>
 
-            return (
-              <div key={step.label} className="flex items-center">
-                <div className="flex flex-col items-center gap-2">
-                  <div
-                    className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-colors ${
-                      isCompleted
-                        ? "bg-primary border-primary text-primary-foreground"
-                        : isActive
-                          ? "border-primary text-primary"
-                          : "border-muted-foreground/30 text-muted-foreground/30"
-                    }`}
-                  >
-                    {isCompleted ? (
-                      <Check className="h-5 w-5" />
-                    ) : (
-                      <span className="text-sm font-medium">{index + 1}</span>
-                    )}
-                  </div>
-                  <span
-                    className={`text-sm whitespace-nowrap ${
-                      isActive
-                        ? "font-bold text-foreground"
-                        : isCompleted
-                          ? "font-medium text-foreground"
-                          : isDisabled
-                            ? "text-muted-foreground/30"
-                            : "text-muted-foreground"
-                    }`}
-                  >
-                    {step.label}
-                  </span>
-                </div>
-                {index < steps.length - 1 && (
-                  <div
-                    className={`w-24 h-0.5 mx-4 mt-[-1.5rem] ${
-                      index < currentStep ? "bg-primary" : "bg-muted-foreground/30"
-                    }`}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </nav>
+        <div className="flex flex-col gap-6 max-w-2xl">
+          {/* Create new campaign */}
+          <Button
+            onClick={() => router.push("/flow-testing/create")}
+            className="cursor-pointer w-fit"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nueva campaña
+          </Button>
 
-        {/* Step Content */}
-        {currentStep === 0 && (
-          <StepCampaignForm onNext={() => setCurrentStep(1)} />
-        )}
-        {currentStep === 1 && <StepInitializeEscrow />}
+          {/* Search escrow */}
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium">
+              Buscar escrow por Contract ID
+            </label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="Contract ID (ej: CABC...XYZ)"
+                value={searchId}
+                onChange={(e) => setSearchId(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              />
+              <Button
+                onClick={handleSearch}
+                disabled={!searchId.trim()}
+                className="cursor-pointer"
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   );
