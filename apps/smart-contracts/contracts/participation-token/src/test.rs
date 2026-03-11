@@ -164,6 +164,36 @@ fn test_buy_transfers_usdc_and_mints_sale_token() {
     assert_eq!(sale_token_balance, amount);
 }
 
+// ─── Security audit: AmountMustBePositive ────────────────────────────────────
+
+#[test]
+fn test_buy_rejects_zero_amount() {
+    let t = setup_test(1_000, 0);
+    t.usdc_admin.mint(&t.payer, &100);
+
+    let result = t.participation_token_client.try_buy(
+        &t.usdc_client.address,
+        &t.payer,
+        &t.beneficiary,
+        &0,
+    );
+    assert_eq!(result, Err(Ok(ContractError::AmountMustBePositive)));
+}
+
+#[test]
+fn test_buy_rejects_negative_amount() {
+    let t = setup_test(1_000, 0);
+    t.usdc_admin.mint(&t.payer, &100);
+
+    let result = t.participation_token_client.try_buy(
+        &t.usdc_client.address,
+        &t.payer,
+        &t.beneficiary,
+        &(-50),
+    );
+    assert_eq!(result, Err(Ok(ContractError::AmountMustBePositive)));
+}
+
 // ─── Hard cap tests ─────────────────────────────────────────────────────────
 
 #[test]

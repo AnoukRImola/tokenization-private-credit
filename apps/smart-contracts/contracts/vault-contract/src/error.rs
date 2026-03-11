@@ -18,6 +18,7 @@ pub enum ContractError {
     TokenAddressNotFound = 12,
     UsdcAddressNotFound = 13,
     ArithmeticOverflow = 14,
+    NotInitialized = 15,
 }
 
 impl fmt::Display for ContractError {
@@ -61,6 +62,7 @@ impl fmt::Display for ContractError {
                 write!(f, "USDC address not found in storage")
             }
             ContractError::ArithmeticOverflow => write!(f, "Arithmetic overflow"),
+            ContractError::NotInitialized => write!(f, "Contract not initialized"),
         }
     }
 }

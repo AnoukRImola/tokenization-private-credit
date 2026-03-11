@@ -23,7 +23,10 @@ fn write_balance(e: &Env, addr: Address, amount: i128) {
 
 pub fn receive_balance(e: &Env, addr: Address, amount: i128) {
     let balance = read_balance(e, addr.clone());
-    write_balance(e, addr, balance + amount);
+    let new_balance = balance
+        .checked_add(amount)
+        .expect("balance overflow");
+    write_balance(e, addr, new_balance);
 }
 
 pub fn spend_balance(e: &Env, addr: Address, amount: i128) {
@@ -31,5 +34,8 @@ pub fn spend_balance(e: &Env, addr: Address, amount: i128) {
     if balance < amount {
         panic!("insufficient balance");
     }
-    write_balance(e, addr, balance - amount);
+    let new_balance = balance
+        .checked_sub(amount)
+        .expect("balance underflow");
+    write_balance(e, addr, new_balance);
 }
