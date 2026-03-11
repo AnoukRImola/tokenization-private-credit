@@ -3,6 +3,8 @@ import { SorobanService } from '../soroban/soroban.service';
 import { DeployParticipationTokenDto } from './dto/deploy-participation-token.dto';
 import { DeployTokenFactoryDto } from './dto/deploy-token-factory.dto';
 
+const TOKEN_DECIMAL = 7;
+
 @Injectable()
 export class DeployService {
   private readonly participationTokenWasmHash: string;
@@ -33,6 +35,8 @@ export class DeployService {
         name: dto.name,
         symbol: dto.symbol,
         escrow_id: dto.escrowContractId,
+        decimal: TOKEN_DECIMAL,
+        mint_authority: dto.mintAuthority,
       },
       dto.callerPublicKey,
     );

@@ -15,5 +15,9 @@ export class DeployTokenFactoryDto {
 
   @IsString()
   @IsNotEmpty()
+  mintAuthority: string;
+
+  @IsString()
+  @IsNotEmpty()
   callerPublicKey: string;
 }

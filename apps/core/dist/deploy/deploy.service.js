@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeployService = void 0;
 const common_1 = require("@nestjs/common");
 const soroban_service_1 = require("../soroban/soroban.service");
+const TOKEN_DECIMAL = 7;
 let DeployService = class DeployService {
     soroban;
     participationTokenWasmHash;
@@ -34,6 +35,8 @@ let DeployService = class DeployService {
             name: dto.name,
             symbol: dto.symbol,
             escrow_id: dto.escrowContractId,
+            decimal: TOKEN_DECIMAL,
+            mint_authority: dto.mintAuthority,
         }, dto.callerPublicKey);
     }
 };

@@ -15,6 +15,7 @@ class DeployTokenFactoryDto {
     name;
     symbol;
     escrowContractId;
+    mintAuthority;
     callerPublicKey;
 }
 exports.DeployTokenFactoryDto = DeployTokenFactoryDto;
@@ -33,6 +34,11 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], DeployTokenFactoryDto.prototype, "escrowContractId", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], DeployTokenFactoryDto.prototype, "mintAuthority", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
