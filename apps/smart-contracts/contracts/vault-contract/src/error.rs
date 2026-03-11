@@ -9,6 +9,11 @@ pub enum ContractError {
     ExchangeIsCurrentlyDisabled = 3,
     BeneficiaryHasNoTokensToClaim = 4,
     VaultDoesNotHaveEnoughUSDC = 5,
+    ArithmeticOverflow = 6,
+    EnabledNotFound = 7,
+    RoiPercentageNotFound = 8,
+    TokenAddressNotFound = 9,
+    UsdcAddressNotFound = 10,
 }
 
 impl fmt::Display for ContractError {
@@ -26,6 +31,21 @@ impl fmt::Display for ContractError {
             }
             ContractError::VaultDoesNotHaveEnoughUSDC => {
                 write!(f, "Vault does not have enough USDC")
+            }
+            ContractError::ArithmeticOverflow => {
+                write!(f, "Arithmetic overflow")
+            }
+            ContractError::EnabledNotFound => {
+                write!(f, "Enabled flag not found in storage")
+            }
+            ContractError::RoiPercentageNotFound => {
+                write!(f, "ROI percentage not found in storage")
+            }
+            ContractError::TokenAddressNotFound => {
+                write!(f, "Token address not found in storage")
+            }
+            ContractError::UsdcAddressNotFound => {
+                write!(f, "USDC address not found in storage")
             }
         }
     }

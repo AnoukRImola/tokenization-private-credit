@@ -133,9 +133,14 @@ impl VaultContract {
     /// * `beneficiary` - The address claiming their ROI (must have tokens)
     ///
     /// # Errors
+    /// * `EnabledNotFound` - If enabled flag is not set in storage
     /// * `ExchangeIsCurrentlyDisabled` - If vault is disabled
+    /// * `RoiPercentageNotFound` - If ROI percentage is not set in storage
+    /// * `TokenAddressNotFound` - If token address is not set in storage
     /// * `BeneficiaryHasNoTokensToClaim` - If beneficiary has zero tokens
+    /// * `UsdcAddressNotFound` - If USDC address is not set in storage
     /// * `VaultDoesNotHaveEnoughUSDC` - If vault cannot cover the claim
+    /// * `ArithmeticOverflow` - If total tokens redeemed overflows
     pub fn claim(env: Env, beneficiary: Address) -> Result<(), ContractError> {
         beneficiary.require_auth();
 
@@ -143,7 +148,7 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::Enabled)
-            .expect("Enabled flag not found");
+            .ok_or(ContractError::EnabledNotFound)?;
 
         if !enabled {
             return Err(ContractError::ExchangeIsCurrentlyDisabled);
@@ -153,13 +158,13 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::RoiPercentage)
-            .expect("ROI percentage not found");
+            .ok_or(ContractError::RoiPercentageNotFound)?;
 
         let token_address: Address = env
             .storage()
             .instance()
             .get(&DataKey::TokenAddress)
-            .expect("Token address not found");
+            .ok_or(ContractError::TokenAddressNotFound)?;
 
         let token_client = TokenClient::new(&env, &token_address);
         let token_balance = token_client.balance(&beneficiary);
@@ -174,7 +179,7 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found");
+            .ok_or(ContractError::UsdcAddressNotFound)?;
 
         let usdc_client = TokenClient::new(&env, &usdc_address);
         let vault_usdc_balance = usdc_client.balance(&env.current_contract_address());
@@ -187,15 +192,18 @@ impl VaultContract {
         token_client.burn(&beneficiary, &token_balance);
         usdc_client.transfer(&env.current_contract_address(), &beneficiary, &usdc_amount);
 
-        // Update total tokens redeemed
+        // Update total tokens redeemed (checked arithmetic — #26)
         let total_redeemed: i128 = env
             .storage()
             .instance()
             .get(&DataKey::TotalTokensRedeemed)
             .unwrap_or(0);
+        let new_total = total_redeemed
+            .checked_add(token_balance)
+            .ok_or(ContractError::ArithmeticOverflow)?;
         env.storage()
             .instance()
-            .set(&DataKey::TotalTokensRedeemed, &(total_redeemed + token_balance));
+            .set(&DataKey::TotalTokensRedeemed, &new_total);
 
         // Emit claim event for indexers and explorers
         events::emit_claim(
@@ -214,11 +222,11 @@ impl VaultContract {
     // ============ View/Getter Functions ============
 
     /// Returns the admin address.
-    pub fn get_admin(env: Env) -> Address {
+    pub fn get_admin(env: Env) -> Result<Address, ContractError> {
         env.storage()
             .instance()
             .get(&DataKey::Admin)
-            .expect("Admin not found")
+            .ok_or(ContractError::AdminNotFound)
     }
 
     /// Returns whether claiming is currently enabled.
@@ -230,39 +238,39 @@ impl VaultContract {
     }
 
     /// Returns the ROI percentage (e.g., 5 means 5% return).
-    pub fn get_roi_percentage(env: Env) -> i128 {
+    pub fn get_roi_percentage(env: Env) -> Result<i128, ContractError> {
         env.storage()
             .instance()
             .get(&DataKey::RoiPercentage)
-            .expect("ROI percentage not found")
+            .ok_or(ContractError::RoiPercentageNotFound)
     }
 
     /// Returns the participation token contract address.
-    pub fn get_token_address(env: Env) -> Address {
+    pub fn get_token_address(env: Env) -> Result<Address, ContractError> {
         env.storage()
             .instance()
             .get(&DataKey::TokenAddress)
-            .expect("Token address not found")
+            .ok_or(ContractError::TokenAddressNotFound)
     }
 
     /// Returns the USDC stablecoin contract address.
-    pub fn get_usdc_address(env: Env) -> Address {
+    pub fn get_usdc_address(env: Env) -> Result<Address, ContractError> {
         env.storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found")
+            .ok_or(ContractError::UsdcAddressNotFound)
     }
 
     /// Returns the current USDC balance held by the vault.
-    pub fn get_vault_usdc_balance(env: Env) -> i128 {
+    pub fn get_vault_usdc_balance(env: Env) -> Result<i128, ContractError> {
         let usdc_address: Address = env
             .storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found");
+            .ok_or(ContractError::UsdcAddressNotFound)?;
 
         let usdc_client = TokenClient::new(&env, &usdc_address);
-        usdc_client.balance(&env.current_contract_address())
+        Ok(usdc_client.balance(&env.current_contract_address()))
     }
 
     /// Returns the total amount of participation tokens that have been redeemed.
@@ -283,7 +291,7 @@ impl VaultContract {
     ///
     /// # Returns
     /// A `ClaimPreview` struct with all relevant claim information
-    pub fn preview_claim(env: Env, beneficiary: Address) -> ClaimPreview {
+    pub fn preview_claim(env: Env, beneficiary: Address) -> Result<ClaimPreview, ContractError> {
         let roi_percentage: i128 = env
             .storage()
             .instance()
@@ -294,7 +302,7 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::TokenAddress)
-            .expect("Token address not found");
+            .ok_or(ContractError::TokenAddressNotFound)?;
 
         let token_client = TokenClient::new(&env, &token_address);
         let token_balance = token_client.balance(&beneficiary);
@@ -311,7 +319,7 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found");
+            .ok_or(ContractError::UsdcAddressNotFound)?;
 
         let usdc_client = TokenClient::new(&env, &usdc_address);
         let vault_usdc_balance = usdc_client.balance(&env.current_contract_address());
@@ -322,25 +330,25 @@ impl VaultContract {
             .get(&DataKey::Enabled)
             .unwrap_or(false);
 
-        ClaimPreview {
+        Ok(ClaimPreview {
             token_balance,
             usdc_amount,
             roi_amount,
             vault_has_sufficient_balance: vault_usdc_balance >= usdc_amount,
             claim_enabled: enabled,
-        }
+        })
     }
 
     // ============ Overview Functions ============
 
     /// Returns a complete snapshot of the vault's current state.
     /// Useful for dashboards and analytics integrations.
-    pub fn get_vault_overview(env: Env) -> VaultOverview {
+    pub fn get_vault_overview(env: Env) -> Result<VaultOverview, ContractError> {
         let admin: Address = env
             .storage()
             .instance()
             .get(&DataKey::Admin)
-            .expect("Admin not found");
+            .ok_or(ContractError::AdminNotFound)?;
 
         let enabled: bool = env
             .storage()
@@ -358,13 +366,13 @@ impl VaultContract {
             .storage()
             .instance()
             .get(&DataKey::TokenAddress)
-            .expect("Token address not found");
+            .ok_or(ContractError::TokenAddressNotFound)?;
 
         let usdc_address: Address = env
             .storage()
             .instance()
             .get(&DataKey::UsdcAddress)
-            .expect("USDC address not found");
+            .ok_or(ContractError::UsdcAddressNotFound)?;
 
         let usdc_client = TokenClient::new(&env, &usdc_address);
         let vault_usdc_balance = usdc_client.balance(&env.current_contract_address());
@@ -375,7 +383,7 @@ impl VaultContract {
             .get(&DataKey::TotalTokensRedeemed)
             .unwrap_or(0);
 
-        VaultOverview {
+        Ok(VaultOverview {
             admin,
             enabled,
             roi_percentage,
@@ -383,6 +391,6 @@ impl VaultContract {
             usdc_address,
             vault_usdc_balance,
             total_tokens_redeemed,
-        }
+        })
     }
 }
