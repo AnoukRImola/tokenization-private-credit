@@ -42,9 +42,11 @@ pub fn write_allowance(
     if amount > 0 {
         let live_for = expiration_ledger
             .checked_sub(e.ledger().sequence())
-            .unwrap();
+            .expect("expiration_ledger must be >= current ledger sequence");
 
-        e.storage().temporary().extend_ttl(&key, live_for, live_for)
+        e.storage()
+            .temporary()
+            .extend_ttl(&key, live_for, live_for)
     }
 }
 
@@ -54,11 +56,15 @@ pub fn spend_allowance(e: &Env, from: Address, spender: Address, amount: i128) {
         panic!("insufficient allowance");
     }
     if amount > 0 {
+        let new_allowance = allowance
+            .amount
+            .checked_sub(amount)
+            .expect("allowance underflow");
         write_allowance(
             e,
             from,
             spender,
-            allowance.amount - amount,
+            new_allowance,
             allowance.expiration_ledger,
         );
     }

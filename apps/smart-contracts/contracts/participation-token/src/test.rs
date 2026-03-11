@@ -1,6 +1,7 @@
 #![cfg(test)]
 extern crate std;
 
+use crate::error::ContractError;
 use crate::sale::{ParticipationTokenContract, ParticipationTokenContractClient};
 use escrow::{Escrow, EscrowContract, EscrowContractClient, Flags, Milestone, Roles, Trustline};
 use soroban_sdk::{testutils::Address as _, token, vec, Address, Env, String};
@@ -39,21 +40,9 @@ fn create_participation_token<'a>(e: &Env, escrow_addr: &Address, sale_token_add
     ParticipationTokenContractClient::new(e, &contract_id)
 }
 
-#[test]
-fn test_buy_transfers_usdc_and_mints_sale_token() {
-    let env = Env::default();
-    env.mock_all_auths_allowing_non_root_auth();
-
-    let admin = Address::generate(&env);
-    let payer = Address::generate(&env);
-    let beneficiary = Address::generate(&env);
-
-    // 1) Create USDC
-    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
-
-    // 2) Create Escrow contract
-    let escrow_client = create_escrow_contract(&env);
-    let engagement_id = String::from_str(&env, "eng_1");
+fn setup_escrow<'a>(env: &Env, payer: &Address, beneficiary: &Address, admin: &Address, usdc_address: &Address, amount: i128) -> EscrowContractClient<'a> {
+    let escrow_client = create_escrow_contract(env);
+    let engagement_id = String::from_str(env, "eng_1");
 
     let roles = Roles {
         approver: payer.clone(),
@@ -71,17 +60,15 @@ fn test_buy_transfers_usdc_and_mints_sale_token() {
     };
 
     let trustline = Trustline {
-        address: usdc_client.address.clone(),
+        address: usdc_address.clone(),
     };
 
-    let amount: i128 = 100;
-
     let milestones = vec![
-        &env,
+        env,
         Milestone {
-            description: String::from_str(&env, "m1"),
-            status: String::from_str(&env, "Pending"),
-            evidence: String::from_str(&env, ""),
+            description: String::from_str(env, "m1"),
+            status: String::from_str(env, "Pending"),
+            evidence: String::from_str(env, ""),
             amount,
             flags: flags.clone(),
             receiver: beneficiary.clone(),
@@ -90,8 +77,8 @@ fn test_buy_transfers_usdc_and_mints_sale_token() {
 
     let escrow_properties = Escrow {
         engagement_id,
-        title: String::from_str(&env, "Test Escrow"),
-        description: String::from_str(&env, "Test Escrow Description"),
+        title: String::from_str(env, "Test Escrow"),
+        description: String::from_str(env, "Test Escrow Description"),
         roles,
         platform_fee: 0,
         milestones,
@@ -100,6 +87,24 @@ fn test_buy_transfers_usdc_and_mints_sale_token() {
     };
 
     escrow_client.initialize_escrow(&escrow_properties);
+    escrow_client
+}
+
+#[test]
+fn test_buy_transfers_usdc_and_mints_sale_token() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let admin = Address::generate(&env);
+    let payer = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+    let amount: i128 = 100;
+
+    // 1) Create USDC
+    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
+
+    // 2) Create Escrow contract
+    let escrow_client = setup_escrow(&env, &payer, &beneficiary, &admin, &usdc_client.address, amount);
 
     // 3) Create token-factory with a temporary admin as mint_authority
     let temp_admin = Address::generate(&env);
@@ -124,4 +129,46 @@ fn test_buy_transfers_usdc_and_mints_sale_token() {
     // 9) Verify that the beneficiary received the minted sale tokens
     let sale_token_balance = sale_token.balance(&beneficiary);
     assert_eq!(sale_token_balance, amount);
+}
+
+#[test]
+fn test_buy_rejects_zero_amount() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let admin = Address::generate(&env);
+    let payer = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
+    let escrow_client = setup_escrow(&env, &payer, &beneficiary, &admin, &usdc_client.address, 100);
+
+    let temp_admin = Address::generate(&env);
+    let sale_token = create_token_factory(&env, &temp_admin);
+    let participation_token_client = create_participation_token(&env, &escrow_client.address, &sale_token.address);
+    sale_token.set_admin(&participation_token_client.address);
+
+    let result = participation_token_client.try_buy(&usdc_client.address, &payer, &beneficiary, &0);
+    assert_eq!(result, Err(Ok(ContractError::AmountMustBePositive)));
+}
+
+#[test]
+fn test_buy_rejects_negative_amount() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let admin = Address::generate(&env);
+    let payer = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
+    let escrow_client = setup_escrow(&env, &payer, &beneficiary, &admin, &usdc_client.address, 100);
+
+    let temp_admin = Address::generate(&env);
+    let sale_token = create_token_factory(&env, &temp_admin);
+    let participation_token_client = create_participation_token(&env, &escrow_client.address, &sale_token.address);
+    sale_token.set_admin(&participation_token_client.address);
+
+    let result = participation_token_client.try_buy(&usdc_client.address, &payer, &beneficiary, &(-50));
+    assert_eq!(result, Err(Ok(ContractError::AmountMustBePositive)));
 }

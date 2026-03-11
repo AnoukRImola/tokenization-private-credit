@@ -199,7 +199,7 @@ fn test_claim_with_6_percent_premium() {
     assert_eq!(usdc_client.balance(&vault.address), 94);
 }
 
-// ============ New Getter Function Tests ============
+// ============ Getter Function Tests ============
 
 #[test]
 fn test_get_admin() {
