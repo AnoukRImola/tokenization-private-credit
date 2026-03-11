@@ -9,10 +9,12 @@ datasource db {
 
 enum CampaignStatus {
   DRAFT
+  FUNDRAISING
   ACTIVE
-  FUNDED
-  PAUSED
+  REPAYMENT
+  CLAIMABLE
   CLOSED
+  PAUSED
 }
 
 model Campaign {
@@ -20,6 +22,7 @@ model Campaign {
   name            String
   description     String?
   status          CampaignStatus @default(DRAFT)
+  previousStatus  CampaignStatus?
   issuerAddress   String
   escrowId        String
   poolSize        Decimal

@@ -1,6 +1,7 @@
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCampaignDto } from './dto/create-campaign.dto';
 import { UpdateCampaignDto } from './dto/update-campaign.dto';
+import { UpdateCampaignStatusDto } from './dto/update-campaign-status.dto';
 export declare class CampaignsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -13,11 +14,12 @@ export declare class CampaignsService {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
+        previousStatus: import("@prisma/client").$Enums.CampaignStatus | null;
         createdAt: Date;
         updatedAt: Date;
     }[]>;
@@ -40,11 +42,12 @@ export declare class CampaignsService {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
+        previousStatus: import("@prisma/client").$Enums.CampaignStatus | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -57,11 +60,12 @@ export declare class CampaignsService {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
+        previousStatus: import("@prisma/client").$Enums.CampaignStatus | null;
         createdAt: Date;
         updatedAt: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
@@ -74,11 +78,12 @@ export declare class CampaignsService {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
+        previousStatus: import("@prisma/client").$Enums.CampaignStatus | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
@@ -91,12 +96,33 @@ export declare class CampaignsService {
         loanDuration: number;
         expectedReturn: import("@prisma/client/runtime/library").Decimal;
         loanSize: import("@prisma/client/runtime/library").Decimal;
-        status: import("@prisma/client").$Enums.CampaignStatus;
         vaultId: string | null;
         tokenSaleId: string | null;
         tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
         id: string;
+        previousStatus: import("@prisma/client").$Enums.CampaignStatus | null;
         createdAt: Date;
         updatedAt: Date;
     }>;
+    updateStatus(id: string, dto: UpdateCampaignStatusDto): Promise<{
+        name: string;
+        description: string | null;
+        issuerAddress: string;
+        escrowId: string;
+        poolSize: import("@prisma/client/runtime/library").Decimal;
+        loanDuration: number;
+        expectedReturn: import("@prisma/client/runtime/library").Decimal;
+        loanSize: import("@prisma/client/runtime/library").Decimal;
+        vaultId: string | null;
+        tokenSaleId: string | null;
+        tokenFactoryId: string | null;
+        status: import("@prisma/client").$Enums.CampaignStatus;
+        id: string;
+        previousStatus: import("@prisma/client").$Enums.CampaignStatus | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    private validateStatusTransition;
+    private validatePrerequisites;
 }
