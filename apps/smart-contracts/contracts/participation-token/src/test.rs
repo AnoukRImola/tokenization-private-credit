@@ -151,8 +151,6 @@ fn setup_test(hard_cap: i128, max_per_investor: i128) -> TestSetup<'static> {
     }
 }
 
-// ─── Existing test (adapted) ────────────────────────────────────────────────
-
 #[test]
 fn test_buy_transfers_usdc_and_mints_sale_token() {
     let amount: i128 = 100;
