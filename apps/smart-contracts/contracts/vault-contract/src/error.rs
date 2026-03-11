@@ -9,6 +9,7 @@ pub enum ContractError {
     ExchangeIsCurrentlyDisabled = 3,
     BeneficiaryHasNoTokensToClaim = 4,
     VaultDoesNotHaveEnoughUSDC = 5,
+    ArithmeticOverflow = 6,
 }
 
 impl fmt::Display for ContractError {
@@ -27,6 +28,7 @@ impl fmt::Display for ContractError {
             ContractError::VaultDoesNotHaveEnoughUSDC => {
                 write!(f, "Vault does not have enough USDC")
             }
+            ContractError::ArithmeticOverflow => write!(f, "Arithmetic overflow"),
         }
     }
 }

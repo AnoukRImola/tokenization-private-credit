@@ -3,7 +3,7 @@ use token::Client as TokenClient;
 
 use crate::error::ContractError;
 use crate::events::{events, AvailabilityChangedEvent, ClaimEvent};
-use crate::storage_types::DataKey;
+use crate::storage_types::{DataKey, INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD};
 
 /// A complete snapshot of the vault's current state.
 /// Useful for dashboards, analytics, and indexer integrations.
@@ -65,6 +65,11 @@ impl VaultContract {
         token: Address,
         usdc: Address,
     ) {
+        const ROI_MAX: i128 = 1000;
+        if roi_percentage < 0 || roi_percentage > ROI_MAX {
+            panic!("roi_percentage must be between 0 and 1000");
+        }
+
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::Enabled, &enabled);
         env.storage()
@@ -77,6 +82,10 @@ impl VaultContract {
         env.storage()
             .instance()
             .set(&DataKey::TotalTokensRedeemed, &0_i128);
+
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
     }
 
     // ============ Admin Functions ============
@@ -97,6 +106,10 @@ impl VaultContract {
         enabled: bool,
     ) -> Result<(), ContractError> {
         admin.require_auth();
+
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
 
         let stored_admin: Address = env
             .storage()
@@ -139,6 +152,10 @@ impl VaultContract {
     pub fn claim(env: Env, beneficiary: Address) -> Result<(), ContractError> {
         beneficiary.require_auth();
 
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
         let enabled: bool = env
             .storage()
             .instance()
@@ -168,7 +185,10 @@ impl VaultContract {
             return Err(ContractError::BeneficiaryHasNoTokensToClaim);
         }
 
-        let usdc_amount = (token_balance * (100 + roi_percentage)) / 100;
+        let usdc_amount = token_balance
+            .checked_mul(100 + roi_percentage)
+            .and_then(|v| v.checked_div(100))
+            .ok_or(ContractError::ArithmeticOverflow)?;
 
         let usdc_address: Address = env
             .storage()
@@ -217,12 +237,18 @@ impl VaultContract {
     pub fn get_admin(env: Env) -> Address {
         env.storage()
             .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+        env.storage()
+            .instance()
             .get(&DataKey::Admin)
             .expect("Admin not found")
     }
 
     /// Returns whether claiming is currently enabled.
     pub fn is_enabled(env: Env) -> bool {
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
         env.storage()
             .instance()
             .get(&DataKey::Enabled)
@@ -233,12 +259,18 @@ impl VaultContract {
     pub fn get_roi_percentage(env: Env) -> i128 {
         env.storage()
             .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+        env.storage()
+            .instance()
             .get(&DataKey::RoiPercentage)
             .expect("ROI percentage not found")
     }
 
     /// Returns the participation token contract address.
     pub fn get_token_address(env: Env) -> Address {
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
         env.storage()
             .instance()
             .get(&DataKey::TokenAddress)
@@ -249,12 +281,18 @@ impl VaultContract {
     pub fn get_usdc_address(env: Env) -> Address {
         env.storage()
             .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+        env.storage()
+            .instance()
             .get(&DataKey::UsdcAddress)
             .expect("USDC address not found")
     }
 
     /// Returns the current USDC balance held by the vault.
     pub fn get_vault_usdc_balance(env: Env) -> i128 {
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
         let usdc_address: Address = env
             .storage()
             .instance()
@@ -267,6 +305,9 @@ impl VaultContract {
 
     /// Returns the total amount of participation tokens that have been redeemed.
     pub fn get_total_tokens_redeemed(env: Env) -> i128 {
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
         env.storage()
             .instance()
             .get(&DataKey::TotalTokensRedeemed)
@@ -283,7 +324,11 @@ impl VaultContract {
     ///
     /// # Returns
     /// A `ClaimPreview` struct with all relevant claim information
-    pub fn preview_claim(env: Env, beneficiary: Address) -> ClaimPreview {
+    pub fn preview_claim(env: Env, beneficiary: Address) -> Result<ClaimPreview, ContractError> {
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
         let roi_percentage: i128 = env
             .storage()
             .instance()
@@ -299,13 +344,18 @@ impl VaultContract {
         let token_client = TokenClient::new(&env, &token_address);
         let token_balance = token_client.balance(&beneficiary);
 
-        let usdc_amount = if token_balance > 0 {
-            (token_balance * (100 + roi_percentage)) / 100
+        let (usdc_amount, roi_amount) = if token_balance > 0 {
+            let usdc = token_balance
+                .checked_mul(100 + roi_percentage)
+                .and_then(|v| v.checked_div(100))
+                .ok_or(ContractError::ArithmeticOverflow)?;
+            let roi = usdc
+                .checked_sub(token_balance)
+                .ok_or(ContractError::ArithmeticOverflow)?;
+            (usdc, roi)
         } else {
-            0
+            (0, 0)
         };
-
-        let roi_amount = usdc_amount - token_balance;
 
         let usdc_address: Address = env
             .storage()
@@ -322,13 +372,13 @@ impl VaultContract {
             .get(&DataKey::Enabled)
             .unwrap_or(false);
 
-        ClaimPreview {
+        Ok(ClaimPreview {
             token_balance,
             usdc_amount,
             roi_amount,
             vault_has_sufficient_balance: vault_usdc_balance >= usdc_amount,
             claim_enabled: enabled,
-        }
+        })
     }
 
     // ============ Overview Functions ============
@@ -336,6 +386,10 @@ impl VaultContract {
     /// Returns a complete snapshot of the vault's current state.
     /// Useful for dashboards and analytics integrations.
     pub fn get_vault_overview(env: Env) -> VaultOverview {
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
         let admin: Address = env
             .storage()
             .instance()

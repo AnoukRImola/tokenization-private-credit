@@ -51,6 +51,36 @@ fn create_vault<'a>(
     VaultContractClient::new(e, &contract_id)
 }
 
+// ============ Constructor Validation Tests ============
+
+#[test]
+#[should_panic(expected = "roi_percentage must be between 0 and 1000")]
+fn test_constructor_rejects_negative_roi_percentage() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    let _ = create_vault(&env, &admin, true, -1, &token.address, &usdc_client.address);
+}
+
+#[test]
+#[should_panic(expected = "roi_percentage must be between 0 and 1000")]
+fn test_constructor_rejects_roi_percentage_over_max() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let token_admin = Address::generate(&env);
+    let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
+    let token = create_token_factory(&env, &token_admin);
+
+    let _ = create_vault(&env, &admin, true, 1001, &token.address, &usdc_client.address);
+}
+
 // ============ Original Tests (Updated) ============
 
 #[test]
