@@ -1,8 +1,9 @@
-use soroban_sdk::{contract, contractimpl, symbol_short, token, Address, Env, IntoVal, Symbol, vec};
+use soroban_sdk::{contract, contractimpl, token, Address, Env, IntoVal, Symbol, vec};
 use token::Client as TokenClient;
 
 use crate::error::ContractError;
-use crate::storage_types::DataKey;
+use crate::events::{events, BuyEvent};
+use crate::storage_types::{DataKey, INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD};
 
 #[contract]
 pub struct ParticipationTokenContract;
@@ -11,6 +12,7 @@ pub struct ParticipationTokenContract;
 pub struct Config {
     pub escrow_contract: Address,
     pub participation_token: Address,
+    pub usdc_address: Address,
 }
 
 fn read_config(e: &Env) -> Result<Config, ContractError> {
@@ -24,30 +26,57 @@ fn read_config(e: &Env) -> Result<Config, ContractError> {
         .instance()
         .get(&DataKey::ParticipationToken)
         .ok_or(ContractError::NotInitialized)?;
+    let usdc_address: Address = e
+        .storage()
+        .instance()
+        .get(&DataKey::UsdcAddress)
+        .ok_or(ContractError::NotInitialized)?;
     Ok(Config {
         escrow_contract,
         participation_token,
+        usdc_address,
     })
 }
 
-fn write_config(e: &Env, escrow_contract: &Address, participation_token: &Address) {
+fn write_config(
+    e: &Env,
+    escrow_contract: &Address,
+    participation_token: &Address,
+    usdc_address: &Address,
+) {
     e.storage()
         .instance()
         .set(&DataKey::EscrowContract, escrow_contract);
     e.storage()
         .instance()
         .set(&DataKey::ParticipationToken, participation_token);
+    e.storage()
+        .instance()
+        .set(&DataKey::UsdcAddress, usdc_address);
+}
+
+/// Invokes the `mint(to, amount)` function on the token-factory contract.
+/// Uses `invoke_contract` because `mint` is a custom method not part of
+/// the standard Soroban `TokenInterface`, so `token::Client` cannot be used.
+fn mint_participation_tokens(env: &Env, token_contract: &Address, to: &Address, amount: i128) {
+    let mint_fn = Symbol::new(env, "mint");
+    let args = vec![env, to.into_val(env), amount.into_val(env)];
+    let _: () = env.invoke_contract(token_contract, &mint_fn, args);
 }
 
 #[contractimpl]
 impl ParticipationTokenContract {
-    pub fn __constructor(env: Env, escrow_contract: Address, participation_token: Address) {
-        write_config(&env, &escrow_contract, &participation_token);
+    pub fn __constructor(
+        env: Env,
+        escrow_contract: Address,
+        participation_token: Address,
+        usdc_address: Address,
+    ) {
+        write_config(&env, &escrow_contract, &participation_token, &usdc_address);
     }
 
     pub fn buy(
         env: Env,
-        usdc: Address,
         payer: Address,
         beneficiary: Address,
         amount: i128,
@@ -58,19 +87,27 @@ impl ParticipationTokenContract {
             return Err(ContractError::AmountMustBePositive);
         }
 
+        // Extend TTL to prevent storage expiration
+        env.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
         let cfg = read_config(&env)?;
 
-        let usdc_client = TokenClient::new(&env, &usdc);
+        // Transfer USDC from payer to escrow
+        let usdc_client = TokenClient::new(&env, &cfg.usdc_address);
         usdc_client.transfer(&payer, &cfg.escrow_contract, &amount);
 
-        let mint_sym = Symbol::new(&env, "mint");
-        let args_vec = vec![&env, beneficiary.into_val(&env), amount.into_val(&env)];
+        // Mint participation tokens to beneficiary
+        mint_participation_tokens(&env, &cfg.participation_token, &beneficiary, amount);
 
-        let _: () = env.invoke_contract(&cfg.participation_token, &mint_sym, args_vec);
-
-        env.events().publish(
-            (symbol_short!("buy"),),
-            (payer, beneficiary, amount),
+        events::emit_buy(
+            &env,
+            BuyEvent {
+                payer,
+                beneficiary,
+                amount,
+            },
         );
 
         Ok(())

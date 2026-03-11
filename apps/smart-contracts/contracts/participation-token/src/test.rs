@@ -35,12 +35,27 @@ fn create_token_factory<'a>(e: &Env, mint_authority: &Address) -> FactoryTokenCl
     FactoryTokenClient::new(e, &token_contract)
 }
 
-fn create_participation_token<'a>(e: &Env, escrow_addr: &Address, sale_token_addr: &Address) -> ParticipationTokenContractClient<'a> {
-    let contract_id = e.register(ParticipationTokenContract, (escrow_addr.clone(), sale_token_addr.clone()));
+fn create_participation_token<'a>(
+    e: &Env,
+    escrow_addr: &Address,
+    sale_token_addr: &Address,
+    usdc_addr: &Address,
+) -> ParticipationTokenContractClient<'a> {
+    let contract_id = e.register(
+        ParticipationTokenContract,
+        (escrow_addr.clone(), sale_token_addr.clone(), usdc_addr.clone()),
+    );
     ParticipationTokenContractClient::new(e, &contract_id)
 }
 
-fn setup_escrow<'a>(env: &Env, payer: &Address, beneficiary: &Address, admin: &Address, usdc_address: &Address, amount: i128) -> EscrowContractClient<'a> {
+fn setup_escrow<'a>(
+    env: &Env,
+    payer: &Address,
+    beneficiary: &Address,
+    admin: &Address,
+    usdc_address: &Address,
+    amount: i128,
+) -> EscrowContractClient<'a> {
     let escrow_client = create_escrow_contract(env);
     let engagement_id = String::from_str(env, "eng_1");
 
@@ -104,14 +119,18 @@ fn test_buy_transfers_usdc_and_mints_sale_token() {
     let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
 
     // 2) Create Escrow contract
-    let escrow_client = setup_escrow(&env, &payer, &beneficiary, &admin, &usdc_client.address, amount);
+    let escrow_client = setup_escrow(
+        &env, &payer, &beneficiary, &admin, &usdc_client.address, amount,
+    );
 
     // 3) Create token-factory with a temporary admin as mint_authority
     let temp_admin = Address::generate(&env);
     let sale_token = create_token_factory(&env, &temp_admin);
 
-    // 4) Create ParticipationToken passing the escrow and token-factory addresses
-    let participation_token_client = create_participation_token(&env, &escrow_client.address, &sale_token.address);
+    // 4) Create ParticipationToken with escrow, token-factory, and USDC addresses
+    let participation_token_client = create_participation_token(
+        &env, &escrow_client.address, &sale_token.address, &usdc_client.address,
+    );
 
     // 5) Transfer mint authority of token-factory to the ParticipationToken contract
     sale_token.set_admin(&participation_token_client.address);
@@ -119,8 +138,8 @@ fn test_buy_transfers_usdc_and_mints_sale_token() {
     // 6) Fund USDC to the payer so they can buy
     usdc_admin.mint(&payer, &amount);
 
-    // 7) Execute buy
-    participation_token_client.buy(&usdc_client.address, &payer, &beneficiary, &amount);
+    // 7) Execute buy (no longer needs usdc address — it's stored in contract)
+    participation_token_client.buy(&payer, &beneficiary, &amount);
 
     // 8) Verify that the escrow received the USDC
     let escrow_balance = usdc_client.balance(&escrow_client.address);
@@ -141,14 +160,18 @@ fn test_buy_rejects_zero_amount() {
     let beneficiary = Address::generate(&env);
 
     let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
-    let escrow_client = setup_escrow(&env, &payer, &beneficiary, &admin, &usdc_client.address, 100);
+    let escrow_client = setup_escrow(
+        &env, &payer, &beneficiary, &admin, &usdc_client.address, 100,
+    );
 
     let temp_admin = Address::generate(&env);
     let sale_token = create_token_factory(&env, &temp_admin);
-    let participation_token_client = create_participation_token(&env, &escrow_client.address, &sale_token.address);
+    let participation_token_client = create_participation_token(
+        &env, &escrow_client.address, &sale_token.address, &usdc_client.address,
+    );
     sale_token.set_admin(&participation_token_client.address);
 
-    let result = participation_token_client.try_buy(&usdc_client.address, &payer, &beneficiary, &0);
+    let result = participation_token_client.try_buy(&payer, &beneficiary, &0);
     assert_eq!(result, Err(Ok(ContractError::AmountMustBePositive)));
 }
 
@@ -162,13 +185,49 @@ fn test_buy_rejects_negative_amount() {
     let beneficiary = Address::generate(&env);
 
     let (usdc_client, _usdc_admin) = create_usdc_token(&env, &admin);
-    let escrow_client = setup_escrow(&env, &payer, &beneficiary, &admin, &usdc_client.address, 100);
+    let escrow_client = setup_escrow(
+        &env, &payer, &beneficiary, &admin, &usdc_client.address, 100,
+    );
 
     let temp_admin = Address::generate(&env);
     let sale_token = create_token_factory(&env, &temp_admin);
-    let participation_token_client = create_participation_token(&env, &escrow_client.address, &sale_token.address);
+    let participation_token_client = create_participation_token(
+        &env, &escrow_client.address, &sale_token.address, &usdc_client.address,
+    );
     sale_token.set_admin(&participation_token_client.address);
 
-    let result = participation_token_client.try_buy(&usdc_client.address, &payer, &beneficiary, &(-50));
+    let result = participation_token_client.try_buy(&payer, &beneficiary, &(-50));
     assert_eq!(result, Err(Ok(ContractError::AmountMustBePositive)));
+}
+
+#[test]
+fn test_buy_payer_different_from_beneficiary() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let admin = Address::generate(&env);
+    let payer = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+    let amount: i128 = 50;
+
+    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
+    let escrow_client = setup_escrow(
+        &env, &payer, &beneficiary, &admin, &usdc_client.address, amount,
+    );
+
+    let temp_admin = Address::generate(&env);
+    let sale_token = create_token_factory(&env, &temp_admin);
+    let participation_token_client = create_participation_token(
+        &env, &escrow_client.address, &sale_token.address, &usdc_client.address,
+    );
+    sale_token.set_admin(&participation_token_client.address);
+    usdc_admin.mint(&payer, &amount);
+
+    // Payer pays, beneficiary receives tokens
+    participation_token_client.buy(&payer, &beneficiary, &amount);
+
+    assert_eq!(usdc_client.balance(&payer), 0);
+    assert_eq!(sale_token.balance(&beneficiary), amount);
+    // Payer should NOT have tokens
+    assert_eq!(sale_token.balance(&payer), 0);
 }
