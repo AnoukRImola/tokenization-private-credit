@@ -231,3 +231,154 @@ fn test_buy_payer_different_from_beneficiary() {
     // Payer should NOT have tokens
     assert_eq!(sale_token.balance(&payer), 0);
 }
+
+// ============ Edge Cases ============
+
+#[test]
+fn test_buy_payer_is_beneficiary() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let admin = Address::generate(&env);
+    let user = Address::generate(&env);
+    let amount: i128 = 75;
+
+    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
+    let escrow_client = setup_escrow(
+        &env, &user, &user, &admin, &usdc_client.address, amount,
+    );
+
+    let temp_admin = Address::generate(&env);
+    let sale_token = create_token_factory(&env, &temp_admin);
+    let pt_client = create_participation_token(
+        &env, &escrow_client.address, &sale_token.address, &usdc_client.address,
+    );
+    sale_token.set_admin(&pt_client.address);
+    usdc_admin.mint(&user, &amount);
+
+    // Same address as payer and beneficiary
+    pt_client.buy(&user, &user, &amount);
+
+    assert_eq!(usdc_client.balance(&user), 0);
+    assert_eq!(sale_token.balance(&user), amount);
+}
+
+#[test]
+fn test_multiple_sequential_buys_accumulate() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let admin = Address::generate(&env);
+    let payer = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
+    let escrow_client = setup_escrow(
+        &env, &payer, &beneficiary, &admin, &usdc_client.address, 500,
+    );
+
+    let temp_admin = Address::generate(&env);
+    let sale_token = create_token_factory(&env, &temp_admin);
+    let pt_client = create_participation_token(
+        &env, &escrow_client.address, &sale_token.address, &usdc_client.address,
+    );
+    sale_token.set_admin(&pt_client.address);
+    usdc_admin.mint(&payer, &300);
+
+    // Three sequential buys
+    pt_client.buy(&payer, &beneficiary, &100);
+    pt_client.buy(&payer, &beneficiary, &100);
+    pt_client.buy(&payer, &beneficiary, &100);
+
+    assert_eq!(usdc_client.balance(&payer), 0);
+    assert_eq!(usdc_client.balance(&escrow_client.address), 300);
+    assert_eq!(sale_token.balance(&beneficiary), 300);
+}
+
+#[test]
+fn test_multiple_payers_same_beneficiary() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let admin = Address::generate(&env);
+    let payer1 = Address::generate(&env);
+    let payer2 = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
+    let escrow_client = setup_escrow(
+        &env, &payer1, &beneficiary, &admin, &usdc_client.address, 500,
+    );
+
+    let temp_admin = Address::generate(&env);
+    let sale_token = create_token_factory(&env, &temp_admin);
+    let pt_client = create_participation_token(
+        &env, &escrow_client.address, &sale_token.address, &usdc_client.address,
+    );
+    sale_token.set_admin(&pt_client.address);
+    usdc_admin.mint(&payer1, &100);
+    usdc_admin.mint(&payer2, &200);
+
+    pt_client.buy(&payer1, &beneficiary, &100);
+    pt_client.buy(&payer2, &beneficiary, &200);
+
+    assert_eq!(sale_token.balance(&beneficiary), 300);
+    assert_eq!(usdc_client.balance(&escrow_client.address), 300);
+}
+
+#[test]
+fn test_buy_fails_insufficient_usdc() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let admin = Address::generate(&env);
+    let payer = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
+    let escrow_client = setup_escrow(
+        &env, &payer, &beneficiary, &admin, &usdc_client.address, 100,
+    );
+
+    let temp_admin = Address::generate(&env);
+    let sale_token = create_token_factory(&env, &temp_admin);
+    let pt_client = create_participation_token(
+        &env, &escrow_client.address, &sale_token.address, &usdc_client.address,
+    );
+    sale_token.set_admin(&pt_client.address);
+
+    // Only give payer 50 USDC but try to buy 100
+    usdc_admin.mint(&payer, &50);
+    let result = pt_client.try_buy(&payer, &beneficiary, &100);
+    // USDC transfer fails because payer doesn't have enough balance
+    assert!(result.is_err());
+}
+
+#[test]
+fn test_buy_minimum_amount() {
+    let env = Env::default();
+    env.mock_all_auths_allowing_non_root_auth();
+
+    let admin = Address::generate(&env);
+    let payer = Address::generate(&env);
+    let beneficiary = Address::generate(&env);
+
+    let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
+    let escrow_client = setup_escrow(
+        &env, &payer, &beneficiary, &admin, &usdc_client.address, 1,
+    );
+
+    let temp_admin = Address::generate(&env);
+    let sale_token = create_token_factory(&env, &temp_admin);
+    let pt_client = create_participation_token(
+        &env, &escrow_client.address, &sale_token.address, &usdc_client.address,
+    );
+    sale_token.set_admin(&pt_client.address);
+    usdc_admin.mint(&payer, &1);
+
+    // Minimum valid amount = 1
+    pt_client.buy(&payer, &beneficiary, &1);
+
+    assert_eq!(sale_token.balance(&beneficiary), 1);
+    assert_eq!(usdc_client.balance(&escrow_client.address), 1);
+}

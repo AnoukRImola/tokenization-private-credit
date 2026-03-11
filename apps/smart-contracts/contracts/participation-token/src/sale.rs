@@ -2,7 +2,7 @@ use soroban_sdk::{contract, contractimpl, token, Address, Env, IntoVal, Symbol, 
 use token::Client as TokenClient;
 
 use crate::error::ContractError;
-use crate::events::{events, BuyEvent};
+use crate::events::BuyEvent;
 use crate::storage_types::{DataKey, INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD};
 
 #[contract]
@@ -101,14 +101,12 @@ impl ParticipationTokenContract {
         // Mint participation tokens to beneficiary
         mint_participation_tokens(&env, &cfg.participation_token, &beneficiary, amount);
 
-        events::emit_buy(
-            &env,
-            BuyEvent {
-                payer,
-                beneficiary,
-                amount,
-            },
-        );
+        BuyEvent {
+            payer,
+            beneficiary,
+            amount,
+        }
+        .publish(&env);
 
         Ok(())
     }
