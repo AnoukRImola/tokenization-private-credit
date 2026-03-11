@@ -99,7 +99,7 @@ impl ParticipationTokenContract {
             .unwrap_or(0);
 
         // Validate hard cap
-        if total_minted + amount > hard_cap {
+        if hard_cap > 0 && total_minted + amount > hard_cap {
             return Err(ContractError::HardCapExceeded);
         }
 
