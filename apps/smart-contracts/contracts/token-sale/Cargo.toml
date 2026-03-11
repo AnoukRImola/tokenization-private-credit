@@ -1,5 +1,5 @@
 [package]
-name = "vault-contract"
+name = "token-sale"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,7 +8,8 @@ soroban-sdk = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
-participation-token = { path = "../participation-token" }
+escrow = { path = "../escrow", features = ["testutils"] }
+participation-token = { path = "../participation-token", features = ["testutils"] }
 
 [lib]
 crate-type = ["cdylib", "rlib"]

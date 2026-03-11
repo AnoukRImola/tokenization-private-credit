@@ -4,7 +4,7 @@ extern crate std;
 use crate::error::ContractError;
 use crate::contract::{VaultContract, VaultContractClient};
 use soroban_sdk::{testutils::Address as _, testutils::Events as _, token, Address, Env, String};
-use soroban_token_contract::{Token as FactoryToken, TokenClient as FactoryTokenClient};
+use participation_token::{Token as FactoryToken, TokenClient as FactoryTokenClient};
 use token::Client as TokenClient;
 use token::StellarAssetClient as TokenAdminClient;
 

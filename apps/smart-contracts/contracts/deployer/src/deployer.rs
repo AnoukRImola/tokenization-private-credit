@@ -30,6 +30,9 @@ pub struct DeployAllParams {
     pub vault_enabled: bool,
     pub roi_percentage: i128,
     pub usdc: Address,
+    pub token_sale_admin: Address,
+    pub hard_cap: i128,
+    pub max_per_investor: i128,
 }
 
 #[contract]
@@ -118,6 +121,9 @@ impl DeployerContract {
         salt: BytesN<32>,
         escrow_contract: Address,
         participation_token: Address,
+        token_sale_admin: Address,
+        hard_cap: i128,
+        max_per_investor: i128,
     ) -> Address {
         let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
         admin.require_auth();
@@ -128,7 +134,13 @@ impl DeployerContract {
             .get(&DataKey::ParticipationTokenWasm)
             .unwrap();
 
-        let constructor_args: Vec<Val> = (escrow_contract, participation_token).into_val(&env);
+        let constructor_args: Vec<Val> = (
+            escrow_contract,
+            participation_token,
+            token_sale_admin,
+            hard_cap,
+            max_per_investor,
+        ).into_val(&env);
 
         env.deployer()
             .with_current_contract(salt)
@@ -224,8 +236,13 @@ impl DeployerContract {
             .deploy_v2(token_factory_wasm, token_factory_args);
 
         // Step 2: Deploy participation-token pointing to the new token-factory
-        let participation_args: Vec<Val> =
-            (params.escrow_contract, token_factory_addr.clone()).into_val(&env);
+        let participation_args: Vec<Val> = (
+            params.escrow_contract,
+            token_factory_addr.clone(),
+            params.token_sale_admin,
+            params.hard_cap,
+            params.max_per_investor,
+        ).into_val(&env);
 
         let participation_addr = env
             .deployer()

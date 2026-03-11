@@ -5,15 +5,15 @@ use crate::deployer::{DeployAllParams, DeployerContract, DeployerContractClient}
 use crate::storage_types::DataKey;
 use soroban_sdk::{testutils::Address as _, Address, BytesN, Env, String};
 
-mod token_factory_wasm {
-    soroban_sdk::contractimport!(
-        file = "../../target/wasm32v1-none/release/soroban_token_contract.wasm"
-    );
-}
-
 mod participation_token_wasm {
     soroban_sdk::contractimport!(
         file = "../../target/wasm32v1-none/release/participation_token.wasm"
+    );
+}
+
+mod token_sale_wasm {
+    soroban_sdk::contractimport!(
+        file = "../../target/wasm32v1-none/release/token_sale.wasm"
     );
 }
 
@@ -24,16 +24,16 @@ mod vault_contract_wasm {
 }
 
 fn setup_deployer<'a>(env: &Env, admin: &Address) -> DeployerContractClient<'a> {
-    let token_factory_hash = env.deployer().upload_contract_wasm(token_factory_wasm::WASM);
     let participation_token_hash = env.deployer().upload_contract_wasm(participation_token_wasm::WASM);
+    let token_sale_hash = env.deployer().upload_contract_wasm(token_sale_wasm::WASM);
     let vault_contract_hash = env.deployer().upload_contract_wasm(vault_contract_wasm::WASM);
 
     let contract_id = env.register(
         DeployerContract,
         (
             admin.clone(),
-            token_factory_hash,
             participation_token_hash,
+            token_sale_hash,
             vault_contract_hash,
         ),
     );
@@ -76,8 +76,15 @@ fn test_deploy_participation_token() {
 
     let salt = BytesN::from_array(&env, &[2u8; 32]);
 
-    let participation_addr =
-        deployer.deploy_participation_token(&salt, &escrow_contract, &token_factory);
+    let token_sale_admin = Address::generate(&env);
+    let participation_addr = deployer.deploy_participation_token(
+        &salt,
+        &escrow_contract,
+        &token_factory,
+        &token_sale_admin,
+        &1_000_000i128,
+        &10_000i128,
+    );
 
     assert_ne!(participation_addr, admin);
 }
@@ -109,6 +116,7 @@ fn test_deploy_all() {
     let admin = Address::generate(&env);
     let escrow_contract = Address::generate(&env);
     let vault_admin = Address::generate(&env);
+    let token_sale_admin = Address::generate(&env);
     let usdc = Address::generate(&env);
     let deployer = setup_deployer(&env, &admin);
 
@@ -129,6 +137,9 @@ fn test_deploy_all() {
         vault_enabled: true,
         roi_percentage: 5i128,
         usdc,
+        token_sale_admin,
+        hard_cap: 1_000_000i128,
+        max_per_investor: 10_000i128,
     });
 
     // All three deployed addresses should be distinct

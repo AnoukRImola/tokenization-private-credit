@@ -1,159 +1,226 @@
-use soroban_sdk::{Address, Env, IntoVal, Symbol, contract, contractimpl, token, vec};
-use token::Client as TokenClient;
+//! T-REX-aligned Soroban Fungible Token implementation.
+//! This contract implements the standard Soroban token interface with immutable
+//! metadata including escrow_id and mint_authority set at initialization.
+use crate::allowance::{read_allowance, spend_allowance, write_allowance};
+use crate::balance::{read_balance, receive_balance, spend_balance};
+use crate::metadata::{
+    read_decimal, read_escrow_id, read_mint_authority, read_name, read_symbol,
+    write_escrow_id, write_mint_authority, write_metadata,
+};
+use crate::storage_types::{INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD};
+use soroban_sdk::{
+    contract, contractimpl, token::TokenInterface, Address, Env, MuxedAddress, String,
+};
+use soroban_token_sdk::events;
+use soroban_token_sdk::metadata::TokenMetadata;
 
-use crate::error::ContractError;
-use crate::events::{emit_buy, BuyEvent};
-use crate::storage_types::DataKey;
+fn check_nonnegative_amount(amount: i128) {
+    if amount < 0 {
+        panic!("negative amount is not allowed: {}", amount)
+    }
+}
 
 #[contract]
-pub struct ParticipationTokenContract;
-
-#[derive(Clone)]
-pub struct Config {
-    pub escrow_contract: Address,
-    pub participation_token: Address,
-}
-
-fn read_config(e: &Env) -> Result<Config, ContractError> {
-    let escrow_contract: Address = e
-        .storage()
-        .instance()
-        .get(&DataKey::EscrowContract)
-        .ok_or(ContractError::EscrowContractNotFound)?;
-    let participation_token: Address = e
-        .storage()
-        .instance()
-        .get(&DataKey::ParticipationToken)
-        .ok_or(ContractError::ParticipationTokenNotFound)?;
-    Ok(Config {
-        escrow_contract,
-        participation_token,
-    })
-}
-
-fn write_config(e: &Env, escrow_contract: &Address, participation_token: &Address) {
-    e.storage()
-        .instance()
-        .set(&DataKey::EscrowContract, escrow_contract);
-    e.storage()
-        .instance()
-        .set(&DataKey::ParticipationToken, participation_token);
-}
-
-fn write_admin(e: &Env, admin: &Address) {
-    e.storage().instance().set(&DataKey::Admin, admin);
-}
+pub struct Token;
 
 #[contractimpl]
-impl ParticipationTokenContract {
+impl Token {
+    /// Initialize the token with immutable metadata.
+    /// This function is called during contract deployment (constructor).
+    /// All metadata is immutable after initialization.
+    ///
+    /// # Arguments
+    /// * `name` - Token name
+    /// * `symbol` - Token symbol
+    /// * `escrow_id` - Escrow contract ID (as String)
+    /// * `decimal` - Token decimals (default: 7, max: 18)
+    /// * `mint_authority` - Address authorized to mint tokens (Participation Token contract)
     pub fn __constructor(
-        env: Env,
-        escrow_contract: Address,
-        participation_token: Address,
-        admin: Address,
-        hard_cap: i128,
-        max_per_investor: i128,
+        e: Env,
+        name: String,
+        symbol: String,
+        escrow_id: String,
+        decimal: u32,
+        mint_authority: Address,
     ) {
-        write_config(&env, &escrow_contract, &participation_token);
-        write_admin(&env, &admin);
-        env.storage().instance().set(&DataKey::HardCap, &hard_cap);
-        env.storage()
-            .instance()
-            .set(&DataKey::MaxPerInvestor, &max_per_investor);
-        env.storage()
-            .instance()
-            .set(&DataKey::TotalMinted, &0_i128);
-    }
-
-    pub fn buy(
-        env: Env,
-        usdc: Address,
-        payer: Address,
-        beneficiary: Address,
-        amount: i128,
-    ) -> Result<(), ContractError> {
-        if amount <= 0 {
-            return Err(ContractError::AmountMustBePositive);
-        }
-        payer.require_auth();
-
-        let cfg = read_config(&env)?;
-
-        // Read caps and current state
-        let hard_cap: i128 = env
-            .storage()
-            .instance()
-            .get(&DataKey::HardCap)
-            .unwrap_or(0);
-        let max_per_investor: i128 = env
-            .storage()
-            .instance()
-            .get(&DataKey::MaxPerInvestor)
-            .unwrap_or(0);
-        let total_minted: i128 = env
-            .storage()
-            .instance()
-            .get(&DataKey::TotalMinted)
-            .unwrap_or(0);
-        let investor_balance: i128 = env
-            .storage()
-            .persistent()
-            .get(&DataKey::InvestorBalance(beneficiary.clone()))
-            .unwrap_or(0);
-
-        // Validate hard cap
-        if hard_cap > 0 && total_minted + amount > hard_cap {
-            return Err(ContractError::HardCapExceeded);
+        if decimal > 18 {
+            panic!("Decimal must not be greater than 18");
         }
 
-        // Validate per-investor cap (0 means no limit)
-        if max_per_investor > 0 && investor_balance + amount > max_per_investor {
-            return Err(ContractError::InvestorCapExceeded);
-        }
-
-        // Transfer USDC to escrow
-        let usdc_client = TokenClient::new(&env, &usdc);
-        usdc_client.transfer(&payer, &cfg.escrow_contract, &amount);
-
-        // Mint participation tokens
-        let mint_sym = Symbol::new(&env, "mint");
-        let args_vec = vec![&env, beneficiary.into_val(&env), amount.into_val(&env)];
-        let _: () = env.invoke_contract(&cfg.participation_token, &mint_sym, args_vec);
-
-        // Update counters after successful mint
-        env.storage()
-            .instance()
-            .set(&DataKey::TotalMinted, &(total_minted + amount));
-        env.storage()
-            .persistent()
-            .set(&DataKey::InvestorBalance(beneficiary.clone()), &(investor_balance + amount));
-
-        emit_buy(
-            &env,
-            BuyEvent {
-                payer,
-                beneficiary,
-                amount,
-                usdc,
+        // Write standard metadata (name, symbol, decimals)
+        write_metadata(
+            &e,
+            TokenMetadata {
+                decimal,
+                name: name.clone(),
+                symbol: symbol.clone(),
             },
         );
 
-        Ok(())
+        // Write immutable metadata (escrow_id, mint_authority)
+        // These functions will panic if called twice (immutability enforced)
+        write_escrow_id(&e, &escrow_id);
+        write_mint_authority(&e, &mint_authority);
     }
 
-    pub fn set_token(env: Env, new_token: Address) -> Result<(), ContractError> {
-        let admin: Address = env
-            .storage()
+    /// Mint new tokens. Only the mint_authority (Token Sale contract) can mint.
+    /// This function enforces that only the mint_authority set at initialization can mint.
+    pub fn mint(e: Env, to: Address, amount: i128) {
+        check_nonnegative_amount(amount);
+
+        // CRITICAL: Only mint_authority can mint (never deployer, never open mint)
+        let mint_authority = read_mint_authority(&e);
+        mint_authority.require_auth();
+
+        e.storage()
             .instance()
-            .get(&DataKey::Admin)
-            .ok_or(ContractError::AdminNotFound)?;
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
 
-        admin.require_auth();
+        receive_balance(&e, to.clone(), amount);
+        events::MintWithAmountOnly { to, amount }.publish(&e);
+    }
+}
 
-        env.storage()
+#[contractimpl]
+impl TokenInterface for Token {
+    fn allowance(e: Env, from: Address, spender: Address) -> i128 {
+        e.storage()
             .instance()
-            .set(&DataKey::ParticipationToken, &new_token);
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+        read_allowance(&e, from, spender).amount
+    }
 
-        Ok(())
+    fn approve(e: Env, from: Address, spender: Address, amount: i128, expiration_ledger: u32) {
+        from.require_auth();
+
+        check_nonnegative_amount(amount);
+
+        e.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
+        write_allowance(&e, from.clone(), spender.clone(), amount, expiration_ledger);
+        events::Approve {
+            from,
+            spender,
+            amount,
+            expiration_ledger,
+        }
+        .publish(&e);
+    }
+
+    fn balance(e: Env, id: Address) -> i128 {
+        e.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+        read_balance(&e, id)
+    }
+
+    fn transfer(e: Env, from: Address, to_muxed: MuxedAddress, amount: i128) {
+        from.require_auth();
+
+        check_nonnegative_amount(amount);
+
+        e.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
+        spend_balance(&e, from.clone(), amount);
+        let to: Address = to_muxed.address();
+        receive_balance(&e, to.clone(), amount);
+        events::Transfer {
+            from,
+            to,
+            to_muxed_id: to_muxed.id(),
+            amount,
+        }
+        .publish(&e);
+    }
+
+    fn transfer_from(e: Env, spender: Address, from: Address, to: Address, amount: i128) {
+        spender.require_auth();
+
+        check_nonnegative_amount(amount);
+
+        e.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
+        spend_allowance(&e, from.clone(), spender, amount);
+        spend_balance(&e, from.clone(), amount);
+        receive_balance(&e, to.clone(), amount);
+        events::Transfer {
+            from,
+            to,
+            // `transfer_from` does not support muxed destination.
+            to_muxed_id: None,
+            amount,
+        }
+        .publish(&e);
+    }
+
+    fn burn(e: Env, from: Address, amount: i128) {
+        from.require_auth();
+
+        check_nonnegative_amount(amount);
+
+        e.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
+        spend_balance(&e, from.clone(), amount);
+        events::Burn { from, amount }.publish(&e);
+    }
+
+    fn burn_from(e: Env, spender: Address, from: Address, amount: i128) {
+        spender.require_auth();
+
+        check_nonnegative_amount(amount);
+
+        e.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
+        spend_allowance(&e, from.clone(), spender, amount);
+        spend_balance(&e, from.clone(), amount);
+        events::Burn { from, amount }.publish(&e);
+    }
+
+    fn decimals(e: Env) -> u32 {
+        read_decimal(&e)
+    }
+
+    fn name(e: Env) -> String {
+        read_name(&e)
+    }
+
+    fn symbol(e: Env) -> String {
+        read_symbol(&e)
+    }
+}
+
+// Additional getters for T-REX-aligned metadata
+#[contractimpl]
+impl Token {
+    /// Get the escrow contract ID associated with this token.
+    /// This is immutable metadata set at initialization.
+    pub fn escrow_id(e: Env) -> String {
+        e.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+        read_escrow_id(&e)
+    }
+
+    /// Transfer the mint authority to a new admin address.
+    /// Only the current mint_authority can call this.
+    pub fn set_admin(e: Env, new_admin: Address) {
+        let current = read_mint_authority(&e);
+        current.require_auth();
+
+        e.storage()
+            .instance()
+            .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
+
+        write_mint_authority(&e, &new_admin);
     }
 }
