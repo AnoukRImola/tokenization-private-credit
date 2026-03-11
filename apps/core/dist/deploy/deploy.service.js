@@ -15,16 +15,25 @@ const soroban_service_1 = require("../soroban/soroban.service");
 let DeployService = class DeployService {
     soroban;
     participationTokenWasmHash;
+    tokenFactoryWasmHash;
     constructor(soroban) {
         this.soroban = soroban;
         this.participationTokenWasmHash =
             process.env.PARTICIPATION_TOKEN_WASM_HASH;
+        this.tokenFactoryWasmHash = process.env.TOKEN_FACTORY_WASM_HASH;
     }
     deployParticipationToken(dto) {
         return this.soroban.buildDeployTransaction(this.participationTokenWasmHash, {
             escrow_contract: dto.escrowContractId,
             participation_token: dto.callerPublicKey,
             admin: dto.callerPublicKey,
+        }, dto.callerPublicKey);
+    }
+    deployTokenFactory(dto) {
+        return this.soroban.buildDeployTransaction(this.tokenFactoryWasmHash, {
+            name: dto.name,
+            symbol: dto.symbol,
+            escrow_id: dto.escrowContractId,
         }, dto.callerPublicKey);
     }
 };
