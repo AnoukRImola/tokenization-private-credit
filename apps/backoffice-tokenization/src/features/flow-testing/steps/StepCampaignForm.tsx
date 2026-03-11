@@ -39,10 +39,10 @@ export function StepCampaignForm({ onNext }: StepCampaignFormProps) {
     defaultValues: {
       name: "",
       description: "",
-      poolSize: undefined,
-      loanDuration: undefined,
-      expectedReturn: undefined,
-      loanSize: undefined,
+      poolSize: "" as unknown as number,
+      loanDuration: "" as unknown as number,
+      expectedReturn: "" as unknown as number,
+      loanSize: "" as unknown as number,
     },
     mode: "onChange",
   });
