@@ -8,7 +8,7 @@ import { RoiTable } from "@/features/campaigns/components/roi/roi-table";
 import { CreateRoiDialog } from "@/features/campaigns/components/roi/create-roi-dialog";
 import { AddFundsDialog } from "@/features/campaigns/components/roi/add-funds-dialog";
 import { useRoi } from "@/features/campaigns/hooks/use-roi";
-import { MOCK_CAMPAIGNS } from "@/features/campaigns/mock/campaigns.mock";
+import { useCampaigns } from "@/features/campaigns/hooks/use-campaigns";
 
 const SUMMARY_STATS = [
   {
@@ -29,6 +29,7 @@ const SUMMARY_STATS = [
 ];
 
 export function RoiView() {
+  const { data: campaigns = [] } = useCampaigns();
   const {
     roiDialogCampaign,
     fundsDialogCampaign,
@@ -52,7 +53,7 @@ export function RoiView() {
         </div>
 
         <RoiTable
-          campaigns={MOCK_CAMPAIGNS}
+          campaigns={campaigns}
           onCreateRoi={openRoiDialog}
           onAddFunds={openFundsDialog}
         />

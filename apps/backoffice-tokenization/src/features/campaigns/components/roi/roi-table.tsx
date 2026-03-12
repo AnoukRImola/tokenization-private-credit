@@ -63,7 +63,7 @@ export function RoiTable({ campaigns, onCreateRoi, onAddFunds }: RoiTableProps) 
                 <TableCell>
                   <div className="flex flex-col gap-0.5">
                     <span className="text-sm font-bold text-foreground">
-                      #{campaign.id.slice(0, 3).toUpperCase()} {campaign.title}
+                      {campaign.name}
                     </span>
                     <span className="text-xs text-text-muted line-clamp-1 max-w-xs">
                       {campaign.description}
@@ -84,7 +84,7 @@ export function RoiTable({ campaigns, onCreateRoi, onAddFunds }: RoiTableProps) 
                 {/* Invested */}
                 <TableCell>
                   <span className="text-sm font-semibold text-foreground">
-                    ${formatCurrency(campaign.raisedAmount)}
+                    ${formatCurrency(campaign.poolSize)}
                   </span>
                 </TableCell>
 

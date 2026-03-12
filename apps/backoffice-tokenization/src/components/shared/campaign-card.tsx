@@ -12,24 +12,15 @@ import { mapCampaignProgress } from "@/features/campaigns/utils/campaign.mapper"
 
 interface CampaignCardProps {
   campaign: Campaign;
-  location?: string;
-  organization?: string;
-  participants?: number;
   onSeeEscrow?: () => void;
 }
 
-export function CampaignCard({
-  campaign,
-  location,
-  organization,
-  participants = 0,
-  onSeeEscrow,
-}: CampaignCardProps) {
-  const { title, description, status, targetAmount, raisedAmount, id } = campaign;
+export function CampaignCard({ campaign, onSeeEscrow }: CampaignCardProps) {
+  const { name, description, status, id } = campaign;
 
   const progress = mapCampaignProgress(campaign);
-
   const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
+  const isDraft = status === "DRAFT";
 
   return (
     <div
@@ -48,18 +39,20 @@ export function CampaignCard({
           {statusCfg.label}
         </Badge>
 
-        <Button size="sm" className="cursor-pointer gap-1.5" asChild>
-          <Link href={`/campaigns/${id}/loans`}>
-            <Landmark className="size-3.5" />
-            Manejar Préstamos
-          </Link>
-        </Button>
+        {!isDraft && (
+          <Button size="sm" className="cursor-pointer gap-1.5" asChild>
+            <Link href={`/campaigns/${id}/loans`}>
+              <Landmark className="size-3.5" />
+              Manejar Préstamos
+            </Link>
+          </Button>
+        )}
       </div>
 
-      {/* Title & subtitle */}
+      {/* Title */}
       <div className="flex flex-col gap-0.5">
         <h3 className="text-lg font-bold text-foreground leading-tight">
-          #{id.slice(0, 3).toUpperCase()} {title}
+          {name}
         </h3>
       </div>
 
@@ -68,25 +61,26 @@ export function CampaignCard({
         {description}
       </p>
 
-      {/* Bottom row: participants + escrow link | progress */}
+      {/* Bottom row: escrow link | progress */}
       <div className="flex items-end justify-between gap-4 pt-1">
-        {/* Participants + escrow */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            onClick={onSeeEscrow}
-            className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer"
-          >
-            See Escrow
-            <ExternalLink className="size-3" />
-          </Button>
+          {!isDraft && (
+            <Button
+              variant="ghost"
+              onClick={onSeeEscrow}
+              className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer"
+            >
+              Ver Escrow
+              <ExternalLink className="size-3" />
+            </Button>
+          )}
         </div>
 
         {/* Progress */}
         <div className="flex flex-col items-end gap-1.5 min-w-40">
           <div className="flex items-center justify-between w-full">
             <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
-              Loans Completed
+              Préstamos completados
             </span>
             <span className="text-xs font-bold text-foreground">{progress}%</span>
           </div>

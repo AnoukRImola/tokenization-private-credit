@@ -1,36 +1,49 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { StatItem } from "@/components/shared/stat-item";
 import { CampaignToolbar } from "./campaign-toolbar";
 import { CampaignList } from "./campaign-list";
-import { MOCK_CAMPAIGNS } from "@/features/campaigns/mock/campaigns.mock";
-import type { Campaign, CampaignStatus } from "@/features/campaigns/types/campaign.types";
+import { useCampaigns } from "@/features/campaigns/hooks/use-campaigns";
+import type { CampaignStatus } from "@/features/campaigns/types/campaign.types";
 
 export function CampaignsView() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<CampaignStatus | "all">("all");
+  const { data: campaigns = [], isLoading, isError } = useCampaigns();
 
-  const filtered = useMemo<Campaign[]>(() => {
-    return MOCK_CAMPAIGNS.filter((c) => {
+  const filtered = useMemo(() => {
+    return campaigns.filter((c) => {
       const matchesStatus = filter === "all" || c.status === filter;
       const matchesSearch =
         search.trim() === "" ||
-        c.title.toLowerCase().includes(search.toLowerCase()) ||
-        c.description.toLowerCase().includes(search.toLowerCase());
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        (c.description ?? "").toLowerCase().includes(search.toLowerCase());
       return matchesStatus && matchesSearch;
     });
-  }, [search, filter]);
+  }, [campaigns, search, filter]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16 text-text-muted text-sm">
+        Cargando campañas...
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center py-16 text-destructive text-sm">
+        No se pudieron cargar las campañas. Verifique que el servidor esté activo.
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Toolbar */}
       <CampaignToolbar
         onSearchChange={setSearch}
         onFilterChange={setFilter}
       />
-
-      {/* List */}
       <CampaignList campaigns={filtered} />
     </div>
   );
