@@ -38,7 +38,6 @@ fn create_token_factory<'a>(e: &Env, mint_authority: &Address) -> FactoryTokenCl
 fn create_token_sale<'a>(
     e: &Env,
     escrow_addr: &Address,
-    sale_token_addr: &Address,
     admin: &Address,
     hard_cap: i128,
     max_per_investor: i128,
@@ -47,7 +46,6 @@ fn create_token_sale<'a>(
         TokenSaleContract,
         (
             escrow_addr.clone(),
-            sale_token_addr.clone(),
             admin.clone(),
             hard_cap,
             max_per_investor,
@@ -131,12 +129,13 @@ fn setup_test(hard_cap: i128, max_per_investor: i128) -> TestSetup<'static> {
     let token_sale_client = create_token_sale(
         &env,
         &escrow_client.address,
-        &sale_token.address,
         &admin,
         hard_cap,
         max_per_investor,
     );
 
+    // Wire up: set participation token via set_token, then transfer mint authority
+    token_sale_client.set_token(&sale_token.address);
     sale_token.set_admin(&token_sale_client.address);
 
     TestSetup {

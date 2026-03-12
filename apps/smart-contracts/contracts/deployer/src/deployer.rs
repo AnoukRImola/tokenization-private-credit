@@ -115,15 +115,16 @@ impl DeployerContract {
     /// # Arguments
     /// * `salt` - Unique salt for deterministic address derivation
     /// * `escrow_contract` - The escrow contract address to receive USDC
-    /// * `participation_token` - The participation-token address for minting tokens
     /// * `token_sale_admin` - The admin address for the token-sale contract
     /// * `hard_cap` - Maximum total tokens that can be sold (0 = no limit)
     /// * `max_per_investor` - Maximum tokens per investor (0 = no limit)
+    ///
+    /// Note: the participation-token address must be set after deployment
+    /// by calling `set_token` from the token-sale admin.
     pub fn deploy_token_sale(
         env: Env,
         salt: BytesN<32>,
         escrow_contract: Address,
-        participation_token: Address,
         token_sale_admin: Address,
         hard_cap: i128,
         max_per_investor: i128,
@@ -139,7 +140,6 @@ impl DeployerContract {
 
         let constructor_args: Vec<Val> = (
             escrow_contract,
-            participation_token,
             token_sale_admin,
             hard_cap,
             max_per_investor,
@@ -193,14 +193,14 @@ impl DeployerContract {
 
     // ============ Full Suite Deploy ============
 
-    /// Deploys all three contracts in the correct order resolving the circular
-    /// dependency between participation-token and token-sale.
+    /// Deploys all three contracts in the correct order.
     ///
     /// Strategy:
-    /// 1. Deploy participation-token with the deployer contract as temporary mint_authority
-    /// 2. Deploy token-sale pointing to the new participation-token
-    /// 3. Transfer participation-token mint_authority to the token-sale via `set_admin`
-    /// 4. Deploy vault-contract pointing to the new participation-token
+    /// 1. Deploy token-sale (no participation-token needed in constructor)
+    /// 2. Deploy participation-token with token-sale as direct mint_authority
+    /// 3. Wire token-sale → participation-token via `set_token` (deployer is temp admin)
+    /// 4. Transfer token-sale admin to params.token_sale_admin via `set_admin`
+    /// 5. Deploy vault-contract pointing to the participation-token
     pub fn deploy_all(env: Env, params: DeployAllParams) -> DeployedContracts {
         let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
         admin.require_auth();
@@ -221,28 +221,13 @@ impl DeployerContract {
             .get(&DataKey::VaultContractWasm)
             .unwrap();
 
-        // Step 1: Deploy participation-token with this deployer contract as temporary mint_authority.
         let deployer_addr = env.current_contract_address();
 
-        let participation_token_args: Vec<Val> = (
-            params.token_name,
-            params.token_symbol,
-            params.escrow_id,
-            params.decimal,
-            deployer_addr.clone(),
-        )
-            .into_val(&env);
-
-        let participation_token_addr = env
-            .deployer()
-            .with_current_contract(params.participation_salt)
-            .deploy_v2(participation_token_wasm, participation_token_args);
-
-        // Step 2: Deploy token-sale pointing to the new participation-token
+        // Step 1: Deploy token-sale with deployer as temporary admin
+        // (allows deployer to call set_token and set_admin in steps 3-4)
         let token_sale_args: Vec<Val> = (
             params.escrow_contract,
-            participation_token_addr.clone(),
-            params.token_sale_admin,
+            deployer_addr.clone(),
             params.hard_cap,
             params.max_per_investor,
         ).into_val(&env);
@@ -252,15 +237,38 @@ impl DeployerContract {
             .with_current_contract(params.token_sale_salt)
             .deploy_v2(token_sale_wasm, token_sale_args);
 
-        // Step 3: Transfer participation-token mint_authority from deployer to token-sale.
-        let set_admin_args = vec![&env, token_sale_addr.clone().into_val(&env)];
+        // Step 2: Deploy participation-token with token-sale as direct mint_authority
+        let participation_token_args: Vec<Val> = (
+            params.token_name,
+            params.token_symbol,
+            params.escrow_id,
+            params.decimal,
+            token_sale_addr.clone(),
+        )
+            .into_val(&env);
+
+        let participation_token_addr = env
+            .deployer()
+            .with_current_contract(params.participation_salt)
+            .deploy_v2(participation_token_wasm, participation_token_args);
+
+        // Step 3: Wire token-sale to its participation-token
+        let set_token_args = vec![&env, participation_token_addr.clone().into_val(&env)];
         env.invoke_contract::<()>(
-            &participation_token_addr,
+            &token_sale_addr,
+            &Symbol::new(&env, "set_token"),
+            set_token_args,
+        );
+
+        // Step 4: Transfer token-sale admin to the intended admin
+        let set_admin_args = vec![&env, params.token_sale_admin.into_val(&env)];
+        env.invoke_contract::<()>(
+            &token_sale_addr,
             &Symbol::new(&env, "set_admin"),
             set_admin_args,
         );
 
-        // Step 4: Deploy vault-contract pointing to the participation-token
+        // Step 5: Deploy vault-contract pointing to the participation-token
         let vault_args: Vec<Val> = (
             params.vault_admin,
             params.vault_enabled,

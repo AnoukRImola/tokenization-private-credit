@@ -71,7 +71,6 @@ fn test_deploy_token_sale() {
 
     let admin = Address::generate(&env);
     let escrow_contract = Address::generate(&env);
-    let participation_token = Address::generate(&env);
     let deployer = setup_deployer(&env, &admin);
 
     let salt = BytesN::from_array(&env, &[2u8; 32]);
@@ -80,7 +79,6 @@ fn test_deploy_token_sale() {
     let token_sale_addr = deployer.deploy_token_sale(
         &salt,
         &escrow_contract,
-        &participation_token,
         &token_sale_admin,
         &1_000_000i128,
         &10_000i128,
@@ -120,8 +118,8 @@ fn test_deploy_all() {
     let usdc = Address::generate(&env);
     let deployer = setup_deployer(&env, &admin);
 
-    let participation_salt = BytesN::from_array(&env, &[10u8; 32]);
-    let token_sale_salt = BytesN::from_array(&env, &[11u8; 32]);
+    let token_sale_salt = BytesN::from_array(&env, &[10u8; 32]);
+    let participation_salt = BytesN::from_array(&env, &[11u8; 32]);
     let vault_salt = BytesN::from_array(&env, &[12u8; 32]);
 
     let result = deployer.deploy_all(&DeployAllParams {

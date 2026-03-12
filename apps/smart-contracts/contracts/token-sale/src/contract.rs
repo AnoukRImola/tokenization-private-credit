@@ -8,36 +8,18 @@ use crate::storage_types::DataKey;
 #[contract]
 pub struct TokenSaleContract;
 
-#[derive(Clone)]
-pub struct Config {
-    pub escrow_contract: Address,
-    pub participation_token: Address,
-}
-
-fn read_config(e: &Env) -> Result<Config, ContractError> {
-    let escrow_contract: Address = e
-        .storage()
+fn read_escrow(e: &Env) -> Result<Address, ContractError> {
+    e.storage()
         .instance()
         .get(&DataKey::EscrowContract)
-        .ok_or(ContractError::EscrowContractNotFound)?;
-    let participation_token: Address = e
-        .storage()
-        .instance()
-        .get(&DataKey::ParticipationToken)
-        .ok_or(ContractError::ParticipationTokenNotFound)?;
-    Ok(Config {
-        escrow_contract,
-        participation_token,
-    })
+        .ok_or(ContractError::EscrowContractNotFound)
 }
 
-fn write_config(e: &Env, escrow_contract: &Address, participation_token: &Address) {
+fn read_participation_token(e: &Env) -> Result<Address, ContractError> {
     e.storage()
         .instance()
-        .set(&DataKey::EscrowContract, escrow_contract);
-    e.storage()
-        .instance()
-        .set(&DataKey::ParticipationToken, participation_token);
+        .get(&DataKey::ParticipationToken)
+        .ok_or(ContractError::ParticipationTokenNotFound)
 }
 
 fn read_admin(e: &Env) -> Result<Address, ContractError> {
@@ -56,12 +38,13 @@ impl TokenSaleContract {
     pub fn __constructor(
         env: Env,
         escrow_contract: Address,
-        participation_token: Address,
         admin: Address,
         hard_cap: i128,
         max_per_investor: i128,
     ) {
-        write_config(&env, &escrow_contract, &participation_token);
+        env.storage()
+            .instance()
+            .set(&DataKey::EscrowContract, &escrow_contract);
         write_admin(&env, &admin);
         env.storage().instance().set(&DataKey::HardCap, &hard_cap);
         env.storage()
@@ -84,7 +67,8 @@ impl TokenSaleContract {
         }
         payer.require_auth();
 
-        let cfg = read_config(&env)?;
+        let escrow_contract = read_escrow(&env)?;
+        let participation_token = read_participation_token(&env)?;
 
         // Read caps and current state
         let hard_cap: i128 = env
@@ -120,12 +104,12 @@ impl TokenSaleContract {
 
         // Transfer USDC to escrow
         let usdc_client = TokenClient::new(&env, &usdc);
-        usdc_client.transfer(&payer, &cfg.escrow_contract, &amount);
+        usdc_client.transfer(&payer, &escrow_contract, &amount);
 
         // Mint participation tokens
         let mint_sym = Symbol::new(&env, "mint");
         let args_vec = vec![&env, beneficiary.into_val(&env), amount.into_val(&env)];
-        let _: () = env.invoke_contract(&cfg.participation_token, &mint_sym, args_vec);
+        let _: () = env.invoke_contract(&participation_token, &mint_sym, args_vec);
 
         // Update counters after successful mint
         env.storage()
@@ -186,6 +170,15 @@ impl TokenSaleContract {
         env.storage()
             .instance()
             .set(&DataKey::ParticipationToken, &new_token);
+
+        Ok(())
+    }
+
+    pub fn set_admin(env: Env, new_admin: Address) -> Result<(), ContractError> {
+        let admin = read_admin(&env)?;
+        admin.require_auth();
+
+        write_admin(&env, &new_admin);
 
         Ok(())
     }
