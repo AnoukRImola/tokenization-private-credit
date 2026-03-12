@@ -18,10 +18,20 @@ import { useCampaignFlow } from "../hooks/useCampaignFlow";
 
 const campaignSchema = z.object({
   name: z.string().min(1, "El nombre es requerido"),
-  description: z.string().min(10, "La descripcion debe tener al menos 10 caracteres"),
+  description: z
+    .string()
+    .min(
+      10,
+      "La descripcion debe tener al menos 10 caracteres",
+    ),
   poolSize: z.coerce.number().positive("Debe ser mayor a 0"),
-  loanDuration: z.coerce.number().int().positive("Debe ser mayor a 0"),
-  expectedReturn: z.coerce.number().positive("Debe ser mayor a 0"),
+  loanDuration: z.coerce
+    .number()
+    .int()
+    .positive("Debe ser mayor a 0"),
+  expectedReturn: z.coerce
+    .number()
+    .positive("Debe ser mayor a 0"),
   loanSize: z.coerce.number().positive("Debe ser mayor a 0"),
 });
 
@@ -31,8 +41,10 @@ interface StepCampaignFormProps {
   onNext: () => void;
 }
 
-export function StepCampaignForm({ onNext }: StepCampaignFormProps) {
-  const { saveCampaign } = useCampaignFlow();
+export function StepCampaignForm({
+  onNext,
+}: StepCampaignFormProps) {
+  const { update } = useCampaignFlow();
 
   const form = useForm<CampaignFormValues>({
     resolver: zodResolver(campaignSchema),
@@ -48,7 +60,7 @@ export function StepCampaignForm({ onNext }: StepCampaignFormProps) {
   });
 
   const handleSubmit = form.handleSubmit((data) => {
-    saveCampaign(data);
+    update({ campaign: data });
     onNext();
   });
 
@@ -56,17 +68,26 @@ export function StepCampaignForm({ onNext }: StepCampaignFormProps) {
     <div className="w-full max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">Nueva campaña</h2>
       <Form {...form}>
-        <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col space-y-6"
+        >
           <FormField
             control={form.control}
             name="name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Nombre<span className="text-destructive ml-1">*</span>
+                  Nombre
+                  <span className="text-destructive ml-1">
+                    *
+                  </span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Nombre de la campaña" {...field} />
+                  <Input
+                    placeholder="Nombre de la campaña"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -79,7 +100,10 @@ export function StepCampaignForm({ onNext }: StepCampaignFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Descripcion<span className="text-destructive ml-1">*</span>
+                  Descripcion
+                  <span className="text-destructive ml-1">
+                    *
+                  </span>
                 </FormLabel>
                 <FormControl>
                   <Textarea
@@ -100,10 +124,17 @@ export function StepCampaignForm({ onNext }: StepCampaignFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Pool Size (USD)<span className="text-destructive ml-1">*</span>
+                    Pool Size (USD)
+                    <span className="text-destructive ml-1">
+                      *
+                    </span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="100000" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="100000"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -116,10 +147,17 @@ export function StepCampaignForm({ onNext }: StepCampaignFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Duracion del prestamo (meses)<span className="text-destructive ml-1">*</span>
+                    Duracion del prestamo (meses)
+                    <span className="text-destructive ml-1">
+                      *
+                    </span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="12" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="12"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -132,10 +170,18 @@ export function StepCampaignForm({ onNext }: StepCampaignFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Retorno esperado (%)<span className="text-destructive ml-1">*</span>
+                    Retorno esperado (%)
+                    <span className="text-destructive ml-1">
+                      *
+                    </span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" placeholder="8.5" {...field} />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      placeholder="8.5"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -148,10 +194,17 @@ export function StepCampaignForm({ onNext }: StepCampaignFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Tamano del prestamo (USD)<span className="text-destructive ml-1">*</span>
+                    Tamano del prestamo (USD)
+                    <span className="text-destructive ml-1">
+                      *
+                    </span>
                   </FormLabel>
                   <FormControl>
-                    <Input type="number" placeholder="50000" {...field} />
+                    <Input
+                      type="number"
+                      placeholder="50000"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

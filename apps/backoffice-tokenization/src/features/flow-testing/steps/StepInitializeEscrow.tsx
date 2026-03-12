@@ -9,31 +9,32 @@ import {
   handleError,
 } from "@tokenization/tw-blocks-shared/src/handle-errors/handle";
 import { useCampaignFlow } from "../hooks/useCampaignFlow";
+import { USDC_TESTNET_ADDRESS, slugify } from "../constants";
 import { InitializeMultiReleaseEscrowPayload } from "@trustless-work/escrow/types";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
-const USDC_TESTNET_ADDRESS =
-  "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-export function StepInitializeEscrow({ onNext }: { onNext?: () => void }) {
+export function StepInitializeEscrow({
+  onNext,
+}: {
+  onNext?: () => void;
+}) {
   const { walletAddress } = useWalletContext();
   const { deployEscrow } = useEscrowsMutations();
-  const { getCampaign, saveContractId } = useCampaignFlow();
+  const { getState, update } = useCampaignFlow();
 
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  const [contractId, setContractId] = useState<string | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [status, setStatus] = useState<
+    "loading" | "success" | "error"
+  >("loading");
+  const [contractId, setContractId] = useState<string | null>(
+    null,
+  );
+  const [errorMessage, setErrorMessage] = useState<string | null>(
+    null,
+  );
   const hasTriggered = useRef(false);
 
   const initializeEscrow = async () => {
-    const campaign = getCampaign();
+    const campaign = getState().campaign;
     if (!campaign || !walletAddress) return;
 
     setStatus("loading");
@@ -75,9 +76,10 @@ export function StepInitializeEscrow({ onNext }: { onNext?: () => void }) {
         address: walletAddress,
       });
 
-      const id = (response as { contractId?: string })?.contractId;
+      const id = (response as { contractId?: string })
+        ?.contractId;
       if (id) {
-        saveContractId(id);
+        update({ contractId: id });
         setContractId(id);
       }
       setStatus("success");
@@ -104,7 +106,9 @@ export function StepInitializeEscrow({ onNext }: { onNext?: () => void }) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-lg text-muted-foreground">Inicializando escrow...</p>
+        <p className="text-lg text-muted-foreground">
+          Inicializando escrow...
+        </p>
       </div>
     );
   }
@@ -113,11 +117,18 @@ export function StepInitializeEscrow({ onNext }: { onNext?: () => void }) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
         <XCircle className="h-12 w-12 text-destructive" />
-        <p className="text-lg font-semibold text-destructive">Error al inicializar escrow</p>
+        <p className="text-lg font-semibold text-destructive">
+          Error al inicializar escrow
+        </p>
         {errorMessage && (
-          <p className="text-sm text-muted-foreground max-w-md text-center">{errorMessage}</p>
+          <p className="text-sm text-muted-foreground max-w-md text-center">
+            {errorMessage}
+          </p>
         )}
-        <Button onClick={handleRetry} className="cursor-pointer mt-2">
+        <Button
+          onClick={handleRetry}
+          className="cursor-pointer mt-2"
+        >
           Reintentar
         </Button>
       </div>
@@ -127,17 +138,24 @@ export function StepInitializeEscrow({ onNext }: { onNext?: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-20">
       <CheckCircle2 className="h-12 w-12 text-green-500" />
-      <p className="text-lg font-semibold">Escrow inicializado exitosamente</p>
+      <p className="text-lg font-semibold">
+        Escrow inicializado exitosamente
+      </p>
       {contractId && (
         <div className="flex flex-col items-center gap-1">
-          <p className="text-sm text-muted-foreground">Contract ID:</p>
+          <p className="text-sm text-muted-foreground">
+            Contract ID:
+          </p>
           <code className="text-sm bg-muted px-3 py-1 rounded break-all max-w-md text-center">
             {contractId}
           </code>
         </div>
       )}
       {onNext && (
-        <Button onClick={onNext} className="cursor-pointer mt-4">
+        <Button
+          onClick={onNext}
+          className="cursor-pointer mt-4"
+        >
           Continuar
         </Button>
       )}
