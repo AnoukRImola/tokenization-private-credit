@@ -7,5 +7,9 @@ export class DeployParticipationTokenDto {
 
   @IsString()
   @IsNotEmpty()
+  tokenContractId: string;
+
+  @IsString()
+  @IsNotEmpty()
   callerPublicKey: string;
 }

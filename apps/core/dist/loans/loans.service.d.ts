@@ -4,12 +4,146 @@ import { UpdateLoanDto } from './dto/update-loan.dto';
 export declare class LoansService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    findAll(): any;
-    findOne(id: string): Promise<any>;
-    findByCampaign(campaignId: string): any;
-    create(dto: CreateLoanDto): Promise<any>;
-    update(id: string, dto: UpdateLoanDto): Promise<any>;
-    remove(id: string): Promise<any>;
-    getCampaignLoanStats(campaignId: string): any;
+    findAll(): import("@prisma/client").Prisma.PrismaPromise<({
+        campaign: {
+            name: string;
+            description: string | null;
+            issuerAddress: string;
+            escrowId: string;
+            poolSize: import("@prisma/client/runtime/library").Decimal;
+            loanDuration: number;
+            expectedReturn: import("@prisma/client/runtime/library").Decimal;
+            loanSize: import("@prisma/client/runtime/library").Decimal;
+            vaultId: string | null;
+            tokenSaleId: string | null;
+            tokenFactoryId: string | null;
+            status: import("@prisma/client").$Enums.CampaignStatus;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    } & {
+        description: string;
+        status: import("@prisma/client").$Enums.LoanStatus;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        campaignId: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        receiver: string;
+        milestoneIndex: number | null;
+        disbursedAt: Date | null;
+        repaidAt: Date | null;
+    })[]>;
+    findOne(id: string): Promise<{
+        campaign: {
+            name: string;
+            description: string | null;
+            issuerAddress: string;
+            escrowId: string;
+            poolSize: import("@prisma/client/runtime/library").Decimal;
+            loanDuration: number;
+            expectedReturn: import("@prisma/client/runtime/library").Decimal;
+            loanSize: import("@prisma/client/runtime/library").Decimal;
+            vaultId: string | null;
+            tokenSaleId: string | null;
+            tokenFactoryId: string | null;
+            status: import("@prisma/client").$Enums.CampaignStatus;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    } & {
+        description: string;
+        status: import("@prisma/client").$Enums.LoanStatus;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        campaignId: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        receiver: string;
+        milestoneIndex: number | null;
+        disbursedAt: Date | null;
+        repaidAt: Date | null;
+    }>;
+    findByCampaign(campaignId: string): import("@prisma/client").Prisma.PrismaPromise<{
+        description: string;
+        status: import("@prisma/client").$Enums.LoanStatus;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        campaignId: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        receiver: string;
+        milestoneIndex: number | null;
+        disbursedAt: Date | null;
+        repaidAt: Date | null;
+    }[]>;
+    create(dto: CreateLoanDto): Promise<{
+        campaign: {
+            name: string;
+            description: string | null;
+            issuerAddress: string;
+            escrowId: string;
+            poolSize: import("@prisma/client/runtime/library").Decimal;
+            loanDuration: number;
+            expectedReturn: import("@prisma/client/runtime/library").Decimal;
+            loanSize: import("@prisma/client/runtime/library").Decimal;
+            vaultId: string | null;
+            tokenSaleId: string | null;
+            tokenFactoryId: string | null;
+            status: import("@prisma/client").$Enums.CampaignStatus;
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+        };
+    } & {
+        description: string;
+        status: import("@prisma/client").$Enums.LoanStatus;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        campaignId: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        receiver: string;
+        milestoneIndex: number | null;
+        disbursedAt: Date | null;
+        repaidAt: Date | null;
+    }>;
+    update(id: string, dto: UpdateLoanDto): Promise<{
+        description: string;
+        status: import("@prisma/client").$Enums.LoanStatus;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        campaignId: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        receiver: string;
+        milestoneIndex: number | null;
+        disbursedAt: Date | null;
+        repaidAt: Date | null;
+    }>;
+    remove(id: string): Promise<{
+        description: string;
+        status: import("@prisma/client").$Enums.LoanStatus;
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        campaignId: string;
+        amount: import("@prisma/client/runtime/library").Decimal;
+        receiver: string;
+        milestoneIndex: number | null;
+        disbursedAt: Date | null;
+        repaidAt: Date | null;
+    }>;
+    getCampaignLoanStats(campaignId: string): import("@prisma/client").Prisma.PrismaPromise<import("@prisma/client").Prisma.GetLoanAggregateType<{
+        where: {
+            campaignId: string;
+        };
+        _sum: {
+            amount: true;
+        };
+        _count: true;
+    }>>;
     private validateStatusTransition;
 }
