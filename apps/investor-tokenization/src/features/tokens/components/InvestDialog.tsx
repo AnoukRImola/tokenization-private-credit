@@ -21,7 +21,7 @@ import {
 } from "@tokenization/ui/form";
 import { Input } from "@tokenization/ui/input";
 import { Button } from "@tokenization/ui/button";
-import { Rocket } from "lucide-react";
+import { Rocket, Info } from "lucide-react";
 import {
   TokenService,
   type BuyTokenPayload,
@@ -173,6 +173,18 @@ export function InvestDialog({
     return milestones.reduce((acc, milestone) => acc + milestone.amount, 0);
   }, [selected.escrow?.milestones]);
 
+  const currency = selected.escrow?.trustline?.symbol ?? "USDC";
+
+  const YIELD_RATE = 0.085;
+  const TERM_MONTHS = 12;
+  const watchedAmount = form.watch("amount");
+  const safeAmount =
+    typeof watchedAmount === "number" && !Number.isNaN(watchedAmount) && watchedAmount > 0
+      ? watchedAmount
+      : 0;
+  const estimatedReturn = safeAmount * YIELD_RATE;
+  const totalAtMaturity = safeAmount + estimatedReturn;
+
   const isSubmitDisabled =
     submitting ||
     !form.watch("amount") ||
@@ -188,7 +200,7 @@ export function InvestDialog({
         </Button>
       </DialogTrigger>
       <DialogContent
-        className={`${successMessage ? "sm:max-w-4xl" : "sm:max-w-md"} max-h-[80vh] overflow-y-auto`}
+        className={`${successMessage ? "sm:max-w-4xl" : "sm:max-w-lg"} max-h-[80vh] overflow-y-auto`}
       >
         {successMessage ? (
           <div className="w-full overflow-hidden p-4 md:p-6">
@@ -277,33 +289,28 @@ export function InvestDialog({
             </div>
           </div>
         ) : (
-          <div className="space-y-6">
-            <DialogHeader>
-              <DialogTitle>Invest in Token Sale</DialogTitle>
-              <DialogDescription>
-                Enter the amount of USDC you want to invest. You will sign and
-                submit the transaction with your wallet.
-              </DialogDescription>
-            </DialogHeader>
-
-            <Form {...form}>
-              <form
-                className="space-y-4"
-                onSubmit={form.handleSubmit(onSubmit)}
-              >
-                <FormField
-                  control={form.control}
-                  name="amount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Amount (USDC)</FormLabel>
-                      <FormControl>
+          <Form {...form}>
+            <form
+              className="space-y-6"
+              onSubmit={form.handleSubmit(onSubmit)}
+            >
+              <FormField
+                control={form.control}
+                name="amount"
+                render={({ field }) => (
+                  <FormItem className="space-y-2">
+                    <FormLabel className="text-base font-semibold">
+                      Amount (USDC)
+                    </FormLabel>
+                    <FormControl>
+                      <div className="relative">
                         <Input
                           type="number"
                           inputMode="decimal"
                           step="0.01"
                           min="0"
                           placeholder="0.00"
+                          className="h-14 text-xl pr-20 rounded-xl border-muted bg-muted/30"
                           {...field}
                           value={
                             Number.isNaN(field.value as number) ||
@@ -319,35 +326,95 @@ export function InvestDialog({
                             field.onChange(next);
                           }}
                         />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-cyan-500">
+                          USDC
+                        </span>
+                      </div>
+                    </FormControl>
+                    <p className="text-xs text-muted-foreground">
+                      Available balance:{" "}
+                      <span className="font-medium">
+                        {totalAmount > 0
+                          ? `${totalAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })} ${currency}`
+                          : `0.00 ${currency}`}
+                      </span>
+                    </p>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                {errorMessage ? (
-                  <p className="text-sm text-destructive" role="alert">
-                    {errorMessage}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-xl border bg-muted/30 px-4 py-3">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Estimated Yield
+                  </span>
+                  <p className="mt-1 text-lg font-bold text-teal-600">
+                    8.5% APY
                   </p>
-                ) : null}
-
-                <div className="flex justify-end gap-2">
-                  <DialogClose asChild>
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      disabled={submitting}
-                    >
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit" disabled={isSubmitDisabled}>
-                    {submitting ? "Processing..." : "Confirm"}
-                  </Button>
                 </div>
-              </form>
-            </Form>
-          </div>
+                <div className="rounded-xl border bg-muted/30 px-4 py-3">
+                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Term Length
+                  </span>
+                  <p className="mt-1 text-lg font-bold text-foreground">
+                    12 Months
+                  </p>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50 p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Your investment</span>
+                  <span className="text-sm font-semibold text-foreground">
+                    {safeAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    Estimated return ({(YIELD_RATE * 100).toFixed(1)}% &times; {TERM_MONTHS}mo)
+                  </span>
+                  <span className="text-sm font-semibold text-teal-600">
+                    +{estimatedReturn.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                  </span>
+                </div>
+                <div className="border-t border-teal-200 pt-3 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-foreground">Total at maturity</span>
+                  <span className="text-lg font-bold text-teal-700">
+                    {totalAtMaturity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+                <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
+                <p className="text-sm text-amber-800">
+                  <span className="font-semibold">Disclaimer:</span> Please
+                  review your investment amount carefully. Once confirmed, these
+                  amounts are not editable and the transaction is final.
+                </p>
+              </div>
+
+              {errorMessage ? (
+                <p className="text-sm text-destructive" role="alert">
+                  {errorMessage}
+                </p>
+              ) : null}
+
+              <Button
+                type="submit"
+                disabled={isSubmitDisabled}
+                className="h-12 w-full rounded-xl bg-cyan-500 text-base font-semibold text-white hover:bg-cyan-600"
+              >
+                {submitting ? "Processing..." : "Confirm Investment"}
+              </Button>
+
+              <p className="text-center text-xs text-muted-foreground">
+                By clicking confirm, you agree to the Terms of Service and
+                Investment Agreement.
+              </p>
+            </form>
+          </Form>
         )}
       </DialogContent>
     </Dialog>

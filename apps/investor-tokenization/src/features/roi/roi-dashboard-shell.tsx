@@ -21,7 +21,7 @@ type RoiDashboardShellProps = {
 
 export function RoiDashboardShell({ children }: RoiDashboardShellProps) {
   return (
-    <div className="fixed inset-0 z-[60] flex min-h-svh bg-background">
+    <div className="fixed inset-0 z-40 flex min-h-svh bg-background">
       <SidebarProvider>
         <AppSidebar
           navItems={ROI_NAV_ITEMS}
@@ -29,7 +29,7 @@ export function RoiDashboardShell({ children }: RoiDashboardShellProps) {
             href: "/",
             element: (
               <Image
-                src="/escrows/interactuar.jpg"
+                src="/interactuar_logo.png"
                 alt="interactuar"
                 width={260}
                 height={68}
