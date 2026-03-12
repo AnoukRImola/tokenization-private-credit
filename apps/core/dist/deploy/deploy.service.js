@@ -28,8 +28,7 @@ let DeployService = class DeployService {
     deployParticipationToken(dto) {
         return this.soroban.buildDeployTransaction(this.participationTokenWasmHash, {
             escrow_contract: dto.escrowContractId,
-            participation_token: dto.callerPublicKey,
-            admin: dto.callerPublicKey,
+            participation_token: dto.tokenContractId,
         }, dto.callerPublicKey);
     }
     deployTokenFactory(dto) {

@@ -9,27 +9,45 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DeployParticipationTokenDto = void 0;
+exports.BuyDto = void 0;
 const class_validator_1 = require("class-validator");
-class DeployParticipationTokenDto {
-    escrowContractId;
-    tokenContractId;
+class BuyDto {
+    contractId;
+    usdcAddress;
+    payer;
+    beneficiary;
+    amount;
     callerPublicKey;
 }
-exports.DeployParticipationTokenDto = DeployParticipationTokenDto;
+exports.BuyDto = BuyDto;
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], DeployParticipationTokenDto.prototype, "escrowContractId", void 0);
+], BuyDto.prototype, "contractId", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], DeployParticipationTokenDto.prototype, "tokenContractId", void 0);
+], BuyDto.prototype, "usdcAddress", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], DeployParticipationTokenDto.prototype, "callerPublicKey", void 0);
-//# sourceMappingURL=deploy-participation-token.dto.js.map
+], BuyDto.prototype, "payer", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], BuyDto.prototype, "beneficiary", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], BuyDto.prototype, "amount", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], BuyDto.prototype, "callerPublicKey", void 0);
+//# sourceMappingURL=buy.dto.js.map
