@@ -2,7 +2,7 @@ use soroban_sdk::{Address, Env, IntoVal, Symbol, contract, contractimpl, token, 
 use token::Client as TokenClient;
 
 use crate::error::ContractError;
-use crate::events::{emit_buy, BuyEvent};
+use crate::events::{emit_buy, emit_caps_updated, BuyEvent, CapsUpdatedEvent};
 use crate::storage_types::DataKey;
 
 #[contract]
@@ -38,6 +38,13 @@ fn write_config(e: &Env, escrow_contract: &Address, participation_token: &Addres
     e.storage()
         .instance()
         .set(&DataKey::ParticipationToken, participation_token);
+}
+
+fn read_admin(e: &Env) -> Result<Address, ContractError> {
+    e.storage()
+        .instance()
+        .get(&DataKey::Admin)
+        .ok_or(ContractError::AdminNotFound)
 }
 
 fn write_admin(e: &Env, admin: &Address) {
@@ -141,13 +148,39 @@ impl TokenSaleContract {
         Ok(())
     }
 
-    pub fn set_token(env: Env, new_token: Address) -> Result<(), ContractError> {
-        let admin: Address = env
-            .storage()
-            .instance()
-            .get(&DataKey::Admin)
-            .ok_or(ContractError::AdminNotFound)?;
+    pub fn get_admin(env: Env) -> Result<Address, ContractError> {
+        read_admin(&env)
+    }
 
+    pub fn update_caps(
+        env: Env,
+        new_hard_cap: i128,
+        new_max_per_investor: i128,
+    ) -> Result<(), ContractError> {
+        let admin = read_admin(&env)?;
+        admin.require_auth();
+
+        env.storage()
+            .instance()
+            .set(&DataKey::HardCap, &new_hard_cap);
+        env.storage()
+            .instance()
+            .set(&DataKey::MaxPerInvestor, &new_max_per_investor);
+
+        emit_caps_updated(
+            &env,
+            CapsUpdatedEvent {
+                admin,
+                new_hard_cap,
+                new_max_per_investor,
+            },
+        );
+
+        Ok(())
+    }
+
+    pub fn set_token(env: Env, new_token: Address) -> Result<(), ContractError> {
+        let admin = read_admin(&env)?;
         admin.require_auth();
 
         env.storage()

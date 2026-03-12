@@ -316,3 +316,60 @@ fn test_buy_no_per_investor_cap() {
 
     assert_eq!(t.sale_token.balance(&t.beneficiary), hard_cap);
 }
+
+// ─── get_admin tests ─────────────────────────────────────────────────────────
+
+#[test]
+fn test_get_admin_returns_stored_admin() {
+    let t = setup_test(1_000, 0);
+    let admin = t.token_sale_client.get_admin();
+    assert_eq!(admin, t.admin);
+}
+
+// ─── update_caps tests ───────────────────────────────────────────────────────
+
+#[test]
+fn test_update_caps_by_admin_changes_hard_cap() {
+    let t = setup_test(1_000, 0);
+
+    // Reduce hard cap to 200
+    t.token_sale_client.update_caps(&200_i128, &0_i128);
+
+    // Buying 201 should now fail
+    t.usdc_admin.mint(&t.payer, &201);
+    let result = t.token_sale_client.try_buy(
+        &t.usdc_client.address,
+        &t.payer,
+        &t.beneficiary,
+        &201,
+    );
+    assert_eq!(result, Err(Ok(ContractError::HardCapExceeded)));
+
+    // Buying exactly 200 should succeed
+    t.usdc_admin.mint(&t.payer, &200);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &200);
+    assert_eq!(t.sale_token.balance(&t.beneficiary), 200);
+}
+
+#[test]
+fn test_update_caps_by_admin_changes_max_per_investor() {
+    let t = setup_test(1_000, 0); // initially no per-investor limit
+
+    // Set per-investor cap to 100
+    t.token_sale_client.update_caps(&1_000_i128, &100_i128);
+
+    // Buying 101 should now fail
+    t.usdc_admin.mint(&t.payer, &101);
+    let result = t.token_sale_client.try_buy(
+        &t.usdc_client.address,
+        &t.payer,
+        &t.beneficiary,
+        &101,
+    );
+    assert_eq!(result, Err(Ok(ContractError::InvestorCapExceeded)));
+
+    // Buying exactly 100 should succeed
+    t.usdc_admin.mint(&t.payer, &100);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &100);
+    assert_eq!(t.sale_token.balance(&t.beneficiary), 100);
+}
