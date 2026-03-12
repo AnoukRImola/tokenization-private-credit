@@ -1,6 +1,6 @@
-import { IsString, IsNumber, IsNotEmpty, IsPositive } from 'class-validator';
+import { IsString, IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 
-export class ApproveDto {
+export class TransferDto {
   @IsString()
   @IsNotEmpty()
   contractId: string;
@@ -11,15 +11,11 @@ export class ApproveDto {
 
   @IsString()
   @IsNotEmpty()
-  spender: string;
+  to: string;
 
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   amount: number;
-
-  @IsNumber()
-  @IsPositive()
-  expirationLedger: number;
 
   @IsString()
   @IsNotEmpty()

@@ -17,13 +17,58 @@ let ParticipationTokenService = class ParticipationTokenService {
     constructor(soroban) {
         this.soroban = soroban;
     }
-    buy(dto) {
-        return this.soroban.buildContractCallTransaction(dto.contractId, 'buy', {
-            usdc: dto.usdcAddress,
-            payer: dto.payer,
-            beneficiary: dto.beneficiary,
+    mint(dto) {
+        return this.soroban.buildContractCallTransaction(dto.contractId, 'mint', { to: dto.to, amount: dto.amount }, dto.callerPublicKey);
+    }
+    setAdmin(dto) {
+        return this.soroban.buildContractCallTransaction(dto.contractId, 'set_admin', { new_admin: dto.newAdmin }, dto.callerPublicKey);
+    }
+    approve(dto) {
+        return this.soroban.buildContractCallTransaction(dto.contractId, 'approve', {
+            from: dto.from,
+            spender: dto.spender,
+            amount: dto.amount,
+            expiration_ledger: dto.expirationLedger,
+        }, dto.callerPublicKey);
+    }
+    transfer(dto) {
+        return this.soroban.buildContractCallTransaction(dto.contractId, 'transfer', { from: dto.from, to_muxed: dto.to, amount: dto.amount }, dto.callerPublicKey);
+    }
+    transferFrom(dto) {
+        return this.soroban.buildContractCallTransaction(dto.contractId, 'transfer_from', {
+            spender: dto.spender,
+            from: dto.from,
+            to: dto.to,
             amount: dto.amount,
         }, dto.callerPublicKey);
+    }
+    burn(dto) {
+        return this.soroban.buildContractCallTransaction(dto.contractId, 'burn', { from: dto.from, amount: dto.amount }, dto.callerPublicKey);
+    }
+    burnFrom(dto) {
+        return this.soroban.buildContractCallTransaction(dto.contractId, 'burn_from', {
+            spender: dto.spender,
+            from: dto.from,
+            amount: dto.amount,
+        }, dto.callerPublicKey);
+    }
+    getBalance(contractId, address, callerPublicKey) {
+        return this.soroban.readContractState(contractId, 'balance', { id: address }, callerPublicKey);
+    }
+    getAllowance(contractId, from, spender, callerPublicKey) {
+        return this.soroban.readContractState(contractId, 'allowance', { from, spender }, callerPublicKey);
+    }
+    getDecimals(contractId, callerPublicKey) {
+        return this.soroban.readContractState(contractId, 'decimals', {}, callerPublicKey);
+    }
+    getName(contractId, callerPublicKey) {
+        return this.soroban.readContractState(contractId, 'name', {}, callerPublicKey);
+    }
+    getSymbol(contractId, callerPublicKey) {
+        return this.soroban.readContractState(contractId, 'symbol', {}, callerPublicKey);
+    }
+    getEscrowId(contractId, callerPublicKey) {
+        return this.soroban.readContractState(contractId, 'escrow_id', {}, callerPublicKey);
     }
 };
 exports.ParticipationTokenService = ParticipationTokenService;

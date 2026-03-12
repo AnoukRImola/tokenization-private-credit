@@ -11,10 +11,7 @@ export class VaultService {
     return this.soroban.buildContractCallTransaction(
       dto.contractId,
       'availability_for_exchange',
-      {
-        admin: dto.admin,
-        enabled: dto.enabled,
-      },
+      { enabled: dto.enabled },
       dto.callerPublicKey,
     );
   }

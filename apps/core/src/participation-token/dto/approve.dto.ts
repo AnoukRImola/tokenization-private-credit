@@ -1,25 +1,25 @@
-import { IsString, IsNotEmpty, IsNumber, IsPositive } from 'class-validator';
+import { IsString, IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 
-export class BuyDto {
+export class ApproveDto {
   @IsString()
   @IsNotEmpty()
   contractId: string;
 
   @IsString()
   @IsNotEmpty()
-  usdcAddress: string;
+  from: string;
 
   @IsString()
   @IsNotEmpty()
-  payer: string;
+  spender: string;
 
-  @IsString()
-  @IsNotEmpty()
-  beneficiary: string;
-
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   amount: number;
+
+  @IsInt()
+  @IsPositive()
+  expirationLedger: number;
 
   @IsString()
   @IsNotEmpty()

@@ -1,15 +1,19 @@
-import { IsString, IsNumber, IsNotEmpty, IsPositive } from 'class-validator';
+import { IsString, IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 
-export class BurnDto {
+export class BurnFromDto {
   @IsString()
   @IsNotEmpty()
   contractId: string;
 
   @IsString()
   @IsNotEmpty()
+  spender: string;
+
+  @IsString()
+  @IsNotEmpty()
   from: string;
 
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   amount: number;
 

@@ -1,6 +1,6 @@
-import { IsString, IsNumber, IsNotEmpty, IsPositive } from 'class-validator';
+import { IsString, IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 
-export class BurnFromDto {
+export class TransferFromDto {
   @IsString()
   @IsNotEmpty()
   contractId: string;
@@ -13,7 +13,11 @@ export class BurnFromDto {
   @IsNotEmpty()
   from: string;
 
-  @IsNumber()
+  @IsString()
+  @IsNotEmpty()
+  to: string;
+
+  @IsInt()
   @IsPositive()
   amount: number;
 

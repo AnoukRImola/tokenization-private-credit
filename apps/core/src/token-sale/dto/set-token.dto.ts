@@ -1,13 +1,13 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
-export class SetAdminDto {
+export class SetTokenDto {
   @IsString()
   @IsNotEmpty()
   contractId: string;
 
   @IsString()
   @IsNotEmpty()
-  newAdmin: string;
+  newToken: string;
 
   @IsString()
   @IsNotEmpty()

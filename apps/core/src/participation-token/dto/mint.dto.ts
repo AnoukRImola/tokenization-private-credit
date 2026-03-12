@@ -1,19 +1,15 @@
-import { IsString, IsNumber, IsNotEmpty, IsPositive } from 'class-validator';
+import { IsString, IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 
-export class TransferDto {
+export class MintDto {
   @IsString()
   @IsNotEmpty()
   contractId: string;
 
   @IsString()
   @IsNotEmpty()
-  from: string;
-
-  @IsString()
-  @IsNotEmpty()
   to: string;
 
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   amount: number;
 

@@ -1,15 +1,15 @@
-import { IsString, IsNumber, IsNotEmpty, IsPositive } from 'class-validator';
+import { IsString, IsInt, IsNotEmpty, IsPositive } from 'class-validator';
 
-export class MintDto {
+export class BurnDto {
   @IsString()
   @IsNotEmpty()
   contractId: string;
 
   @IsString()
   @IsNotEmpty()
-  to: string;
+  from: string;
 
-  @IsNumber()
+  @IsInt()
   @IsPositive()
   amount: number;
 

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { contract, Networks } from '@stellar/stellar-sdk';
+import { Ok } from '@stellar/stellar-sdk/contract';
 
 @Injectable()
 export class SorobanService {
@@ -59,7 +60,8 @@ export class SorobanService {
     });
 
     const result = await client[method](args);
+    const raw = result.result;
 
-    return result.result;
+    return raw instanceof Ok ? raw.unwrap() : raw;
   }
 }
