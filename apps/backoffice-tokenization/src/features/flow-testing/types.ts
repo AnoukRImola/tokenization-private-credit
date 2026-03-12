@@ -7,6 +7,7 @@ export interface Campaign {
   escrowId: string;
   tokenFactoryId: string | null;
   tokenSaleId: string | null;
+  vaultId: string | null;
 }
 
 export interface CampaignFormData {
