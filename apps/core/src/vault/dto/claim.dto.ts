@@ -1,13 +1,13 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 
-export class DeployParticipationTokenDto {
+export class ClaimDto {
   @IsString()
   @IsNotEmpty()
-  escrowContractId: string;
+  contractId: string;
 
   @IsString()
   @IsNotEmpty()
-  tokenContractId: string;
+  beneficiary: string;
 
   @IsString()
   @IsNotEmpty()

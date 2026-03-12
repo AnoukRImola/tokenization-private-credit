@@ -13,10 +13,7 @@ const ALLOWED_TRANSITIONS: Record<CampaignStatus, CampaignStatus[]> = {
   [CampaignStatus.DRAFT]: [CampaignStatus.FUNDRAISING, CampaignStatus.PAUSED],
   [CampaignStatus.FUNDRAISING]: [CampaignStatus.ACTIVE, CampaignStatus.PAUSED],
   [CampaignStatus.ACTIVE]: [CampaignStatus.REPAYMENT, CampaignStatus.PAUSED],
-  [CampaignStatus.REPAYMENT]: [
-    CampaignStatus.CLAIMABLE,
-    CampaignStatus.PAUSED,
-  ],
+  [CampaignStatus.REPAYMENT]: [CampaignStatus.CLAIMABLE, CampaignStatus.PAUSED],
   [CampaignStatus.CLAIMABLE]: [CampaignStatus.CLOSED, CampaignStatus.PAUSED],
   [CampaignStatus.CLOSED]: [],
   [CampaignStatus.PAUSED]: [],
@@ -74,7 +71,10 @@ export class CampaignsService {
     );
     this.validatePrerequisites(campaign, newStatus);
 
-    const data: { status: CampaignStatus; previousStatus?: CampaignStatus | null } = {
+    const data: {
+      status: CampaignStatus;
+      previousStatus?: CampaignStatus | null;
+    } = {
       status: newStatus,
     };
 
@@ -96,9 +96,7 @@ export class CampaignsService {
     previousStatus: CampaignStatus | null,
   ) {
     if (current === next) {
-      throw new BadRequestException(
-        `Campaign is already in status ${current}`,
-      );
+      throw new BadRequestException(`Campaign is already in status ${current}`);
     }
 
     if (current === CampaignStatus.PAUSED) {

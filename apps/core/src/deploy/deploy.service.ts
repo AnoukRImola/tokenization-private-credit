@@ -24,8 +24,7 @@ export class DeployService {
       this.participationTokenWasmHash,
       {
         escrow_contract: dto.escrowContractId,
-        participation_token: dto.callerPublicKey,
-        admin: dto.callerPublicKey,
+        participation_token: dto.tokenContractId,
       },
       dto.callerPublicKey,
     );
