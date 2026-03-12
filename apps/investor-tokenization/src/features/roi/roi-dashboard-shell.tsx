@@ -11,7 +11,7 @@ import { AppSidebar } from "@tokenization/ui/app-sidebar";
 import { SidebarWalletButton } from "@tokenization/ui/sidebar-wallet-button";
 
 const ROI_NAV_ITEMS = [
-  { href: "/", label: "Manage Campaigns", icon: Megaphone },
+  { href: "/campaigns", label: "Manage Campaigns", icon: Megaphone },
   { href: "/roi", label: "ROI", icon: TrendingUp },
 ];
 
@@ -21,7 +21,7 @@ type RoiDashboardShellProps = {
 
 export function RoiDashboardShell({ children }: RoiDashboardShellProps) {
   return (
-    <div className="fixed inset-0 z-[60] flex min-h-svh bg-background">
+    <div className="fixed inset-0 z-40 flex min-h-svh bg-background">
       <SidebarProvider>
         <AppSidebar
           navItems={ROI_NAV_ITEMS}
@@ -29,7 +29,7 @@ export function RoiDashboardShell({ children }: RoiDashboardShellProps) {
             href: "/",
             element: (
               <Image
-                src="/escrows/interactuar.jpg"
+                src="/interactuar_logo.png"
                 alt="interactuar"
                 width={260}
                 height={68}
