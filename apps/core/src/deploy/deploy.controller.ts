@@ -1,5 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { DeployService } from './deploy.service';
+import { DeployAllDto } from './dto/deploy-all.dto';
 import { DeployParticipationTokenDto } from './dto/deploy-participation-token.dto';
 import { DeployTokenFactoryDto } from './dto/deploy-token-factory.dto';
 import { DeployVaultDto } from './dto/deploy-vault.dto';
@@ -24,6 +25,12 @@ export class DeployController {
   @Post('vault')
   async deployVault(@Body() dto: DeployVaultDto) {
     const unsignedXdr = await this.deployService.deployVault(dto);
+    return { unsignedXdr };
+  }
+
+  @Post('all')
+  async deployAll(@Body() dto: DeployAllDto) {
+    const unsignedXdr = await this.deployService.deployAll(dto);
     return { unsignedXdr };
   }
 
