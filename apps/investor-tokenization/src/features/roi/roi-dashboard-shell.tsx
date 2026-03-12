@@ -11,8 +11,8 @@ import { AppSidebar } from "@tokenization/ui/app-sidebar";
 import { SidebarWalletButton } from "@tokenization/ui/sidebar-wallet-button";
 
 const ROI_NAV_ITEMS = [
-  { href: "/campaigns", label: "Manage Campaigns", icon: Megaphone },
-  { href: "/roi", label: "ROI", icon: TrendingUp },
+  { href: "/campaigns", label: "Campaigns", icon: Megaphone },
+  { href: "/my-investments", label: "My investments", icon: TrendingUp },
 ];
 
 type RoiDashboardShellProps = {

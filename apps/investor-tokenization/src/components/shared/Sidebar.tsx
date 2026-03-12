@@ -15,7 +15,7 @@ type SidebarLink = {
 const links: SidebarLink[] = [
   {
     href: "/campaigns",
-    label: "Manage Campaigns",
+    label: "Campaigns",
     icon: <Megaphone className="h-4 w-4" />,
   },
   {
