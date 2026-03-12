@@ -9,27 +9,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DeployParticipationTokenDto = void 0;
+exports.CreateLoanDto = void 0;
 const class_validator_1 = require("class-validator");
-class DeployParticipationTokenDto {
-    escrowContractId;
-    tokenContractId;
-    callerPublicKey;
+class CreateLoanDto {
+    campaignId;
+    description;
+    amount;
+    receiver;
+    milestoneIndex;
 }
-exports.DeployParticipationTokenDto = DeployParticipationTokenDto;
+exports.CreateLoanDto = CreateLoanDto;
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], DeployParticipationTokenDto.prototype, "escrowContractId", void 0);
+], CreateLoanDto.prototype, "campaignId", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], DeployParticipationTokenDto.prototype, "tokenContractId", void 0);
+], CreateLoanDto.prototype, "description", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], CreateLoanDto.prototype, "amount", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], DeployParticipationTokenDto.prototype, "callerPublicKey", void 0);
-//# sourceMappingURL=deploy-participation-token.dto.js.map
+], CreateLoanDto.prototype, "receiver", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], CreateLoanDto.prototype, "milestoneIndex", void 0);
+//# sourceMappingURL=create-loan.dto.js.map

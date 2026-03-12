@@ -9,27 +9,34 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DeployParticipationTokenDto = void 0;
+exports.UpdateLoanDto = void 0;
 const class_validator_1 = require("class-validator");
-class DeployParticipationTokenDto {
-    escrowContractId;
-    tokenContractId;
-    callerPublicKey;
+const client_1 = require("@prisma/client");
+class UpdateLoanDto {
+    status;
+    milestoneIndex;
+    disbursedAt;
+    repaidAt;
 }
-exports.DeployParticipationTokenDto = DeployParticipationTokenDto;
+exports.UpdateLoanDto = UpdateLoanDto;
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(client_1.LoanStatus),
     __metadata("design:type", String)
-], DeployParticipationTokenDto.prototype, "escrowContractId", void 0);
+], UpdateLoanDto.prototype, "status", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], DeployParticipationTokenDto.prototype, "tokenContractId", void 0);
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], UpdateLoanDto.prototype, "milestoneIndex", void 0);
 __decorate([
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
     __metadata("design:type", String)
-], DeployParticipationTokenDto.prototype, "callerPublicKey", void 0);
-//# sourceMappingURL=deploy-participation-token.dto.js.map
+], UpdateLoanDto.prototype, "disbursedAt", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], UpdateLoanDto.prototype, "repaidAt", void 0);
+//# sourceMappingURL=update-loan.dto.js.map
