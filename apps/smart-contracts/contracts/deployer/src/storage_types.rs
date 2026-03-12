@@ -4,7 +4,7 @@ use soroban_sdk::contracttype;
 #[contracttype]
 pub enum DataKey {
     Admin,
-    TokenFactoryWasm,
     ParticipationTokenWasm,
+    TokenSaleWasm,
     VaultContractWasm,
 }

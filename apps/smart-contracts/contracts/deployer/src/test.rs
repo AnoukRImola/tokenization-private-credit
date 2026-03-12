@@ -42,7 +42,7 @@ fn setup_deployer<'a>(env: &Env, admin: &Address) -> DeployerContractClient<'a> 
 }
 
 #[test]
-fn test_deploy_token_factory() {
+fn test_deploy_participation_token() {
     let env = Env::default();
     env.mock_all_auths();
 
@@ -52,7 +52,7 @@ fn test_deploy_token_factory() {
 
     let salt = BytesN::from_array(&env, &[1u8; 32]);
 
-    let token_addr = deployer.deploy_token_factory(
+    let token_addr = deployer.deploy_participation_token(
         &salt,
         &String::from_str(&env, "TestToken"),
         &String::from_str(&env, "TST"),
@@ -65,28 +65,28 @@ fn test_deploy_token_factory() {
 }
 
 #[test]
-fn test_deploy_participation_token() {
+fn test_deploy_token_sale() {
     let env = Env::default();
     env.mock_all_auths();
 
     let admin = Address::generate(&env);
     let escrow_contract = Address::generate(&env);
-    let token_factory = Address::generate(&env);
+    let participation_token = Address::generate(&env);
     let deployer = setup_deployer(&env, &admin);
 
     let salt = BytesN::from_array(&env, &[2u8; 32]);
 
     let token_sale_admin = Address::generate(&env);
-    let participation_addr = deployer.deploy_participation_token(
+    let token_sale_addr = deployer.deploy_token_sale(
         &salt,
         &escrow_contract,
-        &token_factory,
+        &participation_token,
         &token_sale_admin,
         &1_000_000i128,
         &10_000i128,
     );
 
-    assert_ne!(participation_addr, admin);
+    assert_ne!(token_sale_addr, admin);
 }
 
 #[test]
@@ -120,13 +120,13 @@ fn test_deploy_all() {
     let usdc = Address::generate(&env);
     let deployer = setup_deployer(&env, &admin);
 
-    let token_salt = BytesN::from_array(&env, &[10u8; 32]);
-    let participation_salt = BytesN::from_array(&env, &[11u8; 32]);
+    let participation_salt = BytesN::from_array(&env, &[10u8; 32]);
+    let token_sale_salt = BytesN::from_array(&env, &[11u8; 32]);
     let vault_salt = BytesN::from_array(&env, &[12u8; 32]);
 
     let result = deployer.deploy_all(&DeployAllParams {
-        token_salt,
         participation_salt,
+        token_sale_salt,
         vault_salt,
         token_name: String::from_str(&env, "CampaignToken"),
         token_symbol: String::from_str(&env, "CAMP"),
@@ -143,9 +143,9 @@ fn test_deploy_all() {
     });
 
     // All three deployed addresses should be distinct
-    assert_ne!(result.token_factory, result.participation_token);
-    assert_ne!(result.token_factory, result.vault_contract);
+    assert_ne!(result.participation_token, result.token_sale);
     assert_ne!(result.participation_token, result.vault_contract);
+    assert_ne!(result.token_sale, result.vault_contract);
 }
 
 #[test]
@@ -157,7 +157,7 @@ fn test_update_wasm() {
     let deployer = setup_deployer(&env, &admin);
 
     let new_hash = BytesN::from_array(&env, &[99u8; 32]);
-    deployer.update_wasm(&DataKey::TokenFactoryWasm, &new_hash);
+    deployer.update_wasm(&DataKey::ParticipationTokenWasm, &new_hash);
 }
 
 #[test]
