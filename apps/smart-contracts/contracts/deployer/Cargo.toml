@@ -1,5 +1,5 @@
 [package]
-name = "vault-contract"
+name = "deployer"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,8 +8,10 @@ soroban-sdk = { workspace = true }
 
 [dev-dependencies]
 soroban-sdk = { workspace = true, features = ["testutils"] }
-participation-token = { path = "../participation-token" }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 doctest = false
+
+[features]
+testutils = ["soroban-sdk/testutils"]
