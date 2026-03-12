@@ -70,7 +70,7 @@ export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) =
   }, [search, filter, escrowsById]);
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {filteredData.map((item) => {
         const escrow = escrowsById[item.escrowId];
         return (
