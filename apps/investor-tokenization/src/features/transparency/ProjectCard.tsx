@@ -1,8 +1,11 @@
 "use client";
 
-import { Card, CardContent } from "@tokenization/ui/card";
+import Link from "next/link";
 import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
+import { CampaignCard as SharedCampaignCard } from "@tokenization/ui/campaign-card";
+import { cn } from "@tokenization/shared/lib/utils";
+import { ExternalLink, Rocket } from "lucide-react";
 import {
   formatCurrency,
 } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
@@ -12,7 +15,6 @@ import type {
 } from "@trustless-work/escrow/types";
 import { InvestDialog } from "@/features/tokens/components/InvestDialog";
 import { SelectedEscrowProvider } from "@/features/tokens/context/SelectedEscrowContext";
-import { Rocket } from "lucide-react";
 
 export type ProjectCardProps = {
   escrow: Escrow | undefined;
@@ -29,11 +31,37 @@ function getLoansCompleted(escrow: Escrow | undefined): number {
   return milestones.filter((m) => m.status === "Approved").length;
 }
 
-function getMinInvest(escrow: Escrow | undefined): number {
-  if (!escrow?.milestones?.length) return 100;
-  const milestones = escrow.milestones as MultiReleaseMilestone[];
-  const amounts = milestones.map((m) => Number(m.amount));
-  return Math.min(...amounts);
+function getTotalMilestones(escrow: Escrow | undefined): number {
+  if (!escrow?.milestones) return 0;
+  return (escrow.milestones as MultiReleaseMilestone[]).length;
+}
+
+function getProgress(escrow: Escrow | undefined): number {
+  const total = getTotalMilestones(escrow);
+  if (total === 0) return 0;
+  return Math.min((getLoansCompleted(escrow) / total) * 100, 100);
+}
+
+function LoadingSkeleton() {
+  return (
+    <div
+      className={cn(
+        "flex flex-col gap-4 rounded-xl border border-border bg-card p-5",
+        "shadow-card",
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <div className="h-5 w-20 animate-pulse rounded bg-muted" />
+        <div className="h-8 w-28 animate-pulse rounded bg-muted" />
+      </div>
+      <div className="h-5 w-48 animate-pulse rounded bg-muted" />
+      <div className="h-4 w-full animate-pulse rounded bg-muted" />
+      <div className="flex items-end justify-between">
+        <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+        <div className="h-4 w-40 animate-pulse rounded bg-muted" />
+      </div>
+    </div>
+  );
 }
 
 export const ProjectCard = ({
@@ -45,88 +73,66 @@ export const ProjectCard = ({
 }: ProjectCardProps) => {
   const title = escrow?.title ?? "Loading...";
   const description = escrow?.description ?? "";
-  const loansCompleted = getLoansCompleted(escrow);
-  const minInvest = getMinInvest(escrow);
-  const currency = escrow?.trustline?.symbol ?? "USDC";
+  const progress = getProgress(escrow);
+  const isActive = escrow?.isActive === true;
+  const escrowExplorerUrl = `https://stellar.expert/explorer/testnet/contract/${escrowId}`;
 
   if (isLoading) {
-    return (
-      <Card className="px-6 py-5">
-        <CardContent className="flex flex-col gap-4 p-0">
-          <div className="flex items-start justify-between">
-            <div className="h-6 w-48 animate-pulse rounded bg-muted" />
-            <div className="h-5 w-24 animate-pulse rounded bg-muted" />
-          </div>
-          <div className="h-4 w-full animate-pulse rounded bg-muted" />
-          <div className="flex items-center justify-between">
-            <div className="flex gap-8">
-              <div className="h-5 w-24 animate-pulse rounded bg-muted" />
-              <div className="h-5 w-20 animate-pulse rounded bg-muted" />
-            </div>
-            <div className="h-9 w-24 animate-pulse rounded bg-muted" />
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <LoadingSkeleton />;
   }
 
+  const statusLabel = isActive ? "Active" : "Fundraising";
+  const statusClassName = isActive
+    ? "bg-success-bg text-success border-success/30"
+    : "bg-yellow-50 text-yellow-700 border-yellow-200";
+
   return (
-    <Card className="px-6 py-5">
-      <CardContent className="flex flex-col gap-3 p-0">
-        <div className="flex items-start justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <Badge className="bg-teal-100 text-teal-700 border-teal-200 hover:bg-teal-100">
-            FUNDRAISING
-          </Badge>
-        </div>
-
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {description || "No description"}
-        </p>
-
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex gap-8">
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Loans Completed
-              </span>
-              <span className="font-medium">{loansCompleted}</span>
-            </div>
-
-            <div className="flex flex-col">
-              <span className="text-xs text-muted-foreground uppercase tracking-wide">
-                Min. Invest
-              </span>
-              <span className="font-medium">
-                {formatCurrency(minInvest, currency)}
-              </span>
-            </div>
-          </div>
-
-          <div className="shrink-0">
-            {tokenSale ? (
-              <SelectedEscrowProvider
-                value={{
-                  escrow,
-                  escrowId,
-                  tokenSaleContractId: tokenSale,
-                  imageSrc,
-                }}
-              >
-                <InvestDialog tokenSaleContractId={tokenSale} />
-              </SelectedEscrowProvider>
-            ) : (
-              <Button
-                disabled
-                className="bg-orange-500 text-white hover:bg-orange-600"
-              >
-                <Rocket className="h-4 w-4" />
-                Invest
-              </Button>
-            )}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <SharedCampaignCard
+      title={`#${escrowId.slice(0, 3).toUpperCase()} ${title}`}
+      description={description || "No description"}
+      statusBadge={
+        <Badge
+          variant="outline"
+          className={cn("text-xs font-semibold uppercase tracking-wide", statusClassName)}
+        >
+          {statusLabel}
+        </Badge>
+      }
+      actions={
+        tokenSale ? (
+          <SelectedEscrowProvider
+            value={{
+              escrow,
+              escrowId,
+              tokenSaleContractId: tokenSale,
+              imageSrc,
+            }}
+          >
+            <InvestDialog
+              tokenSaleContractId={tokenSale}
+              triggerLabel="Invest"
+            />
+          </SelectedEscrowProvider>
+        ) : (
+          <Button size="sm" className="cursor-pointer gap-1.5" disabled>
+            <Rocket className="size-3.5" />
+            Invest
+          </Button>
+        )
+      }
+      footer={
+        <Button
+          variant="ghost"
+          className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer"
+          asChild
+        >
+          <Link href={escrowExplorerUrl} target="_blank" rel="noopener noreferrer">
+            See Escrow
+            <ExternalLink className="size-3" />
+          </Link>
+        </Button>
+      }
+      progress={{ label: "Loans Completed", value: progress }}
+    />
   );
 };
