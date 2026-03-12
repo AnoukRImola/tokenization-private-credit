@@ -194,8 +194,8 @@ export function InvestDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-orange-500 text-white hover:bg-orange-600 cursor-pointer">
-          <Rocket className="h-4 w-4" />
+        <Button size="sm" className="cursor-pointer gap-1.5">
+          <Rocket className="size-3.5" />
           {triggerLabel}
         </Button>
       </DialogTrigger>
@@ -363,7 +363,7 @@ export function InvestDialog({
                 </div>
               </div>
 
-              <div className="rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50 p-4 space-y-3">
+              <div className="rounded-xl border border-teal-200 bg-linear-to-br from-teal-50 to-cyan-50 p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Your investment</span>
                   <span className="text-sm font-semibold text-foreground">

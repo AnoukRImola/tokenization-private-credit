@@ -1,26 +1,25 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import { useState } from "react";
-import { RoiHeader } from "@/features/roi/components/roi-header";
+import { SectionTitle } from "@/components/shared/section-title";
+import { CampaignToolbar } from "@/features/roi/components/campaign-toolbar";
 import { ProjectList } from "@/features/transparency/ProjectList";
-
-const CampaignToolbar = dynamic(
-  () =>
-    import("@/features/roi/components/campaign-toolbar").then(
-      (m) => m.CampaignToolbar
-    ),
-  { ssr: false }
-);
+import type { CampaignStatus } from "@/features/roi/types/campaign.types";
 
 export default function CampaignsPage() {
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<CampaignStatus | "all">("all");
 
   return (
-    <div className="space-y-6">
-      <RoiHeader searchValue={search} onSearchChange={setSearch} />
-      <CampaignToolbar filterValue={filter} onFilterChange={setFilter} />
+    <div className="flex flex-col gap-6">
+      <SectionTitle
+        title="Campaigns"
+        description="Browse and support local entrepreneurship projects."
+      />
+      <CampaignToolbar
+        onSearchChange={setSearch}
+        onFilterChange={setFilter}
+      />
       <ProjectList search={search} filter={filter} />
     </div>
   );

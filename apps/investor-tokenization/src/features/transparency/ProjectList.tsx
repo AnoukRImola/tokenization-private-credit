@@ -63,14 +63,23 @@ export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) =
         const desc = (escrow?.description ?? "").toLowerCase();
         if (!title.includes(q) && !desc.includes(q)) return false;
       }
-      if (filter === "active") return escrow?.isActive === true;
-      if (filter === "fundraising") return !escrow?.isActive;
+      if (filter === "READY") return escrow?.isActive === true;
+      if (filter === "PENDING") return !escrow?.isActive;
+      if (filter === "CLOSED") return false;
       return true;
     });
   }, [search, filter, escrowsById]);
 
+  if (!isLoading && filteredData.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-text-muted">
+        <p className="text-sm">No campaigns available.</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       {filteredData.map((item) => {
         const escrow = escrowsById[item.escrowId];
         return (
