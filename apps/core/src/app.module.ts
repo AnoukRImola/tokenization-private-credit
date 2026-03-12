@@ -9,6 +9,7 @@ import { DeployModule } from './deploy/deploy.module';
 import { LoansModule } from './loans/loans.module';
 import { ParticipationTokenModule } from './participation-token/participation-token.module';
 import { VaultModule } from './vault/vault.module';
+import { TokenFactoryModule } from './token-factory/token-factory.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { VaultModule } from './vault/vault.module';
     LoansModule,
     ParticipationTokenModule,
     VaultModule,
+    TokenFactoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
