@@ -27,7 +27,7 @@ interface CampaignCardProps {
 export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
   const { title, description, status, id, escrowId, poolSize } = campaign;
   const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
-  const escrowExplorerUrl = `https://stellar.expert/explorer/testnet/contract/${escrowId}`;
+  const escrowExplorerUrl = `https://viewer.trustlesswork.com/${escrowId}`;
 
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
 
