@@ -13,6 +13,7 @@ async function bootstrap() {
     origin: ['http://localhost:3000', 'http://localhost:3001', "https://backoffice-tokenization.vercel.app", "https://investor-orcin.vercel.app"],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
+    credentials: true,
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
