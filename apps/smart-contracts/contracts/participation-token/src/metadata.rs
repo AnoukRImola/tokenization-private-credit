@@ -24,22 +24,22 @@ pub fn write_metadata(e: &Env, metadata: TokenMetadata) {
     util.metadata().set_metadata(&metadata);
 }
 
-// Immutable metadata (escrow_id, mint_authority) - set only once at initialization
-pub fn read_escrow_id(e: &Env) -> String {
-    let key = DataKey::EscrowId;
+// Immutable metadata (escrow_contract, mint_authority) - set only once at initialization
+pub fn read_escrow_contract(e: &Env) -> Address {
+    let key = DataKey::EscrowContract;
     e.storage()
         .instance()
         .get(&key)
-        .expect("Escrow ID not initialized")
+        .expect("Escrow contract not initialized")
 }
 
-pub fn write_escrow_id(e: &Env, escrow_id: &String) {
-    let key = DataKey::EscrowId;
+pub fn write_escrow_contract(e: &Env, escrow_contract: &Address) {
+    let key = DataKey::EscrowContract;
     // Check if already set (immutable - can only be set once)
     if e.storage().instance().has(&key) {
-        panic!("Escrow ID already set - cannot modify");
+        panic!("Escrow contract already set - cannot modify");
     }
-    e.storage().instance().set(&key, escrow_id);
+    e.storage().instance().set(&key, escrow_contract);
 }
 
 pub fn read_mint_authority(e: &Env) -> Address {
