@@ -8,14 +8,8 @@ import {
 import { Button } from "@tokenization/ui/button";
 import { Progress } from "@tokenization/ui/progress";
 import { Landmark, Zap } from "lucide-react";
-import type { Campaign } from "@/features/campaigns/types/campaign.types";
 import { mapCampaignProgress } from "@/features/campaigns/utils/campaign.mapper";
-
-interface AddFundsDialogProps {
-  campaign: Campaign | null;
-  onClose: () => void;
-  onFundNow: () => void;
-}
+import type { AddFundsDialogProps } from "./types";
 
 export function AddFundsDialog({
   campaign,

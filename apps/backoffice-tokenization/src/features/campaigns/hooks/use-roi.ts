@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
-
-export interface RoiFormValues {
-  roiPercentage: number;
-}
+import type { RoiFormValues } from "@/features/campaigns/components/roi/types";
 
 export function useRoi() {
   const [roiDialogCampaign, setRoiDialogCampaign] = useState<Campaign | null>(null);
