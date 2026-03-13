@@ -29,8 +29,8 @@ const USDC_TESTNET_ADDRESS =
 const STORAGE_KEY = "campaigns-create-flow";
 
 const DEPLOY_PHASE_LABELS = [
-  "Desplegando contratos (deploy-all)",
-  "Creando campaña en base de datos",
+  "Creando token de participación y tokenizando",
+  "Últimos pasos...",
 ];
 
 // --- Utility functions ---
@@ -245,9 +245,9 @@ export function useCreateCampaign() {
           tokenSymbol: slugToSymbol(campaign.tokenName),
           escrowId: escrowEngagementId,
           escrowContract,
-          roiPercentage: campaign.expectedReturn,
-          hardCap: campaign.poolSize,
-          maxPerInvestor: campaign.loanSize,
+          roiPercentage: Number(campaign.expectedReturn),
+          hardCap: Number(campaign.poolSize),
+          maxPerInvestor: Number(campaign.loanSize),
           callerPublicKey: walletAddress,
         });
 
@@ -276,10 +276,10 @@ export function useCreateCampaign() {
           description: campaign.description,
           issuerAddress: walletAddress,
           escrowId: escrowContract,
-          poolSize: campaign.poolSize,
-          loanDuration: campaign.loanDuration,
-          expectedReturn: campaign.expectedReturn,
-          loanSize: campaign.loanSize,
+          poolSize: Number(campaign.poolSize),
+          loanDuration: Number(campaign.loanDuration),
+          expectedReturn: Number(campaign.expectedReturn),
+          loanSize: Number(campaign.loanSize),
           tokenFactoryId: updatedState.participationToken!,
           tokenSaleId: updatedState.tokenSale!,
           vaultId: updatedState.vaultContract!,
