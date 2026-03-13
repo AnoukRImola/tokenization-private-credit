@@ -245,18 +245,17 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
           milestones.map((milestone, index) => {
             const isApproved = milestone.flags?.approved === true;
             const isReleased = milestone.flags?.released === true;
-            const milestoneAmount = fromStroops(milestone.amount || 0);
+            const milestoneAmount = milestone.amount
             const insufficientFunds = escrowBalance < milestoneAmount;
 
 
             return (
               <div
                 key={index}
-                className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-colors ${
-                  isReleased
+                className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-colors ${isReleased
                     ? "border-border bg-secondary/20 opacity-60"
                     : "border-border bg-card"
-                }`}
+                  }`}
               >
                 <div className="flex flex-col gap-0.5">
                   <span

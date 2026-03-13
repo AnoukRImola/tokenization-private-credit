@@ -82,7 +82,7 @@ export function AppSidebar({
               <SidebarMenuItem key={item.href}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === item.href}
+                  isActive={item.href === "/" ? pathname === "/" : pathname.startsWith(item.href)}
                   tooltip={item.tooltip ?? item.label}
                   size="lg"
                   className="rounded-xl px-3 my-1"
