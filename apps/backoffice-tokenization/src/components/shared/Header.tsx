@@ -3,9 +3,9 @@ import Image from "next/image";
 
 export const Header = () => {
   return (
-    <header className="flex justify-between items-center w-full py-4">
+    <header className="flex justify-between items-center w-full px-5 py-4 sm:px-6">
       <Link href="/">
-        <Image src="/favicon.ico" alt="logo" width={50} height={50} />
+        <Image src="/interactuar_logo.png" alt="logo" width={160} height={32} priority style={{ objectFit: "contain" }} />
       </Link>
     </header>
   );
