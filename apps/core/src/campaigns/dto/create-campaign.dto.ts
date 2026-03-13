@@ -47,4 +47,8 @@ export class CreateCampaignDto {
   @IsString()
   @IsNotEmpty()
   tokenSaleId: string;
+
+  @IsString()
+  @IsOptional()
+  vaultId?: string;
 }

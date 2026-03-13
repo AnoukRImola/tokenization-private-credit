@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Loader2, PenLine } from "lucide-react";
 import { cn } from "@tokenization/shared/lib/utils";
 import { Button } from "@tokenization/ui/button";
 import { useCreateCampaign } from "@/features/campaigns/hooks/use-create-campaign";
@@ -11,14 +10,43 @@ import { StepCreateToken } from "./step-create-token";
 
 const STEPS = [
   { number: 1, label: "Campaña Básica" },
-  { number: 2, label: "Configuración Escrow" },
-  { number: 3, label: "Crear Token" },
+  { number: 2, label: "Inicializar Escrow" },
+  { number: 3, label: "Desplegar y Crear" },
 ];
 
 export function CreateCampaignStepper() {
   const router = useRouter();
-  const { form, step, totalSteps, nextStep, prevStep, isSubmitting, error, onSubmit, totalCommitment } =
-    useCreateCampaign();
+  const {
+    form,
+    step,
+    nextStep,
+    prevStep,
+    walletAddress,
+    // Escrow
+    escrowStatus,
+    escrowContractId,
+    escrowError,
+    initializeEscrow,
+    retryEscrow,
+    // Deploy
+    deployPhases,
+    deployPhaseLabels,
+    deployFailedAt,
+    runDeployAndCreate,
+    retryDeploy,
+  } = useCreateCampaign();
+
+  if (!walletAddress) {
+    return (
+      <div className="flex flex-col gap-6 max-w-2xl">
+        <div className="flex flex-col items-center justify-center gap-4 py-20">
+          <p className="text-lg text-muted-foreground">
+            Conecta tu wallet para crear una campaña
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl">
@@ -66,48 +94,41 @@ export function CreateCampaignStepper() {
       <div className="rounded-xl border border-border bg-card p-6">
         {step === 1 && <StepCampaignBasics form={form} />}
         {step === 2 && (
-          <StepEscrowConfig form={form} totalCommitment={totalCommitment} />
+          <StepEscrowConfig
+            escrowStatus={escrowStatus}
+            escrowContractId={escrowContractId}
+            escrowError={escrowError}
+            onInitialize={initializeEscrow}
+            onRetry={retryEscrow}
+            onNext={nextStep}
+          />
         )}
-        {step === 3 && <StepCreateToken form={form} />}
+        {step === 3 && (
+          <StepCreateToken
+            phases={deployPhases}
+            phaseLabels={deployPhaseLabels}
+            failedAt={deployFailedAt}
+            onRun={runDeployAndCreate}
+            onRetry={retryDeploy}
+          />
+        )}
       </div>
 
-      {/* Error */}
-      {error && (
-        <p className="text-sm text-destructive" role="alert">
-          {error}
-        </p>
-      )}
-
-      {/* Navigation */}
-      <div className="flex justify-between">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={step === 1 ? () => router.push("/campaigns") : prevStep}
-        >
-          {step === 1 ? "Cancelar" : "← Atrás"}
-        </Button>
-
-        {step < totalSteps ? (
+      {/* Navigation - only show for Step 1 */}
+      {step === 1 && (
+        <div className="flex justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push("/campaigns")}
+          >
+            Cancelar
+          </Button>
           <Button type="button" onClick={nextStep}>
             Siguiente →
           </Button>
-        ) : (
-          <Button type="button" onClick={onSubmit} disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <Loader2 className="size-4 animate-spin" />
-                Procesando...
-              </>
-            ) : (
-              <>
-                <PenLine className="size-4" />
-                Confirmar y Firmar
-              </>
-            )}
-          </Button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
