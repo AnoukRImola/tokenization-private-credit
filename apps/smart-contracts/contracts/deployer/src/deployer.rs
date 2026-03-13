@@ -201,6 +201,10 @@ impl DeployerContract {
     /// 4. Transfer token-sale admin to params.token_sale_admin via `set_admin`
     /// 5. Deploy vault-contract pointing to the participation-token
     pub fn deploy_all(env: Env, signer: Address, params: DeployAllParams) -> DeployedContracts {
+        let admin: Address = env.storage().instance().get(&DataKey::Admin).unwrap();
+        if signer != admin {
+            panic!("Signer must be the contract admin");
+        }
         signer.require_auth();
 
         let participation_token_wasm: BytesN<32> = env

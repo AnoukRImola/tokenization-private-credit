@@ -150,6 +150,45 @@ fn test_deploy_all() {
 }
 
 #[test]
+#[should_panic(expected = "Signer must be the contract admin")]
+fn test_deploy_all_rejects_non_admin_signer() {
+    let env = Env::default();
+    env.mock_all_auths();
+
+    let admin = Address::generate(&env);
+    let non_admin = Address::generate(&env);
+    let escrow_contract = Address::generate(&env);
+    let vault_admin = Address::generate(&env);
+    let token_sale_admin = Address::generate(&env);
+    let usdc = Address::generate(&env);
+    let deployer = setup_deployer(&env, &admin);
+
+    let token_sale_salt = BytesN::from_array(&env, &[10u8; 32]);
+    let participation_salt = BytesN::from_array(&env, &[11u8; 32]);
+    let vault_salt = BytesN::from_array(&env, &[12u8; 32]);
+
+    deployer.deploy_all(
+        &non_admin,
+        &DeployAllParams {
+            participation_salt,
+            token_sale_salt,
+            vault_salt,
+            token_name: String::from_str(&env, "CampaignToken"),
+            token_symbol: String::from_str(&env, "CAMP"),
+            decimal: 7u32,
+            escrow_contract,
+            vault_admin,
+            vault_enabled: true,
+            roi_percentage: 5i128,
+            usdc,
+            token_sale_admin,
+            hard_cap: 1_000_000i128,
+            max_per_investor: 10_000i128,
+        }
+    );
+}
+
+#[test]
 fn test_update_wasm() {
     let env = Env::default();
     env.mock_all_auths();
