@@ -34,7 +34,7 @@ export function AddFundsDialog({
           <div className="flex flex-col items-center gap-2 text-center">
             <h2 className="text-2xl font-bold text-foreground">
               Fondear Campaña #{campaign?.id.slice(0, 3).toUpperCase()}{" "}
-              {campaign?.title}
+              {campaign?.name}
             </h2>
             <p className="text-sm text-text-secondary leading-relaxed max-w-sm">
               El fondeo se puede realizar directamente desde el panel de la

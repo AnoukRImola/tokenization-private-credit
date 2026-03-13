@@ -140,7 +140,7 @@ export function CampaignRoiCard({
           onOpenChange={setFundOpen}
           campaignName={campaign.name}
           vaultId={campaign.vaultId}
-          onFunded={handleRefresh}
+          onFunded={() => setFundOpen(false)}
         />
       ) : null}
     </>

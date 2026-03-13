@@ -5,6 +5,7 @@ import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { submitAndExtractAddress } from "@/features/flow-testing/services/soroban.service";
 import { enableVault } from "../services/roi.service";
+import { updateCampaignStatus } from "@/features/campaigns/services/campaigns.api";
 
 interface UseToggleVaultParams {
   onSuccess?: (newEnabled: boolean) => void;
@@ -30,7 +31,6 @@ export function useToggleVault({ onSuccess }: UseToggleVaultParams = {}) {
         admin: walletAddress,
         enabled,
         callerPublicKey: walletAddress,
-        campaignId,
       });
 
       const signedXdr = await signTransaction({
@@ -39,6 +39,10 @@ export function useToggleVault({ onSuccess }: UseToggleVaultParams = {}) {
       });
 
       await submitAndExtractAddress(signedXdr);
+
+      if (enabled && campaignId) {
+        await updateCampaignStatus(campaignId, "CLAIMABLE").catch(() => null);
+      }
 
       onSuccess?.(enabled);
     } catch (e) {
