@@ -7,13 +7,11 @@ export interface RoiFormValues {
 
 export interface RoiTableProps {
   campaigns: Campaign[];
-  onCreateRoi: (campaign: Campaign) => void;
   onAddFunds: (campaign: Campaign) => void;
 }
 
 export interface RoiTableRowProps {
   campaign: Campaign;
-  onCreateRoi: (campaign: Campaign) => void;
   onAddFunds: (campaign: Campaign) => void;
 }
 

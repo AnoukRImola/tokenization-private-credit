@@ -14,7 +14,7 @@ import type { RoiTableProps } from "./types";
 
 const PAGE_SIZE = 4;
 
-export function RoiTable({ campaigns, onCreateRoi, onAddFunds }: RoiTableProps) {
+export function RoiTable({ campaigns, onAddFunds }: RoiTableProps) {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const visible = campaigns.slice(0, visibleCount);
@@ -48,7 +48,6 @@ export function RoiTable({ campaigns, onCreateRoi, onAddFunds }: RoiTableProps) 
             <RoiTableRow
               key={campaign.id}
               campaign={campaign}
-              onCreateRoi={onCreateRoi}
               onAddFunds={onAddFunds}
             />
           ))}

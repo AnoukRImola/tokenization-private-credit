@@ -1,12 +1,8 @@
 "use client";
 
-import Link from "next/link";
-import { Button } from "@tokenization/ui/button";
-import { Plus } from "lucide-react";
 import { StatItem } from "@/components/shared/stat-item";
 import { RoiTable } from "@/features/campaigns/components/roi/roi-table";
-import { CreateRoiDialog } from "@/features/campaigns/components/roi/create-roi-dialog";
-import { AddFundsDialog } from "@/features/campaigns/components/roi/add-funds-dialog";
+import { FundRoiDialog } from "@/features/flow-roi/components/FundRoiDialog";
 import { useRoi } from "@/features/campaigns/hooks/use-roi";
 import { useCampaigns } from "@/features/campaigns/hooks/use-campaigns";
 
@@ -31,15 +27,10 @@ const SUMMARY_STATS = [
 export function RoiView() {
   const { data: campaigns = [] } = useCampaigns();
   const {
-    roiDialogCampaign,
     fundsDialogCampaign,
-    roiForm,
-    openRoiDialog,
-    closeRoiDialog,
+    fundDialogOpen,
     openFundsDialog,
     closeFundsDialog,
-    onSubmitRoi,
-    onFundNow,
   } = useRoi();
 
   return (
@@ -54,7 +45,6 @@ export function RoiView() {
 
         <RoiTable
           campaigns={campaigns}
-          onCreateRoi={openRoiDialog}
           onAddFunds={openFundsDialog}
         />
       </div>
@@ -81,17 +71,15 @@ export function RoiView() {
       </div>
 
       {/* Dialogs */}
-      <CreateRoiDialog
-        campaign={roiDialogCampaign}
-        form={roiForm}
-        onClose={closeRoiDialog}
-        onSubmit={onSubmitRoi}
-      />
-      <AddFundsDialog
-        campaign={fundsDialogCampaign}
-        onClose={closeFundsDialog}
-        onFundNow={onFundNow}
-      />
+      {fundsDialogCampaign?.vaultId ? (
+        <FundRoiDialog
+          open={fundDialogOpen}
+          onOpenChange={(open) => { if (!open) closeFundsDialog(); }}
+          campaignName={fundsDialogCampaign.name}
+          vaultId={fundsDialogCampaign.vaultId}
+          onFunded={closeFundsDialog}
+        />
+      ) : null}
     </div>
   );
 }

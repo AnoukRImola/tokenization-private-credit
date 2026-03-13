@@ -27,7 +27,6 @@ import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/
 import { useEscrowsMutations } from "@tokenization/tw-blocks-shared/src/tanstack/useEscrowsMutations";
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import {
-  GetEscrowsFromIndexerResponse,
   MultiReleaseMilestone,
   MultiReleaseReleaseFundsPayload,
   ApproveMilestonePayload,
@@ -39,7 +38,6 @@ import {
 } from "@tokenization/tw-blocks-shared/src/handle-errors/handle";
 import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
 import { useChangeMilestoneStatus } from "@tokenization/tw-blocks-shared/src/escrows/single-multi-release/change-milestone-status/dialog/useChangeMilestoneStatus";
-import { getCampaignById } from "@/features/campaigns/services/campaigns.api";
 import { numericInputKeyDown, parseNumericInput } from "@/lib/numeric-input";
 import { formatCurrency } from "@/lib/utils";
 
@@ -51,10 +49,10 @@ const addMilestoneSchema = z.object({
 type AddMilestoneFormValues = z.infer<typeof addMilestoneSchema>;
 
 interface ManageLoansViewProps {
-  campaignId: string;
+  contractId: string;
 }
 
-export function ManageLoansView({ campaignId }: ManageLoansViewProps) {
+export function ManageLoansView({ contractId }: ManageLoansViewProps) {
   const { walletAddress } = useWalletContext();
   const { releaseFunds, approveMilestone, updateEscrow } = useEscrowsMutations();
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
@@ -63,7 +61,6 @@ export function ManageLoansView({ campaignId }: ManageLoansViewProps) {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [contractId, setContractId] = useState<string | null>(null);
   const [releasingIndex, setReleasingIndex] = useState<number | null>(null);
   const [approvingIndex, setApprovingIndex] = useState<number | null>(null);
   const [changeStatusOpenIndex, setChangeStatusOpenIndex] = useState<number | null>(null);
@@ -98,18 +95,8 @@ export function ManageLoansView({ campaignId }: ManageLoansViewProps) {
   );
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const campaign = await getCampaignById(campaignId);
-        setContractId(campaign.escrowId);
-        await fetchEscrow(campaign.escrowId);
-      } catch (err) {
-        setError(handleError(err as ErrorResponse).message);
-        setLoading(false);
-      }
-    };
-    init();
-  }, [campaignId, fetchEscrow]);
+    fetchEscrow(contractId);
+  }, [contractId, fetchEscrow]);
 
   const handleApprove = async (milestoneIndex: number) => {
     if (!walletAddress || !selectedEscrow?.contractId) return;

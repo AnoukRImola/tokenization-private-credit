@@ -1,12 +1,14 @@
-"use client";
-
-import { Suspense } from "react";
-import { RoiDashboard } from "@/features/flow-roi/RoiDashboard";
+import { SectionTitle } from "@/components/shared/section-title";
+import { RoiView } from "@/features/campaigns/components/roi/roi-view";
 
 export default function RoiPage() {
   return (
-    <Suspense fallback={null}>
-      <RoiDashboard />
-    </Suspense>
+    <div className="flex flex-col gap-6">
+      <SectionTitle
+        title="Retornos"
+        description="Gestione y monitoree sus programas de ROI activos en tiempo real."
+      />
+      <RoiView />
+    </div>
   );
 }

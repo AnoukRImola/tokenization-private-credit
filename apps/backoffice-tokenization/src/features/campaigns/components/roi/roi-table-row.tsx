@@ -6,13 +6,13 @@ import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
 import { Progress } from "@tokenization/ui/progress";
 import { cn } from "@tokenization/shared/lib/utils";
-import { ArrowUpCircle, Landmark, TrendingUp } from "lucide-react";
+import { ArrowUpCircle, Landmark } from "lucide-react";
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
 import { mapCampaignProgress } from "@/features/campaigns/utils/campaign.mapper";
 import { formatCurrency } from "@/lib/utils";
 import type { RoiTableRowProps } from "./types";
 
-export function RoiTableRow({ campaign, onCreateRoi, onAddFunds }: RoiTableRowProps) {
+export function RoiTableRow({ campaign, onAddFunds }: RoiTableRowProps) {
   const progress = mapCampaignProgress(campaign);
   const statusCfg = CAMPAIGN_STATUS_CONFIG[campaign.status];
 
@@ -66,15 +66,6 @@ export function RoiTableRow({ campaign, onCreateRoi, onAddFunds }: RoiTableRowPr
               <Landmark className="size-3.5" />
               Gestionar Préstamos
             </Link>
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            className="cursor-pointer gap-1 text-xs"
-            onClick={() => onCreateRoi(campaign)}
-          >
-            <TrendingUp className="size-3.5" />
-            Crear ROI
           </Button>
           <Button
             size="sm"
