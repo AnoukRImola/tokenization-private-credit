@@ -9,14 +9,10 @@ import { ApiKeyGuard } from './common/guards/api-key.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', "https://backoffice-tokenization.vercel.app", "https://investor-orcin.vercel.app"],
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
-  });
+  app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
-  // app.useGlobalGuards(new ApiKeyGuard());
+  app.useGlobalGuards(new ApiKeyGuard());
   await app.listen(process.env.PORT ?? 4000);
   console.log(`Core API is running on port ${process.env.PORT ?? 4000}`);
 }
