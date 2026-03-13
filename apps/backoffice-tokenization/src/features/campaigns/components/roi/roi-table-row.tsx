@@ -4,16 +4,13 @@ import Link from "next/link";
 import { TableCell, TableRow } from "@tokenization/ui/table";
 import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
-import { Progress } from "@tokenization/ui/progress";
 import { cn } from "@tokenization/shared/lib/utils";
 import { ArrowUpCircle, Landmark } from "lucide-react";
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
-import { mapCampaignProgress } from "@/features/campaigns/utils/campaign.mapper";
 import { formatCurrency } from "@/lib/utils";
 import type { RoiTableRowProps } from "./types";
 
-export function RoiTableRow({ campaign, onAddFunds }: RoiTableRowProps) {
-  const progress = mapCampaignProgress(campaign);
+export function RoiTableRow({ campaign, balance, onAddFunds }: RoiTableRowProps) {
   const statusCfg = CAMPAIGN_STATUS_CONFIG[campaign.status];
 
   return (
@@ -28,17 +25,8 @@ export function RoiTableRow({ campaign, onAddFunds }: RoiTableRowProps) {
       </TableCell>
 
       <TableCell>
-        <div className="flex items-center gap-3 min-w-36">
-          <Progress value={progress} className="h-1.5 flex-1" />
-          <span className="text-xs font-semibold text-foreground tabular-nums w-8 shrink-0">
-            {progress}%
-          </span>
-        </div>
-      </TableCell>
-
-      <TableCell>
         <span className="text-sm font-semibold text-foreground">
-          ${formatCurrency(campaign.poolSize)}
+          ${formatCurrency(balance)}
         </span>
       </TableCell>
 

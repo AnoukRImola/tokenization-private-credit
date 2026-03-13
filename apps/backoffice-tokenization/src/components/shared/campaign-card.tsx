@@ -1,26 +1,47 @@
 "use client";
 
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
 import { Progress } from "@tokenization/ui/progress";
 import { cn } from "@tokenization/shared/lib/utils";
-import { ExternalLink, Landmark } from "lucide-react";
+import { Landmark } from "lucide-react";
+import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
+import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
-import { mapCampaignProgress } from "@/features/campaigns/utils/campaign.mapper";
+import { formatCurrency } from "@/lib/utils";
 
 interface CampaignCardProps {
   campaign: Campaign;
-  onSeeEscrow?: () => void;
 }
 
-export function CampaignCard({ campaign, onSeeEscrow }: CampaignCardProps) {
+export function CampaignCard({ campaign }: CampaignCardProps) {
   const { name, description, status, escrowId } = campaign;
 
-  const progress = mapCampaignProgress(campaign);
   const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
   const isDraft = status === "DRAFT";
+
+  const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
+
+  const { data: escrowData } = useQuery({
+    queryKey: ["escrow", escrowId],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    queryFn: async () => {
+      const data = (await getEscrowByContractIds({
+        contractIds: [escrowId],
+        validateOnChain: true,
+      })) as any;
+      return data?.[0] ?? null;
+    },
+    enabled: !isDraft && !!escrowId,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const milestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
+  const assigned = milestones.reduce((sum, m) => sum + Number(m.amount ?? 0), 0);
+  const progress = campaign.poolSize > 0 ? Math.min(100, (assigned / campaign.poolSize) * 100) : 0;
 
   return (
     <div
@@ -61,31 +82,17 @@ export function CampaignCard({ campaign, onSeeEscrow }: CampaignCardProps) {
         {description}
       </p>
 
-      {/* Bottom row: escrow link | progress */}
-      <div className="flex items-end justify-between gap-4 pt-1">
-        <div className="flex items-center gap-2">
-          {!isDraft && (
-            <Button
-              variant="ghost"
-              onClick={onSeeEscrow}
-              className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer"
-            >
-              Ver Escrow
-              <ExternalLink className="size-3" />
-            </Button>
-          )}
+      {/* Progress */}
+      <div className="flex flex-col items-end gap-1.5">
+        <div className="flex items-center justify-between w-full">
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+            Dinero asignado
+          </span>
+          <span className="text-xs font-bold text-foreground">
+            USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
+          </span>
         </div>
-
-        {/* Progress */}
-        <div className="flex flex-col items-end gap-1.5 min-w-40">
-          <div className="flex items-center justify-between w-full">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
-              Préstamos completados
-            </span>
-            <span className="p-1 text-xs font-bold text-foreground">{progress}%</span>
-          </div>
-          <Progress value={progress} className="h-1.5 w-full" />
-        </div>
+        <Progress value={progress} className="h-1.5 w-full" />
       </div>
     </div>
   );
