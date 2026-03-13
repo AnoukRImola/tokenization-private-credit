@@ -39,9 +39,10 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
     staleTime: 1000 * 60 * 5,
   });
 
-  const milestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
-  const assigned = milestones.reduce((sum, m) => sum + Number(m.amount ?? 0), 0);
-  const progressValue = campaign.poolSize > 0 ? Math.min(100, (assigned / campaign.poolSize) * 100) : 0;
+  // const milestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
+  // const assigned = milestones.reduce((sum, m) => sum + Number(m.amount ?? 0), 0);
+  const raised = escrowData?.balance ?? 0;
+  const progressValue = campaign.poolSize > 0 ? Math.min(100, (raised / campaign.poolSize) * 100) : 0;
 
   return (
     <SharedCampaignCard
@@ -67,10 +68,10 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       }
       footer={
         <span className="text-xs font-bold text-foreground">
-          USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
+          USDC {formatCurrency(raised)} / USDC {formatCurrency(campaign.poolSize)}
         </span>
       }
-      progress={{ label: "Dinero asignado", value: progressValue }}
+      progress={{ label: "Dinero recaudado", value: progressValue }}
     />
   );
 }
