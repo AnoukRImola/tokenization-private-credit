@@ -71,7 +71,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
+            <span className="font-bold">Pool Size:</span> USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
           </span>
         </div>
       }
@@ -85,15 +85,15 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           <ul className="flex flex-col gap-1">
             {visibleMilestones.map((m, i) => (
               <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                {m.status === "Approved" ? (
+                {m.flags?.approved ? (
                   <CheckCircle className="size-3.5 text-green-500 shrink-0" />
-                ) : m.status === "Released" ? (
+                ) : m.flags?.released ? (
                   <Banknote className="size-3.5 text-blue-500 shrink-0" />
                 ) : (
                   <Circle className="size-3.5 shrink-0" />
                 )}
                 <span className="truncate">{m.description || `Loan ${i + 1}`}</span>
-                <span className="ml-auto font-medium">{fromStroops(m.amount ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })} USDC</span>
+                <span className="ml-auto font-medium">{m.amount} USDC</span>
               </li>
             ))}
           </ul>

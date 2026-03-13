@@ -133,7 +133,7 @@ export const ProjectCard = ({
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            USDC {assigned.toLocaleString("en-US", { minimumFractionDigits: 2 })} / USDC {poolSize.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            <span className="font-bold">Pool Size:</span> USDC {assigned.toLocaleString("en-US", { minimumFractionDigits: 2 })} / USDC {poolSize.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </span>
         </div>
       }
@@ -147,15 +147,15 @@ export const ProjectCard = ({
           <ul className="flex flex-col gap-1">
             {milestones.slice(1).map((m, i) => (
               <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                {m.status === "Approved" ? (
+                {m.flags?.approved ? (
                   <CheckCircle className="size-3.5 text-green-500 shrink-0" />
-                ) : m.status === "Released" ? (
+                ) : m.flags?.released ? (
                   <Banknote className="size-3.5 text-blue-500 shrink-0" />
                 ) : (
                   <Circle className="size-3.5 shrink-0" />
                 )}
                 <span className="truncate">{m.description || `Loan ${i + 1}`}</span>
-                <span className="ml-auto font-medium">{fromStroops(m.amount ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })} USDC</span>
+                <span className="ml-auto font-medium">{m.amount} USDC</span>
               </li>
             ))}
           </ul>
