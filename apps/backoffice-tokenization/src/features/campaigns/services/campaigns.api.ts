@@ -1,23 +1,60 @@
-import type { Campaign, CreateCampaignFormValues } from "@/features/campaigns/types/campaign.types";
+import type { Campaign } from "@/features/campaigns/types/campaign.types";
+
+const CORE_API =
+  process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:4000";
+
+async function post<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${CORE_API}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(
+      (err as { message?: string }).message ??
+        `Error ${res.status} en ${path}`,
+    );
+  }
+  return res.json() as Promise<T>;
+}
 
 export async function getCampaigns(): Promise<Campaign[]> {
-  const res = await fetch("/api/campaigns");
-  if (!res.ok) throw new Error("Failed to fetch campaigns");
+  const res = await fetch(`${CORE_API}/campaigns`);
+  if (!res.ok) throw new Error("No se pudieron cargar las campañas.");
   return res.json();
 }
 
 export async function getCampaignById(id: string): Promise<Campaign> {
-  const res = await fetch(`/api/campaigns/${id}`);
-  if (!res.ok) throw new Error("Failed to fetch campaign");
+  const res = await fetch(`${CORE_API}/campaigns/${id}`);
+  if (!res.ok) throw new Error("No se pudo cargar la campaña.");
   return res.json();
 }
 
-export async function createCampaign(data: CreateCampaignFormValues): Promise<Campaign> {
-  const res = await fetch("/api/campaigns", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) throw new Error("Failed to create campaign");
-  return res.json();
+export async function deployAll(params: {
+  tokenName: string;
+  tokenSymbol: string;
+  escrowId: string;
+  escrowContract: string;
+  roiPercentage: number;
+  hardCap: number;
+  maxPerInvestor: number;
+  callerPublicKey: string;
+}): Promise<{ unsignedXdr: string }> {
+  return post("/deploy/all", params);
+}
+
+export async function createCampaign(params: {
+  name: string;
+  description: string;
+  issuerAddress: string;
+  escrowId: string;
+  poolSize: number;
+  loanDuration: number;
+  expectedReturn: number;
+  loanSize: number;
+  tokenFactoryId: string;
+  tokenSaleId: string;
+}): Promise<{ id: string }> {
+  return post("/campaigns", params);
 }
