@@ -83,3 +83,56 @@ export async function createCampaign(params: {
 }): Promise<{ id: string }> {
   return post("/campaigns", params);
 }
+
+async function get<T>(path: string): Promise<T> {
+  const res = await fetch(`${CORE_API}${path}`, {
+    headers: { "x-api-key": API_KEY },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(
+      (err as { message?: string }).message ?? `Error ${res.status} on ${path}`,
+    );
+  }
+  return res.json() as Promise<T>;
+}
+
+async function patch<T>(path: string, body: unknown): Promise<T> {
+  const res = await fetch(`${CORE_API}${path}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(
+      (err as { message?: string }).message ?? `Error ${res.status} on ${path}`,
+    );
+  }
+  return res.json() as Promise<T>;
+}
+
+export async function enableVault(params: {
+  contractId: string;
+  admin: string;
+  enabled: boolean;
+  callerPublicKey: string;
+}): Promise<{ unsignedXdr: string }> {
+  return post("/vault/availability-for-exchange", params);
+}
+
+export async function getVaultIsEnabled(
+  contractId: string,
+  callerPublicKey: string,
+): Promise<{ enabled: boolean }> {
+  return get(
+    `/vault/is-enabled?contractId=${contractId}&callerPublicKey=${callerPublicKey}`,
+  );
+}
+
+export async function updateCampaignVaultId(
+  campaignId: string,
+  vaultId: string,
+): Promise<unknown> {
+  return patch(`/campaigns/${campaignId}`, { vaultId });
+}
