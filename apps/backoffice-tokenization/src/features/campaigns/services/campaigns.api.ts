@@ -3,10 +3,12 @@ import type { Campaign } from "@/features/campaigns/types/campaign.types";
 const CORE_API =
   process.env.NEXT_PUBLIC_CORE_API_URL ?? "http://localhost:4000";
 
+const API_KEY = process.env.NEXT_PUBLIC_CORE_API_KEY ?? "";
+
 async function post<T>(path: string, body: unknown): Promise<T> {
   const res = await fetch(`${CORE_API}${path}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
     body: JSON.stringify(body),
   });
   if (!res.ok) {
@@ -20,13 +22,17 @@ async function post<T>(path: string, body: unknown): Promise<T> {
 }
 
 export async function getCampaigns(): Promise<Campaign[]> {
-  const res = await fetch(`${CORE_API}/campaigns`);
+  const res = await fetch(`${CORE_API}/campaigns`, {
+    headers: { "x-api-key": API_KEY },
+  });
   if (!res.ok) throw new Error("No se pudieron cargar las campañas.");
   return res.json();
 }
 
 export async function getCampaignById(id: string): Promise<Campaign> {
-  const res = await fetch(`${CORE_API}/campaigns/${id}`);
+  const res = await fetch(`${CORE_API}/campaigns/${id}`, {
+    headers: { "x-api-key": API_KEY },
+  });
   if (!res.ok) throw new Error("No se pudo cargar la campaña.");
   return res.json();
 }
@@ -42,6 +48,24 @@ export async function deployAll(params: {
   callerPublicKey: string;
 }): Promise<{ unsignedXdr: string }> {
   return post("/deploy/all", params);
+}
+
+export async function updateCampaignStatus(
+  id: string,
+  status: string,
+): Promise<unknown> {
+  const res = await fetch(`${CORE_API}/campaigns/${id}/status`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", "x-api-key": API_KEY },
+    body: JSON.stringify({ status }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(
+      (err as { message?: string }).message ?? `Error ${res.status}`,
+    );
+  }
+  return res.json();
 }
 
 export async function createCampaign(params: {

@@ -41,7 +41,9 @@ export class CampaignsService {
   }
 
   create(dto: CreateCampaignDto) {
-    return this.prisma.campaign.create({ data: dto });
+    return this.prisma.campaign.create({
+      data: { ...dto, status: CampaignStatus.FUNDRAISING },
+    });
   }
 
   async update(id: string, dto: UpdateCampaignDto) {

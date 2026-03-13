@@ -1,17 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { TableCell, TableRow } from "@tokenization/ui/table";
 import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
 import { cn } from "@tokenization/shared/lib/utils";
 import { ArrowUpCircle, Landmark } from "lucide-react";
+import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
 import { formatCurrency } from "@/lib/utils";
+import { getVaultIsEnabled } from "@/features/flow-roi/services/roi.service";
+import { updateCampaignStatus } from "@/features/campaigns/services/campaigns.api";
+import { ToggleVaultButton } from "@/features/flow-roi/components/ToggleVaultButton";
 import type { RoiTableRowProps } from "./types";
 
 export function RoiTableRow({ campaign, balance, onAddFunds }: RoiTableRowProps) {
   const statusCfg = CAMPAIGN_STATUS_CONFIG[campaign.status];
+  const { walletAddress } = useWalletContext();
+  const [vaultEnabled, setVaultEnabled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!campaign.vaultId || !walletAddress) return;
+    getVaultIsEnabled(campaign.vaultId, walletAddress)
+      .then(({ enabled }) => setVaultEnabled(enabled))
+      .catch(() => setVaultEnabled(null));
+  }, [campaign.vaultId, walletAddress]);
+
+  const handleToggled = async () => {
+    const wasDisabled = vaultEnabled === false;
+    setVaultEnabled((prev) => (prev === null ? null : !prev));
+    if (wasDisabled) {
+      await updateCampaignStatus(campaign.id, "CLAIMABLE").catch(() => null);
+    }
+  };
 
   return (
     <TableRow className="border-border hover:bg-secondary/30 transition-colors">
@@ -55,6 +77,13 @@ export function RoiTableRow({ campaign, balance, onAddFunds }: RoiTableRowProps)
               Gestionar Préstamos
             </Link>
           </Button>
+          {campaign.vaultId && (
+            <ToggleVaultButton
+              vaultId={campaign.vaultId}
+              currentlyEnabled={vaultEnabled}
+              onToggled={handleToggled}
+            />
+          )}
           <Button
             size="sm"
             className="cursor-pointer gap-1 text-xs"
