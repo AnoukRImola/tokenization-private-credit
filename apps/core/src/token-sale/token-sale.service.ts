@@ -19,7 +19,6 @@ export class TokenSaleService {
       {
         usdc: dto.usdcAddress,
         payer: dto.payer,
-        beneficiary: dto.beneficiary,
         amount: toMicroUSDC(dto.amount),
       },
       dto.callerPublicKey,
