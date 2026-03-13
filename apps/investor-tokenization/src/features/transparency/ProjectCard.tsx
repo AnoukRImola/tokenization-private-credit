@@ -31,6 +31,16 @@ function getTotalLoans(escrow: Escrow | undefined): number {
   return getVisibleMilestones(escrow).length;
 }
 
+function getLoansCompleted(escrow: Escrow | undefined): number {
+  return getVisibleMilestones(escrow).filter((m) => m.status === "Approved").length;
+}
+
+function getProgress(escrow: Escrow | undefined): number {
+  const total = getTotalLoans(escrow);
+  if (total === 0) return 0;
+  return Math.min((getLoansCompleted(escrow) / total) * 100, 100);
+}
+
 function LoadingSkeleton() {
   return (
     <div
