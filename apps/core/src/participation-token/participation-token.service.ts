@@ -143,6 +143,6 @@ export class ParticipationTokenService {
   }
 
   getEscrowId(contractId: string, callerPublicKey: string): Promise<unknown> {
-    return this.soroban.readContractState(contractId, 'escrow_id', {}, callerPublicKey);
+    return this.soroban.readContractState(contractId, 'escrow_contract', {}, callerPublicKey);
   }
 }
