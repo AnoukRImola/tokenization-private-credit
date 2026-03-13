@@ -59,7 +59,6 @@ impl TokenSaleContract {
         env: Env,
         usdc: Address,
         payer: Address,
-        beneficiary: Address,
         amount: i128,
     ) -> Result<(), ContractError> {
         if amount <= 0 {
@@ -89,7 +88,7 @@ impl TokenSaleContract {
         let investor_balance: i128 = env
             .storage()
             .persistent()
-            .get(&DataKey::InvestorBalance(beneficiary.clone()))
+            .get(&DataKey::InvestorBalance(payer.clone()))
             .unwrap_or(0);
 
         // Validate hard cap
@@ -106,9 +105,9 @@ impl TokenSaleContract {
         let usdc_client = TokenClient::new(&env, &usdc);
         usdc_client.transfer(&payer, &escrow_contract, &amount);
 
-        // Mint participation tokens
+        // Mint participation tokens to payer
         let mint_sym = Symbol::new(&env, "mint");
-        let args_vec = vec![&env, beneficiary.into_val(&env), amount.into_val(&env)];
+        let args_vec = vec![&env, payer.clone().into_val(&env), amount.into_val(&env)];
         let _: () = env.invoke_contract(&participation_token, &mint_sym, args_vec);
 
         // Update counters after successful mint
@@ -117,13 +116,12 @@ impl TokenSaleContract {
             .set(&DataKey::TotalMinted, &(total_minted + amount));
         env.storage()
             .persistent()
-            .set(&DataKey::InvestorBalance(beneficiary.clone()), &(investor_balance + amount));
+            .set(&DataKey::InvestorBalance(payer.clone()), &(investor_balance + amount));
 
         emit_buy(
             &env,
             BuyEvent {
                 payer,
-                beneficiary,
                 amount,
                 usdc,
             },
