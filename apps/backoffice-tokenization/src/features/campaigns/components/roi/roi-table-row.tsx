@@ -41,12 +41,12 @@ export function RoiTableRow({ campaign, onAddFunds, onUpdateRoi }: RoiTableRowPr
 
   return (
     <TableRow className="border-border hover:bg-secondary/30 transition-colors">
-      <TableCell>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-sm font-bold text-foreground overflow-hidden text-ellipsis whitespace-nowrap">
+      <TableCell className="max-w-[200px]">
+        <div className="flex flex-col gap-0.5 min-w-0">
+          <span className="block overflow-hidden text-ellipsis whitespace-nowrap text-sm font-bold text-foreground">
             {campaign.name}
           </span>
-          <span className="text-xs text-text-muted overflow-hidden text-ellipsis whitespace-nowrap max-w-xs">
+          <span className="block overflow-hidden text-ellipsis whitespace-nowrap text-xs text-text-muted">
             {campaign.description}
           </span>
         </div>
