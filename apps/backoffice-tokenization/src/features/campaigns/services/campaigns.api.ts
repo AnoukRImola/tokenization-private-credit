@@ -55,6 +55,7 @@ export async function createCampaign(params: {
   loanSize: number;
   tokenFactoryId: string;
   tokenSaleId: string;
+  vaultId?: string;
 }): Promise<{ id: string }> {
   return post("/campaigns", params);
 }

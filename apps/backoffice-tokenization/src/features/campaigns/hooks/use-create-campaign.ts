@@ -282,6 +282,7 @@ export function useCreateCampaign() {
           loanSize: campaign.loanSize,
           tokenFactoryId: updatedState.participationToken!,
           tokenSaleId: updatedState.tokenSale!,
+          vaultId: updatedState.vaultContract!,
         });
 
         saveFlowState({ campaignDbId: created.id });
