@@ -37,7 +37,7 @@ export function CampaignCard({
       </div>
 
       <div className="flex flex-col gap-0.5">
-        <h3 className="text-lg font-bold text-foreground leading-tight">
+        <h3 className="text-lg font-bold text-foreground leading-tight overflow-hidden text-ellipsis whitespace-nowrap">
           {title}
         </h3>
       </div>

@@ -17,6 +17,7 @@
     "./chart": "./src/chart.tsx",
     "./checkbox": "./src/checkbox.tsx",
     "./dialog": "./src/dialog.tsx",
+    "./dropdown-menu": "./src/dropdown-menu.tsx",
     "./empty": "./src/empty.tsx",
     "./floating-dock": "./src/floating-dock.tsx",
     "./form": "./src/form.tsx",
@@ -38,7 +39,8 @@
     "./hooks/use-mobile": "./src/hooks/use-mobile.ts",
     "./sidebar-wallet-button": "./src/sidebar-wallet-button.tsx",
     "./campaign-card": "./src/campaign-card.tsx"
+  },
+  "dependencies": {
+    "@radix-ui/react-dropdown-menu": "^2.1.16"
   }
 }
-
-

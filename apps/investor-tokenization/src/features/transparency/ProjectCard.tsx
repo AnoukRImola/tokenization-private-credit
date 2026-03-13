@@ -78,7 +78,7 @@ export const ProjectCard = ({
   const assigned = milestones.reduce((sum, m) => sum + fromStroops(m.amount ?? 0), 0);
   const poolSize = campaign.poolSize ?? 0;
 
-  if (isLoading) {
+  if (isLoading && !escrow && !name) {
     return <LoadingSkeleton />;
   }
 
@@ -142,7 +142,13 @@ export const ProjectCard = ({
       }
       stat={{ label: "Loans", value: totalLoans }}
     >
-      {milestones.slice(1).length > 0 ? (
+      {isLoading && !escrow ? (
+        <div className="flex flex-col gap-2">
+          <div className="h-4 w-16 animate-pulse rounded bg-muted" />
+          <div className="h-3 w-full animate-pulse rounded bg-muted" />
+          <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
+        </div>
+      ) : milestones.slice(1).length > 0 ? (
         <>
           <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
             Loans

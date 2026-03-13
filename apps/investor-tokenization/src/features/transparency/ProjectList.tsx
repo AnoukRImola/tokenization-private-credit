@@ -38,7 +38,7 @@ export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) =
     queryFn: async () => {
       const result = await getEscrowByContractIds({
         contractIds: escrowIds,
-        validateOnChain: true,
+        validateOnChain: false,
       });
       const list = Array.isArray(result)
         ? result
@@ -48,6 +48,7 @@ export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) =
       return list as GetEscrowsFromIndexerResponse[];
     },
     enabled: escrowIds.length > 0,
+    staleTime: 1000 * 60 * 10,
   });
 
   const escrowsById = useMemo(() => {
@@ -76,9 +77,7 @@ export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) =
     });
   }, [search, filter, visibleCampaigns]);
 
-  const isLoading = isCampaignsLoading || isEscrowsLoading;
-
-  if (!isLoading && filteredCampaigns.length === 0) {
+  if (!isCampaignsLoading && filteredCampaigns.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-text-muted">
         <p className="text-sm">No campaigns available.</p>
