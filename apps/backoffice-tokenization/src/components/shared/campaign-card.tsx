@@ -42,7 +42,6 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
 
   const allMilestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
   const visibleMilestones = allMilestones.slice(1);
-  const assigned = allMilestones.reduce((sum, m) => sum + fromStroops(m.amount ?? 0), 0);
   const loansCompleted = visibleMilestones.filter((m) => m.status === "Approved").length;
   const totalLoans = visibleMilestones.length;
   const progressValue = totalLoans > 0 ? Math.min(100, (loansCompleted / totalLoans) * 100) : 0;
@@ -87,7 +86,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">Pool Size:</span> USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
+            <span className="font-bold">Pool Size:</span> USDC {formatCurrency(escrowData?.balance ?? 0)} / USDC {formatCurrency(campaign.poolSize)}
           </span>
         </div>
       }
