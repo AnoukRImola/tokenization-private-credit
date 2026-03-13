@@ -10,7 +10,6 @@ import { LoansModule } from './loans/loans.module';
 import { ParticipationTokenModule } from './participation-token/participation-token.module';
 import { VaultModule } from './vault/vault.module';
 import { TokenSaleModule } from './token-sale/token-sale.module';
-import { TrustlineModule } from './trustline/trustline.module';
 import { HelperModule } from './helper/helper.module';
 
 @Module({
@@ -24,8 +23,7 @@ import { HelperModule } from './helper/helper.module';
     ParticipationTokenModule,
     VaultModule,
     TokenSaleModule,
-    TrustlineModule,
-    HelperModule,
+HelperModule,
   ],
   controllers: [AppController],
   providers: [AppService],
