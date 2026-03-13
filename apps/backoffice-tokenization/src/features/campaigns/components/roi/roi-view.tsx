@@ -50,7 +50,7 @@ export function RoiView() {
       </div>
 
       {/* Financial summary */}
-      <div className="flex flex-col gap-4">
+      {/* <div className="flex flex-col gap-4">
         <h3 className="text-base font-semibold text-foreground">
           Resumen Financiero
         </h3>
@@ -68,7 +68,7 @@ export function RoiView() {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
       {/* Dialogs */}
       {fundsDialogCampaign?.vaultId ? (
