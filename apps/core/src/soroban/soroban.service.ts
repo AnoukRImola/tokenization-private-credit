@@ -40,6 +40,7 @@ export class SorobanService {
     method: string,
     args: Record<string, unknown>,
     callerPublicKey: string,
+    errorContext?: string,
   ): Promise<string> {
     const client = await contract.Client.from({
       contractId,
@@ -60,6 +61,7 @@ export class SorobanService {
     method: string,
     args: Record<string, unknown>,
     callerPublicKey: string,
+    errorContext?: string,
   ): Promise<unknown> {
     const client = await contract.Client.from({
       contractId,
