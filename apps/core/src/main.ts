@@ -9,8 +9,21 @@ import { ApiKeyGuard } from './common/guards/api-key.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    ...(process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : []),
+  ];
+
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001', 'https://backoffice-tokenization.vercel.app', 'https://investor-orcin.vercel.app'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Allow any vercel.app preview URL for this project
+      if (origin.endsWith('.vercel.app')) return callback(null, true);
+      callback(new Error(`CORS blocked: ${origin}`));
+    },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
     credentials: true,
