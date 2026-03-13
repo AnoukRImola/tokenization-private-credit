@@ -1,5 +1,9 @@
 "use client";
 
+import { useEffect, useState, useCallback } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
   Form,
   FormControl,
@@ -8,35 +12,227 @@ import {
   FormLabel,
   FormMessage,
 } from "@tokenization/ui/form";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@tokenization/ui/dialog";
 import { Input } from "@tokenization/ui/input";
 import { Textarea } from "@tokenization/ui/textarea";
 import { Button } from "@tokenization/ui/button";
-import { CheckCircle2, Pencil, Wallet, X, Check } from "lucide-react";
-import { useManageLoans } from "@/features/campaigns/hooks/use-manage-loans";
+import { CheckCircle2, Pencil, Wallet, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
+import { useEscrowsMutations } from "@tokenization/tw-blocks-shared/src/tanstack/useEscrowsMutations";
+import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
+import {
+  MultiReleaseMilestone,
+  MultiReleaseReleaseFundsPayload,
+  ApproveMilestonePayload,
+  UpdateMultiReleaseEscrowPayload,
+} from "@trustless-work/escrow/types";
+import {
+  ErrorResponse,
+  handleError,
+} from "@tokenization/tw-blocks-shared/src/handle-errors/handle";
+import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
+import { useChangeMilestoneStatus } from "@tokenization/tw-blocks-shared/src/escrows/single-multi-release/change-milestone-status/dialog/useChangeMilestoneStatus";
 import { numericInputKeyDown, parseNumericInput } from "@/lib/numeric-input";
 import { formatCurrency } from "@/lib/utils";
 
-export function ManageLoansView() {
-  const {
-    form,
-    milestones,
-    walletAddress,
-    editingId,
-    editValues,
-    setEditValues,
-    completeMilestone,
-    startEdit,
-    cancelEdit,
-    saveEdit,
-    onSubmit,
-  } = useManageLoans();
+const addMilestoneSchema = z.object({
+  description: z.string().min(1, "La descripción es obligatoria"),
+  amount: z.coerce.number().positive("Debe ser mayor a 0"),
+});
+
+type AddMilestoneFormValues = z.infer<typeof addMilestoneSchema>;
+
+interface ManageLoansViewProps {
+  contractId: string;
+}
+
+export function ManageLoansView({ contractId }: ManageLoansViewProps) {
+  const { walletAddress } = useWalletContext();
+  const { releaseFunds, approveMilestone, updateEscrow } = useEscrowsMutations();
+  const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
+  const { selectedEscrow, setSelectedEscrow } = useEscrowContext();
+  const changeMilestoneStatusHook = useChangeMilestoneStatus();
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [releasingIndex, setReleasingIndex] = useState<number | null>(null);
+  const [approvingIndex, setApprovingIndex] = useState<number | null>(null);
+  const [changeStatusOpenIndex, setChangeStatusOpenIndex] = useState<number | null>(null);
+  const [addingLoan, setAddingLoan] = useState(false);
+
+  const form = useForm<AddMilestoneFormValues>({
+    resolver: zodResolver(addMilestoneSchema),
+    defaultValues: { description: "", amount: "" as unknown as number },
+    mode: "onChange",
+  });
+
+  const fetchEscrow = useCallback(
+    async (escrowId: string) => {
+      setLoading(true);
+      setError(null);
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const data = (await getEscrowByContractIds({
+          contractIds: [escrowId],
+          validateOnChain: true,
+        })) as any;
+        if (!data || !data[0]) throw new Error("Escrow no encontrado");
+        setSelectedEscrow(data[0]);
+      } catch (err) {
+        setError(handleError(err as ErrorResponse).message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  useEffect(() => {
+    fetchEscrow(contractId);
+  }, [contractId, fetchEscrow]);
+
+  const handleApprove = async (milestoneIndex: number) => {
+    if (!walletAddress || !selectedEscrow?.contractId) return;
+    setApprovingIndex(milestoneIndex);
+    try {
+      const payload: ApproveMilestonePayload = {
+        contractId: selectedEscrow.contractId,
+        milestoneIndex: String(milestoneIndex),
+        approver: walletAddress,
+      };
+      await approveMilestone.mutateAsync({
+        payload,
+        type: "multi-release",
+        address: walletAddress,
+      });
+      toast.success(`Préstamo ${milestoneIndex + 1} aprobado`);
+      await fetchEscrow(selectedEscrow.contractId);
+    } catch (err) {
+      toast.error(handleError(err as ErrorResponse).message);
+    } finally {
+      setApprovingIndex(null);
+    }
+  };
+
+  const handleRelease = async (milestoneIndex: number) => {
+    if (!walletAddress || !selectedEscrow?.contractId) return;
+    setReleasingIndex(milestoneIndex);
+    try {
+      const payload: MultiReleaseReleaseFundsPayload = {
+        contractId: selectedEscrow.contractId,
+        releaseSigner: walletAddress,
+        milestoneIndex: String(milestoneIndex),
+      };
+      await releaseFunds.mutateAsync({
+        payload,
+        type: "multi-release",
+        address: walletAddress,
+      });
+      toast.success(`Fondos del préstamo ${milestoneIndex + 1} liberados`);
+      await fetchEscrow(selectedEscrow.contractId);
+    } catch (err) {
+      toast.error(handleError(err as ErrorResponse).message);
+    } finally {
+      setReleasingIndex(null);
+    }
+  };
+
+  const handleOpenChangeStatus = (milestoneIndex: number) => {
+    changeMilestoneStatusHook.form.setValue("milestoneIndex", String(milestoneIndex));
+    setChangeStatusOpenIndex(milestoneIndex);
+  };
+
+  const handleAddLoan = form.handleSubmit(async (data) => {
+    if (!walletAddress || !selectedEscrow?.contractId) return;
+    setAddingLoan(true);
+    try {
+      const existingMilestones = (
+        (selectedEscrow.milestones || []) as MultiReleaseMilestone[]
+      ).map((m, i) => ({
+        description: m.description,
+        amount: typeof m.amount === "string" ? Number(m.amount) : m.amount,
+        receiver: (m as MultiReleaseMilestone & { receiver?: string }).receiver || "",
+        evidence: selectedEscrow.milestones?.[i]?.evidence || "",
+        status: selectedEscrow.milestones?.[i]?.status || "",
+      }));
+
+      const payload: UpdateMultiReleaseEscrowPayload = {
+        contractId: selectedEscrow.contractId,
+        signer: walletAddress,
+        escrow: {
+          engagementId: selectedEscrow.engagementId,
+          title: selectedEscrow.title,
+          description: selectedEscrow.description,
+          platformFee:
+            typeof selectedEscrow.platformFee === "string"
+              ? Number(selectedEscrow.platformFee)
+              : selectedEscrow.platformFee,
+          trustline: {
+            address: selectedEscrow.trustline?.address || "",
+            symbol: "USDC",
+          },
+          roles: {
+            approver: selectedEscrow.roles?.approver || "",
+            serviceProvider: selectedEscrow.roles?.serviceProvider || "",
+            platformAddress: selectedEscrow.roles?.platformAddress || "",
+            releaseSigner: selectedEscrow.roles?.releaseSigner || "",
+            disputeResolver: selectedEscrow.roles?.disputeResolver || "",
+          },
+          milestones: [
+            ...existingMilestones,
+            { description: data.description, amount: data.amount, receiver: walletAddress, evidence: "", status: "" },
+          ],
+        },
+      };
+
+      await updateEscrow.mutateAsync({
+        payload,
+        type: "multi-release",
+        address: walletAddress,
+      });
+
+      toast.success("Préstamo agregado exitosamente");
+      form.reset();
+      await fetchEscrow(selectedEscrow.contractId);
+    } catch (err) {
+      toast.error(handleError(err as ErrorResponse).message);
+    } finally {
+      setAddingLoan(false);
+    }
+  });
 
   const shortAddress = walletAddress
     ? `${walletAddress.slice(0, 8)}…${walletAddress.slice(-6)}`
     : null;
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error || !selectedEscrow) {
+    return (
+      <div className="flex items-center justify-center py-16 text-destructive text-sm">
+        {error || "Escrow no encontrado"}
+      </div>
+    );
+  }
+
+  const milestones = (selectedEscrow.milestones || []) as MultiReleaseMilestone[];
+  const escrowBalance = Number(selectedEscrow.balance || 0);
+
   return (
-    <div className="flex flex-col gap-8 max-w-2xl">
+    <div className="flex flex-col gap-8 mx-auto w-full">
       {/* Milestones list */}
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
@@ -46,115 +242,88 @@ export function ManageLoansView() {
         {milestones.length === 0 ? (
           <p className="text-sm text-text-muted">No hay hitos registrados.</p>
         ) : (
-          milestones.map((milestone) => {
-            const isCompleted = milestone.status === "completed";
-            const isEditing = editingId === milestone.id;
+          milestones.map((milestone, index) => {
+            const isApproved = milestone.flags?.approved === true;
+            const isReleased = milestone.flags?.released === true;
+            const milestoneAmount = Number(milestone.amount || 0);
+            const insufficientFunds = escrowBalance < milestoneAmount;
 
-            if (isEditing) {
-              return (
-                <div
-                  key={milestone.id}
-                  className="flex flex-col gap-3 rounded-xl border border-primary/40 bg-card px-4 py-4"
-                >
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-text-muted">Descripción</label>
-                    <Input
-                      value={editValues.description}
-                      onChange={(e) =>
-                        setEditValues((v) => ({ ...v, description: e.target.value }))
-                      }
-                      autoFocus
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-medium text-text-muted">Monto (USDC)</label>
-                    <div className="relative">
-                      <Input
-                        type="text"
-                        inputMode="decimal"
-                        className="pr-14"
-                        value={editValues.amount}
-                        onKeyDown={numericInputKeyDown}
-                        onChange={(e) => setEditValues((prev) => ({ ...prev, amount: parseNumericInput(e.target.value) }))}
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-muted pointer-events-none">
-                        USDC
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2 justify-end">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={cancelEdit}
-                      className="cursor-pointer"
-                    >
-                      <X className="size-3.5" />
-                      Cancelar
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={saveEdit}
-                      className="cursor-pointer"
-                    >
-                      <Check className="size-3.5" />
-                      Guardar
-                    </Button>
-                  </div>
-                </div>
-              );
-            }
 
             return (
               <div
-                key={milestone.id}
+                key={index}
                 className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-colors ${
-                  isCompleted
+                  isReleased
                     ? "border-border bg-secondary/20 opacity-60"
                     : "border-border bg-card"
                 }`}
               >
                 <div className="flex flex-col gap-0.5">
                   <span
-                    className={`text-sm font-medium ${isCompleted ? "line-through text-text-muted" : "text-foreground"}`}
+                    className={`text-sm font-medium ${isReleased ? "line-through text-text-muted" : "text-foreground"}`}
                   >
                     {milestone.description}
                   </span>
+                  {milestone.status && (
+                    <span className="text-xs text-text-muted">
+                      Estado: {milestone.status}
+                    </span>
+                  )}
                   <span
-                    className={`text-xs font-semibold ${isCompleted ? "text-text-muted" : "text-primary"}`}
+                    className={`text-xs font-semibold ${isReleased ? "text-text-muted" : "text-primary"}`}
                   >
-                    USDC {formatCurrency(milestone.amount)}
+                    USDC {formatCurrency(milestoneAmount)}
                   </span>
                 </div>
 
-                {isCompleted ? (
+                {isReleased ? (
                   <div className="flex items-center gap-1.5 text-xs text-text-muted">
                     <CheckCircle2 className="size-4 text-green-500" />
-                    <span>Completado</span>
+                    <span>Desembolsado</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
+                    {/* Edit → change status */}
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => startEdit(milestone)}
+                      onClick={() => handleOpenChangeStatus(index)}
                       className="cursor-pointer text-text-muted hover:text-foreground"
                     >
                       <Pencil className="size-3.5" />
                     </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => completeMilestone(milestone.id)}
-                      className="text-xs uppercase tracking-wide cursor-pointer"
-                    >
-                      Completar
-                    </Button>
+
+                    {isApproved ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => handleRelease(index)}
+                        disabled={isReleased || releasingIndex !== null || insufficientFunds}
+                        className="text-xs uppercase tracking-wide cursor-pointer"
+                        title={insufficientFunds ? "Fondos insuficientes en el escrow" : undefined}
+                      >
+                        {releasingIndex === index ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          "Desembolsar"
+                        )}
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => handleApprove(index)}
+                        disabled={approvingIndex !== null}
+                        className="text-xs uppercase tracking-wide cursor-pointer"
+                      >
+                        {approvingIndex === index ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          "Aprobar"
+                        )}
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>
@@ -162,6 +331,67 @@ export function ManageLoansView() {
           })
         )}
       </div>
+
+      {/* Change status dialog */}
+      <Dialog
+        open={changeStatusOpenIndex !== null}
+        onOpenChange={(open) => !open && setChangeStatusOpenIndex(null)}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Cambiar estado del préstamo</DialogTitle>
+          </DialogHeader>
+          <Form {...changeMilestoneStatusHook.form}>
+            <form
+              onSubmit={(e) => {
+                changeMilestoneStatusHook.handleSubmit(e);
+                setChangeStatusOpenIndex(null);
+              }}
+              className="flex flex-col space-y-4"
+            >
+              <FormField
+                control={changeMilestoneStatusHook.form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Estado<span className="text-destructive ml-1">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ej: completed" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={changeMilestoneStatusHook.form.control}
+                name="evidence"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Evidencia</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="Evidencia (opcional)" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={changeMilestoneStatusHook.isSubmitting}
+                className="cursor-pointer"
+              >
+                {changeMilestoneStatusHook.isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Actualizar"
+                )}
+              </Button>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
       {/* Add new milestone */}
       <div className="flex flex-col gap-4">
@@ -171,11 +401,10 @@ export function ManageLoansView() {
 
         <div className="rounded-xl border border-border bg-card p-6">
           <Form {...form}>
-            <form onSubmit={onSubmit} className="flex flex-col gap-4">
+            <form onSubmit={handleAddLoan} className="flex flex-col gap-4">
               <FormField
                 control={form.control}
                 name="description"
-                rules={{ required: "La descripción es obligatoria" }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Descripción del Préstamo</FormLabel>
@@ -193,7 +422,6 @@ export function ManageLoansView() {
               />
 
               <div className="grid grid-cols-2 gap-4">
-                {/* Wallet address preview – read-only */}
                 <div className="flex flex-col gap-1.5">
                   <span className="text-sm font-medium leading-none">Dirección ONG</span>
                   <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 h-9">
@@ -211,10 +439,6 @@ export function ManageLoansView() {
                 <FormField
                   control={form.control}
                   name="amount"
-                  rules={{
-                    required: "El monto es obligatorio",
-                    min: { value: 0.01, message: "Debe ser mayor a 0" },
-                  }}
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Monto (USDC)</FormLabel>
@@ -240,8 +464,16 @@ export function ManageLoansView() {
                 />
               </div>
 
-              <Button type="submit" className="w-full cursor-pointer">
-                Crear Nuevo Hito
+              <Button
+                type="submit"
+                disabled={addingLoan}
+                className="w-full cursor-pointer"
+              >
+                {addingLoan ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Crear Nuevo Hito"
+                )}
               </Button>
             </form>
           </Form>

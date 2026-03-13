@@ -8,14 +8,8 @@ import {
 import { Button } from "@tokenization/ui/button";
 import { Progress } from "@tokenization/ui/progress";
 import { Landmark, Zap } from "lucide-react";
-import type { Campaign } from "@/features/campaigns/types/campaign.types";
 import { mapCampaignProgress } from "@/features/campaigns/utils/campaign.mapper";
-
-interface AddFundsDialogProps {
-  campaign: Campaign | null;
-  onClose: () => void;
-  onFundNow: () => void;
-}
+import type { AddFundsDialogProps } from "./types";
 
 export function AddFundsDialog({
   campaign,
@@ -40,7 +34,7 @@ export function AddFundsDialog({
           <div className="flex flex-col items-center gap-2 text-center">
             <h2 className="text-2xl font-bold text-foreground">
               Fondear Campaña #{campaign?.id.slice(0, 3).toUpperCase()}{" "}
-              {campaign?.title}
+              {campaign?.name}
             </h2>
             <p className="text-sm text-text-secondary leading-relaxed max-w-sm">
               El fondeo se puede realizar directamente desde el panel de la

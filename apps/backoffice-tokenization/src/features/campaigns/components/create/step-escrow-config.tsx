@@ -72,16 +72,6 @@ export function StepEscrowConfig({
       <p className="text-lg font-semibold">
         Escrow inicializado exitosamente
       </p>
-      {escrowContractId && (
-        <div className="flex flex-col items-center gap-1">
-          <p className="text-sm text-muted-foreground">
-            Contract ID:
-          </p>
-          <code className="text-sm bg-muted px-3 py-1 rounded break-all max-w-md text-center">
-            {escrowContractId}
-          </code>
-        </div>
-      )}
       <Button
         onClick={onNext}
         className="cursor-pointer mt-4"

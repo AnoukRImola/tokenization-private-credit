@@ -57,6 +57,7 @@ export async function enableVault(params: {
   admin: string;
   enabled: boolean;
   callerPublicKey: string;
+  campaignId?: string;
 }): Promise<{ unsignedXdr: string }> {
   return post("/vault/availability-for-exchange", params);
 }

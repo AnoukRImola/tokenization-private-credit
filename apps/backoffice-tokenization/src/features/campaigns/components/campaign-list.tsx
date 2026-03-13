@@ -20,9 +20,6 @@ export function CampaignList({ campaigns }: CampaignListProps) {
         <CampaignCard
           key={campaign.id}
           campaign={campaign}
-          location="Colombia"
-          organization="Give Colombia"
-          participants={12}
         />
       ))}
     </div>

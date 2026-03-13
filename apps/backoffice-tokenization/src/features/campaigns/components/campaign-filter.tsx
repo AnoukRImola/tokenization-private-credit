@@ -4,10 +4,9 @@ import type { CampaignStatus } from "@/features/campaigns/types/campaign.types";
 
 const STATUS_OPTIONS: { value: CampaignStatus | "all"; label: string }[] = [
   { value: "all", label: "Todas" },
-  { value: "active", label: "Activas" },
-  { value: "pending", label: "Pendientes" },
-  { value: "completed", label: "Completadas" },
-  { value: "cancelled", label: "Canceladas" },
+  { value: "FUNDRAISING", label: "Recaudando" },
+  { value: "ACTIVE", label: "Activa" },
+  { value: "CLOSED", label: "Cerrada" },
 ];
 
 interface CampaignFilterProps {

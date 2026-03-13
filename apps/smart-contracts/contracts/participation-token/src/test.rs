@@ -8,13 +8,13 @@ use soroban_sdk::{
     Address, Env, FromVal, IntoVal, String, Symbol, Vec,
 };
 
-fn create_token<'a>(e: &Env, mint_authority: &Address, escrow_id: &str) -> TokenClient<'a> {
+fn create_token<'a>(e: &Env, mint_authority: &Address, escrow_contract: &Address) -> TokenClient<'a> {
     let token_contract = e.register(
         Token,
         (
             String::from_val(e, &"TestToken"),
             String::from_val(e, &"TST"),
-            String::from_val(e, &escrow_id),
+            escrow_contract,
             7_u32,
             mint_authority,
         ),
@@ -31,8 +31,8 @@ fn test() {
     let user1 = Address::generate(&e);
     let user2 = Address::generate(&e);
     let user3 = Address::generate(&e);
-    let escrow_id = "test_escrow_123";
-    let token = create_token(&e, &mint_authority, escrow_id);
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user1, &1000);
     assert_eq!(
@@ -137,8 +137,8 @@ fn test_burn() {
     let mint_authority = Address::generate(&e);
     let user1 = Address::generate(&e);
     let user2 = Address::generate(&e);
-    let escrow_id = "test_escrow_456";
-    let token = create_token(&e, &mint_authority, escrow_id);
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user1, &1000);
     assert_eq!(token.balance(&user1), 1000);
@@ -195,8 +195,8 @@ fn transfer_insufficient_balance() {
     let mint_authority = Address::generate(&e);
     let user1 = Address::generate(&e);
     let user2 = Address::generate(&e);
-    let escrow_id = "test_escrow_789";
-    let token = create_token(&e, &mint_authority, escrow_id);
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user1, &1000);
     assert_eq!(token.balance(&user1), 1000);
@@ -214,8 +214,8 @@ fn transfer_from_insufficient_allowance() {
     let user1 = Address::generate(&e);
     let user2 = Address::generate(&e);
     let user3 = Address::generate(&e);
-    let escrow_id = "test_escrow_101112";
-    let token = create_token(&e, &mint_authority, escrow_id);
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user1, &1000);
     assert_eq!(token.balance(&user1), 1000);
@@ -231,6 +231,7 @@ fn transfer_from_insufficient_allowance() {
 fn decimal_is_over_eighteen() {
     let e = Env::default();
     let mint_authority = Address::generate(&e);
+    let escrow_contract = Address::generate(&e);
     let _ = TokenClient::new(
         &e,
         &e.register(
@@ -238,7 +239,7 @@ fn decimal_is_over_eighteen() {
             (
                 String::from_val(&e, &"name"),
                 String::from_val(&e, &"symbol"),
-                String::from_val(&e, &"escrow_123"),
+                escrow_contract,
                 19_u32,
                 mint_authority,
             ),
@@ -252,19 +253,19 @@ fn decimal_is_over_eighteen() {
 fn test_metadata_getters() {
     let e = Env::default();
     let mint_authority = Address::generate(&e);
-    let escrow_id = "test_escrow_metadata";
-    let token = create_token(&e, &mint_authority, escrow_id);
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     // Test standard metadata getters
     assert_eq!(token.name(), String::from_val(&e, &"TestToken"));
     assert_eq!(token.symbol(), String::from_val(&e, &"TST"));
     assert_eq!(token.decimals(), 7);
 
-    // Test escrow_id getter
+    // Test escrow_contract getter
     let token_contract = token.address.clone();
-    let escrow_id_result: String = e
-        .invoke_contract(&token_contract, &symbol_short!("escrow_id"), Vec::new(&e));
-    assert_eq!(escrow_id_result, String::from_val(&e, &escrow_id));
+    let escrow_result: Address = e
+        .invoke_contract(&token_contract, &Symbol::new(&e, "escrow_contract"), Vec::new(&e));
+    assert_eq!(escrow_result, escrow_contract);
 }
 
 #[test]
@@ -274,8 +275,8 @@ fn test_mint_authority_can_mint() {
 
     let mint_authority = Address::generate(&e);
     let user = Address::generate(&e);
-    let escrow_id = "test_escrow_mint";
-    let token = create_token(&e, &mint_authority, escrow_id);
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     // Mint authority should be able to mint
     // With mock_all_auths(), the mint_authority's auth is automatically provided
@@ -297,7 +298,7 @@ fn test_deployer_cannot_mint() {
         (
             String::from_val(&e, &"TestToken"),
             String::from_val(&e, &"TST"),
-            String::from_val(&e, &"test_escrow_deployer"),
+            Address::generate(&e), // escrow_contract
             7_u32,
             Address::generate(&e), // mint_authority
         ),
@@ -322,30 +323,30 @@ fn test_deployer_cannot_mint() {
 }
 
 #[test]
-#[should_panic(expected = "Escrow ID already set")]
+#[should_panic(expected = "Escrow contract already set")]
 fn test_metadata_immutability() {
     let e = Env::default();
     let mint_authority = Address::generate(&e);
-    let escrow_id = "test_escrow_immutable";
-    
+    let escrow_contract = Address::generate(&e);
+
     // Create token (initializes metadata via __constructor)
     let token_contract = e.register(
         Token,
         (
             String::from_val(&e, &"TestToken"),
             String::from_val(&e, &"TST"),
-            String::from_val(&e, &escrow_id),
+            escrow_contract.clone(),
             7_u32,
             mint_authority.clone(),
         ),
     );
 
-    // Try to write escrow_id again (should panic - immutability enforced)
+    // Try to write escrow_contract again (should panic - immutability enforced)
     // We need to wrap in as_contract to access storage
     e.as_contract(&token_contract, || {
-        use crate::metadata::write_escrow_id;
-        let new_escrow_id = String::from_val(&e, &"new_escrow");
-        write_escrow_id(&e, &new_escrow_id); // This should panic
+        use crate::metadata::write_escrow_contract;
+        let new_escrow = Address::generate(&e);
+        write_escrow_contract(&e, &new_escrow); // This should panic
     });
 }
 
@@ -358,7 +359,8 @@ fn test_mint_zero_tokens() {
 
     let mint_authority = Address::generate(&e);
     let user = Address::generate(&e);
-    let token = create_token(&e, &mint_authority, "escrow_zero");
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     // Minting zero should succeed (no-op)
     token.mint(&user, &0);
@@ -373,7 +375,8 @@ fn test_transfer_zero_amount() {
     let mint_authority = Address::generate(&e);
     let user1 = Address::generate(&e);
     let user2 = Address::generate(&e);
-    let token = create_token(&e, &mint_authority, "escrow_zero_transfer");
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user1, &100);
 
@@ -391,7 +394,8 @@ fn test_burn_more_than_balance() {
 
     let mint_authority = Address::generate(&e);
     let user = Address::generate(&e);
-    let token = create_token(&e, &mint_authority, "escrow_burn_excess");
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user, &100);
     token.burn(&user, &101); // should panic
@@ -404,7 +408,8 @@ fn test_burn_entire_balance() {
 
     let mint_authority = Address::generate(&e);
     let user = Address::generate(&e);
-    let token = create_token(&e, &mint_authority, "escrow_burn_all");
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user, &500);
     token.burn(&user, &500);
@@ -418,7 +423,8 @@ fn test_transfer_to_self() {
 
     let mint_authority = Address::generate(&e);
     let user = Address::generate(&e);
-    let token = create_token(&e, &mint_authority, "escrow_self_transfer");
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user, &100);
 
@@ -434,7 +440,8 @@ fn test_multiple_mints_accumulate() {
 
     let mint_authority = Address::generate(&e);
     let user = Address::generate(&e);
-    let token = create_token(&e, &mint_authority, "escrow_multi_mint");
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user, &100);
     token.mint(&user, &200);
@@ -451,7 +458,8 @@ fn test_mint_negative_amount() {
 
     let mint_authority = Address::generate(&e);
     let user = Address::generate(&e);
-    let token = create_token(&e, &mint_authority, "escrow_neg_mint");
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user, &(-100));
 }
@@ -465,7 +473,8 @@ fn test_transfer_negative_amount() {
     let mint_authority = Address::generate(&e);
     let user1 = Address::generate(&e);
     let user2 = Address::generate(&e);
-    let token = create_token(&e, &mint_authority, "escrow_neg_transfer");
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     token.mint(&user1, &100);
     token.transfer(&user1, &user2, &(-50));
@@ -479,7 +488,8 @@ fn test_set_admin_transfers_authority() {
     let mint_authority = Address::generate(&e);
     let new_authority = Address::generate(&e);
     let user = Address::generate(&e);
-    let token = create_token(&e, &mint_authority, "escrow_admin_transfer");
+    let escrow_contract = Address::generate(&e);
+    let token = create_token(&e, &mint_authority, &escrow_contract);
 
     // Original authority mints
     token.mint(&user, &100);

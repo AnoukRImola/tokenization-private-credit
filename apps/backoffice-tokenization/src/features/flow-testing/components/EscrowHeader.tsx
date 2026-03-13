@@ -19,7 +19,7 @@ export function EscrowHeader({ title, contractId, onBack }: EscrowHeaderProps) {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="text-3xl font-bold">Campanas</h1>
+        <h1 className="text-3xl font-bold">Campañas</h1>
       </div>
       <div className="mb-6 ml-14">
         <p className="text-sm text-muted-foreground">

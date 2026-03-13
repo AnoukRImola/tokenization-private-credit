@@ -21,13 +21,13 @@ fn create_escrow_contract<'a>(env: &Env) -> EscrowContractClient<'a> {
     EscrowContractClient::new(env, &env.register(EscrowContract {}, ()))
 }
 
-fn create_token_factory<'a>(e: &Env, mint_authority: &Address) -> FactoryTokenClient<'a> {
+fn create_token_factory<'a>(e: &Env, mint_authority: &Address, escrow_contract: &Address) -> FactoryTokenClient<'a> {
     let token_contract = e.register(
         FactoryToken,
         (
             String::from_str(e, "SaleToken"),
             String::from_str(e, "SALE"),
-            String::from_str(e, "eng_1"),
+            escrow_contract,
             7_u32,
             mint_authority,
         ),
@@ -124,7 +124,7 @@ fn setup_test(hard_cap: i128, max_per_investor: i128) -> TestSetup<'static> {
     escrow_client.initialize_escrow(&escrow_properties);
 
     let temp_admin = Address::generate(&env);
-    let sale_token = create_token_factory(&env, &temp_admin);
+    let sale_token = create_token_factory(&env, &temp_admin, &escrow_client.address);
 
     let token_sale_client = create_token_sale(
         &env,

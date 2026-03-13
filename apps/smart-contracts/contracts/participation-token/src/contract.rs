@@ -4,8 +4,8 @@
 use crate::allowance::{read_allowance, spend_allowance, write_allowance};
 use crate::balance::{read_balance, receive_balance, spend_balance};
 use crate::metadata::{
-    read_decimal, read_escrow_id, read_mint_authority, read_name, read_symbol,
-    write_escrow_id, write_mint_authority, write_metadata,
+    read_decimal, read_escrow_contract, read_mint_authority, read_name, read_symbol,
+    write_escrow_contract, write_mint_authority, write_metadata,
 };
 use crate::storage_types::{INSTANCE_BUMP_AMOUNT, INSTANCE_LIFETIME_THRESHOLD};
 use soroban_sdk::{
@@ -32,14 +32,14 @@ impl Token {
     /// # Arguments
     /// * `name` - Token name
     /// * `symbol` - Token symbol
-    /// * `escrow_id` - Escrow contract ID (as String)
+    /// * `escrow_contract` - Escrow contract address
     /// * `decimal` - Token decimals (default: 7, max: 18)
     /// * `mint_authority` - Address authorized to mint tokens (Participation Token contract)
     pub fn __constructor(
         e: Env,
         name: String,
         symbol: String,
-        escrow_id: String,
+        escrow_contract: Address,
         decimal: u32,
         mint_authority: Address,
     ) {
@@ -57,9 +57,9 @@ impl Token {
             },
         );
 
-        // Write immutable metadata (escrow_id, mint_authority)
+        // Write immutable metadata (escrow_contract, mint_authority)
         // These functions will panic if called twice (immutability enforced)
-        write_escrow_id(&e, &escrow_id);
+        write_escrow_contract(&e, &escrow_contract);
         write_mint_authority(&e, &mint_authority);
     }
 
@@ -202,13 +202,13 @@ impl TokenInterface for Token {
 // Additional getters for T-REX-aligned metadata
 #[contractimpl]
 impl Token {
-    /// Get the escrow contract ID associated with this token.
+    /// Get the escrow contract address associated with this token.
     /// This is immutable metadata set at initialization.
-    pub fn escrow_id(e: Env) -> String {
+    pub fn escrow_contract(e: Env) -> Address {
         e.storage()
             .instance()
             .extend_ttl(INSTANCE_LIFETIME_THRESHOLD, INSTANCE_BUMP_AMOUNT);
-        read_escrow_id(&e)
+        read_escrow_contract(&e)
     }
 
     /// Transfer the mint authority to a new admin address.
