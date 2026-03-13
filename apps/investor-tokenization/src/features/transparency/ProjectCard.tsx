@@ -27,18 +27,8 @@ function getVisibleMilestones(escrow: Escrow | undefined): MultiReleaseMilestone
   return (escrow.milestones as MultiReleaseMilestone[]).slice(1);
 }
 
-function getLoansCompleted(escrow: Escrow | undefined): number {
-  return getVisibleMilestones(escrow).filter((m) => m.status === "Approved").length;
-}
-
-function getTotalMilestones(escrow: Escrow | undefined): number {
+function getTotalLoans(escrow: Escrow | undefined): number {
   return getVisibleMilestones(escrow).length;
-}
-
-function getProgress(escrow: Escrow | undefined): number {
-  const total = getTotalMilestones(escrow);
-  if (total === 0) return 0;
-  return Math.min((getLoansCompleted(escrow) / total) * 100, 100);
 }
 
 function LoadingSkeleton() {
@@ -69,7 +59,7 @@ export const ProjectCard = ({
   isLoading = false,
 }: ProjectCardProps) => {
   const { name, description, status, escrowId, tokenSaleId } = campaign;
-  const progress = getProgress(escrow);
+  const totalLoans = getTotalLoans(escrow);
   const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
   const escrowExplorerUrl = `https://stellar.expert/explorer/testnet/contract/${escrowId}`;
   const milestones = (escrow?.milestones ?? []) as MultiReleaseMilestone[];
@@ -137,7 +127,7 @@ export const ProjectCard = ({
           </span>
         </div>
       }
-      progress={{ label: "Loans Completed", value: progress }}
+      stat={{ label: "Loans", value: totalLoans }}
     >
       {milestones.slice(1).length > 0 ? (
         <>

@@ -61,12 +61,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
     (sum, m) => sum + fromStroops((m.amount as number) ?? 0),
     0,
   );
-  const loansCompleted = visibleMilestones.filter(
-    (m) => m.status === "Approved",
-  ).length;
   const totalLoans = visibleMilestones.length;
-  const progressValue =
-    totalLoans > 0 ? Math.min(100, (loansCompleted / totalLoans) * 100) : 0;
 
   return (
     <SharedCampaignCard
@@ -118,7 +113,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
           <span className="font-bold">Pool Size:</span> USDC {formatCurrency((escrowData?.balance as number) ?? 0, "USDC")} / USDC {formatCurrency(campaign.poolSize, "USDC")}
         </div>
       }
-      progress={{ label: "Loans Completed", value: progressValue }}
+      stat={{ label: "Loans", value: totalLoans }}
     >
       {visibleMilestones.length > 0 ? (
         <>

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { cn } from "@tokenization/shared/lib/utils";
-import { Progress } from "./progress";
 
 export interface CampaignCardProps {
   title: string;
@@ -8,7 +7,7 @@ export interface CampaignCardProps {
   statusBadge: ReactNode;
   actions?: ReactNode;
   footer?: ReactNode;
-  progress?: { label: string; value: number };
+  stat?: { label: string; value: number };
   className?: string;
   children?: ReactNode;
 }
@@ -19,7 +18,7 @@ export function CampaignCard({
   statusBadge,
   actions,
   footer,
-  progress,
+  stat,
   className,
   children,
 }: CampaignCardProps) {
@@ -52,17 +51,14 @@ export function CampaignCard({
       <div className="flex items-end justify-between gap-4 pt-1">
         {footer && <div className="flex items-center gap-2">{footer}</div>}
 
-        {progress && (
-          <div className="flex flex-col items-end gap-1.5 min-w-40">
-            <div className="flex items-center justify-between w-full">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
-                {progress.label}
-              </span>
-              <span className="text-xs font-bold text-foreground">
-                {progress.value}%
-              </span>
-            </div>
-            <Progress value={progress.value} className="h-1.5 w-full" />
+        {stat && (
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+              {stat.label}
+            </span>
+            <span className="text-lg font-bold text-foreground">
+              {stat.value}
+            </span>
           </div>
         )}
       </div>

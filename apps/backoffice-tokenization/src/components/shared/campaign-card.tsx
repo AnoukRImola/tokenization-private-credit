@@ -42,9 +42,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
 
   const allMilestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
   const visibleMilestones = allMilestones.slice(1);
-  const loansCompleted = visibleMilestones.filter((m) => m.status === "Approved").length;
   const totalLoans = visibleMilestones.length;
-  const progressValue = totalLoans > 0 ? Math.min(100, (loansCompleted / totalLoans) * 100) : 0;
 
   return (
     <SharedCampaignCard
@@ -90,7 +88,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           </span>
         </div>
       }
-      progress={{ label: "Loans Completed", value: progressValue }}
+      stat={{ label: "Loans", value: totalLoans }}
     >
       {visibleMilestones.length > 0 ? (
         <>
