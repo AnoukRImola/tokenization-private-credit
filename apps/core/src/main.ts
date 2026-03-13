@@ -16,7 +16,7 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
-  app.useGlobalGuards(new ApiKeyGuard());
+  // app.useGlobalGuards(new ApiKeyGuard());
   await app.listen(process.env.PORT ?? 4000);
   console.log(`Core API is running on port ${process.env.PORT ?? 4000}`);
 }
