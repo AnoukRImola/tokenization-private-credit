@@ -14,7 +14,7 @@ export default async function CampaignLoansPage({ params }: Props) {
         title="Manejar Préstamos"
         description="Administra los hitos y préstamos de la campaña."
       />
-      <ManageLoansView campaignId={id} />
+      <ManageLoansView contractId={id} />
     </div>
   );
 }

@@ -16,7 +16,7 @@ interface CampaignCardProps {
 }
 
 export function CampaignCard({ campaign, onSeeEscrow }: CampaignCardProps) {
-  const { name, description, status, id } = campaign;
+  const { name, description, status, escrowId } = campaign;
 
   const progress = mapCampaignProgress(campaign);
   const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
@@ -41,7 +41,7 @@ export function CampaignCard({ campaign, onSeeEscrow }: CampaignCardProps) {
 
         {!isDraft && (
           <Button size="sm" className="cursor-pointer gap-1.5" asChild>
-            <Link href={`/campaigns/${id}/loans`}>
+            <Link href={`/campaigns/loans/${escrowId}`}>
               <Landmark className="size-3.5" />
               Manejar Préstamos
             </Link>

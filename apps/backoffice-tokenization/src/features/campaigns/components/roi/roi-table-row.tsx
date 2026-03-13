@@ -62,7 +62,7 @@ export function RoiTableRow({ campaign, onCreateRoi, onAddFunds }: RoiTableRowPr
             className="cursor-pointer text-primary hover:text-primary/80 gap-1 text-xs font-semibold"
             asChild
           >
-            <Link href={`/campaigns/${campaign.id}/loans`}>
+            <Link href={`/campaigns/loans/${campaign.escrowId}`}>
               <Landmark className="size-3.5" />
               Gestionar Préstamos
             </Link>
