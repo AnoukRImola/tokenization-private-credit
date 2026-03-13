@@ -20,7 +20,7 @@ export const HeroSection = () => {
           project, from contract deployment to milestone execution.
         </p>
 
-        <Link href="/manage-escrows">
+        <Link href="/campaigns">
           <RainbowButton variant="outline">Open App</RainbowButton>
         </Link>
       </div>
