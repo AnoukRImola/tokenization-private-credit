@@ -70,6 +70,10 @@ export class CampaignsService {
     const currentStatus = campaign.status;
     const newStatus = dto.status;
 
+    if (currentStatus === newStatus) {
+      return campaign;
+    }
+
     this.validateStatusTransition(
       currentStatus,
       newStatus,
@@ -114,7 +118,15 @@ export class CampaignsService {
     dto: UpdateCampaignStatusDto,
   ) {
     const campaign = await this.findOneByVaultId(vaultId);
-    return this.updateStatus(campaign.id, dto);
+
+    if (campaign.status === dto.status) {
+      return campaign;
+    }
+
+    return this.prisma.campaign.update({
+      where: { id: campaign.id },
+      data: { status: dto.status },
+    });
   }
 
   private validateStatusTransition(
