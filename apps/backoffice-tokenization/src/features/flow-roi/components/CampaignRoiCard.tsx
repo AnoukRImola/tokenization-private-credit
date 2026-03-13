@@ -25,6 +25,7 @@ export function CampaignRoiCard({
   const [createOpen, setCreateOpen] = useState(false);
   const [fundOpen, setFundOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [enabledOverride, setEnabledOverride] = useState<boolean | null>(null);
 
   const statusColor =
     STATUS_COLORS[campaign.status] ??
@@ -38,7 +39,8 @@ export function CampaignRoiCard({
     refreshKey,
   );
 
-  const handleRefresh = () => {
+  const handleToggle = (newEnabled: boolean) => {
+    setEnabledOverride(newEnabled);
     setRefreshKey((k) => k + 1);
     onUpdated();
   };
@@ -104,8 +106,9 @@ export function CampaignRoiCard({
               </Button>
               <ToggleVaultButton
                 vaultId={campaign.vaultId!}
-                currentlyEnabled={vaultInfo?.enabled ?? null}
-                onToggled={handleRefresh}
+                currentlyEnabled={enabledOverride !== null ? enabledOverride : (vaultInfo?.enabled ?? null)}
+                campaignId={campaign.id}
+                onToggled={handleToggle}
               />
             </>
           ) : null}

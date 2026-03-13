@@ -49,9 +49,9 @@ export function CreateCampaignStepper() {
   }
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-6">
       {/* Step indicator */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 justify-center">
         {STEPS.map(({ number, label }, index) => (
           <div key={number} className="flex items-center gap-2">
             <div

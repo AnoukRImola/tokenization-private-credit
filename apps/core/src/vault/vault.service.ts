@@ -1,14 +1,19 @@
 import { Injectable } from '@nestjs/common';
+import { CampaignStatus } from '@prisma/client';
+import { PrismaService } from '../prisma/prisma.service';
 import { SorobanService } from '../soroban/soroban.service';
 import { AvailabilityForExchangeDto } from './dto/availability-for-exchange.dto';
 import { ClaimDto } from './dto/claim.dto';
 
 @Injectable()
 export class VaultService {
-  constructor(private readonly soroban: SorobanService) {}
+  constructor(
+    private readonly soroban: SorobanService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  availabilityForExchange(dto: AvailabilityForExchangeDto): Promise<string> {
-    return this.soroban.buildContractCallTransaction(
+  async availabilityForExchange(dto: AvailabilityForExchangeDto): Promise<string> {
+    const unsignedXdr = await this.soroban.buildContractCallTransaction(
       dto.contractId,
       'availability_for_exchange',
       {
@@ -17,6 +22,15 @@ export class VaultService {
       },
       dto.callerPublicKey,
     );
+
+    if (dto.enabled && dto.campaignId) {
+      await this.prisma.campaign.update({
+        where: { id: dto.campaignId },
+        data: { status: CampaignStatus.CLAIMABLE },
+      });
+    }
+
+    return unsignedXdr;
   }
 
   claim(dto: ClaimDto): Promise<string> {

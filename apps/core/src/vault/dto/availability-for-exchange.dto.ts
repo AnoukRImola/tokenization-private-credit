@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsString, IsBoolean, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class AvailabilityForExchangeDto {
   @IsString()
@@ -16,4 +16,8 @@ export class AvailabilityForExchangeDto {
   @IsString()
   @IsNotEmpty()
   callerPublicKey: string;
+
+  @IsString()
+  @IsOptional()
+  campaignId?: string;
 }

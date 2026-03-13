@@ -29,9 +29,16 @@ export function useVaultInfo(vaultId: string, refreshKey?: number) {
     ])
       .then(([enabledRes, balanceRes, roiRes]) => {
         if (enabledRes || balanceRes || roiRes) {
+          const rawBalance = balanceRes?.balance;
+          const usdcBalance = rawBalance
+            ? (Number(rawBalance) / 10_000_000).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })
+            : "—";
           setInfo({
             enabled: enabledRes?.enabled ?? false,
-            usdcBalance: balanceRes?.balance ?? "—",
+            usdcBalance,
             roiPercentage: roiRes?.roiPercentage ?? "—",
           });
         }

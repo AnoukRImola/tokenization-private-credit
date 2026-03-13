@@ -11,7 +11,6 @@ import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
 import { formatCurrency } from "@/lib/utils";
 import { getVaultIsEnabled } from "@/features/flow-roi/services/roi.service";
-import { updateCampaignStatus } from "@/features/campaigns/services/campaigns.api";
 import { ToggleVaultButton } from "@/features/flow-roi/components/ToggleVaultButton";
 import type { RoiTableRowProps } from "./types";
 
@@ -27,12 +26,8 @@ export function RoiTableRow({ campaign, balance, onAddFunds }: RoiTableRowProps)
       .catch(() => setVaultEnabled(null));
   }, [campaign.vaultId, walletAddress]);
 
-  const handleToggled = async () => {
-    const wasDisabled = vaultEnabled === false;
-    setVaultEnabled((prev) => (prev === null ? null : !prev));
-    if (wasDisabled) {
-      await updateCampaignStatus(campaign.id, "CLAIMABLE").catch(() => null);
-    }
+  const handleToggled = (newEnabled: boolean) => {
+    setVaultEnabled(newEnabled);
   };
 
   return (
@@ -48,7 +43,7 @@ export function RoiTableRow({ campaign, balance, onAddFunds }: RoiTableRowProps)
 
       <TableCell>
         <span className="text-sm font-semibold text-foreground">
-          ${formatCurrency(balance)}
+          ${formatCurrency(balance / 10_000_000, 2)}
         </span>
       </TableCell>
 
@@ -81,6 +76,7 @@ export function RoiTableRow({ campaign, balance, onAddFunds }: RoiTableRowProps)
             <ToggleVaultButton
               vaultId={campaign.vaultId}
               currentlyEnabled={vaultEnabled}
+              campaignId={campaign.id}
               onToggled={handleToggled}
             />
           )}

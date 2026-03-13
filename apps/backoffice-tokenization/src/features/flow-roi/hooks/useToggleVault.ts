@@ -7,7 +7,7 @@ import { submitAndExtractAddress } from "@/features/flow-testing/services/soroba
 import { enableVault } from "../services/roi.service";
 
 interface UseToggleVaultParams {
-  onSuccess?: () => void;
+  onSuccess?: (newEnabled: boolean) => void;
 }
 
 export function useToggleVault({ onSuccess }: UseToggleVaultParams = {}) {
@@ -15,7 +15,7 @@ export function useToggleVault({ onSuccess }: UseToggleVaultParams = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const execute = async (vaultContractId: string, enabled: boolean) => {
+  const execute = async (vaultContractId: string, enabled: boolean, campaignId?: string) => {
     if (!walletAddress) {
       setError("Wallet not connected");
       return;
@@ -30,6 +30,7 @@ export function useToggleVault({ onSuccess }: UseToggleVaultParams = {}) {
         admin: walletAddress,
         enabled,
         callerPublicKey: walletAddress,
+        campaignId,
       });
 
       const signedXdr = await signTransaction({
@@ -39,7 +40,7 @@ export function useToggleVault({ onSuccess }: UseToggleVaultParams = {}) {
 
       await submitAndExtractAddress(signedXdr);
 
-      onSuccess?.();
+      onSuccess?.(enabled);
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unexpected error";
       setError(message);
