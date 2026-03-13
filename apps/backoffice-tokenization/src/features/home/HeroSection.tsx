@@ -3,12 +3,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
-const PILLS = [
-  { label: "Apoyo", className: "rounded-full border border-sky-200 bg-white px-3 py-1.5 text-xs font-medium text-sky-800 shadow-sm" },
-  { label: "Confianza", className: "rounded-full border border-sky-200 bg-white px-3 py-1.5 text-xs font-medium text-sky-800 shadow-sm" },
-  { label: "Progreso", className: "rounded-full border border-orange-200 bg-white px-3 py-1.5 text-xs font-medium text-orange-800 shadow-sm" },
-] as const;
-
 const CARDS = [
   { title: "Financiación", description: "Soluciones de crédito pensadas para impulsar el crecimiento de emprendedores y microempresas." },
   { title: "Acompañamiento", description: "Orientación y apoyo para fortalecer capacidades, tomar decisiones y avanzar con confianza." },
@@ -20,7 +14,8 @@ const cardClassName = "rounded-2xl border border-slate-200 bg-white p-3 shadow-l
 
 export const HeroSection = () => {
   return (
-    <section className="relative flex w-full flex-col gap-4 overflow-hidden px-4 py-12 md:min-h-[80vh] md:flex-row md:items-center md:gap-0 md:px-0 md:py-16">
+    <>
+    <section className="relative flex w-full flex-col gap-4 overflow-hidden px-4 pt-10 pb-2 md:min-h-[55vh] md:flex-row md:items-center md:gap-0 md:px-0 md:pt-12 md:pb-4">
       {/* Fila 1 / Columna 1: info — fondo sólido siempre */}
       <div className="relative z-10 flex w-full flex-col gap-5 bg-[#def1f8] px-0 py-6 md:w-[38%] md:gap-6 md:py-8 md:pl-4 md:pr-8">
         <h1 className="text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl">
@@ -41,54 +36,27 @@ export const HeroSection = () => {
         </Link>
       </div>
 
-      {/* Móvil: fila 2 = imagen de fondo + pills + cards (mismo orden: Financiación → Acompañamiento → Fortalecimiento → Oportunidades) */}
-      <div className="relative min-h-[55vh] w-full bg-[url('/landing-bg.jpg')] bg-contain bg-center bg-no-repeat md:hidden">
-        <div className="relative z-10 flex flex-col gap-6 py-6">
-          <div className="flex flex-wrap justify-center gap-2">
-            {PILLS.map((p) => (
-              <span key={p.label} className={p.className}>{p.label}</span>
-            ))}
-          </div>
-          <div className="flex flex-col gap-4">
-            {CARDS.map((c) => (
-              <div key={c.title} className={cardClassName}>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-sky-600 md:text-xs">{c.title}</p>
-                <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">{c.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      {/* Móvil: fila 2 = solo imagen de fondo */}
+      <div className="relative min-h-[55vh] w-full bg-[url('/landing-bg.jpeg')] bg-contain bg-center bg-no-repeat md:hidden" />
 
-      {/* Desktop: zona derecha con imagen completa (1639×1437) sin recortar */}
-      <div className="relative hidden flex-1 items-center justify-center bg-[#def1f8] bg-contain bg-center bg-no-repeat md:flex md:min-h-[520px] md:bg-[url('/landing-bg.jpg')] [perspective:1200px]">
-        {PILLS.map((p, i) => {
-          const pos = [
-            "left-[10%] top-[15%]",
-            "right-[10%] top-[12%]",
-            "left-1/2 bottom-[32%] -translate-x-1/2",
-          ][i];
-          return (
-            <div key={p.label} className={`absolute ${pos} ${p.className}`}>{p.label}</div>
-          );
-        })}
-        <div className={`card-3d-left absolute left-0 top-1/2 w-[160px] ${cardClassName} border-slate-200/80 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.08),0_12px_24px_-8px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] backdrop-blur-md transition-transform hover:scale-[1.02] md:left-2 md:w-[175px]`}>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-sky-600 md:text-xs">{CARDS[0].title}</p>
-          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">{CARDS[0].description}</p>
-        </div>
-        <div className={`card-3d-top absolute left-1/2 top-2 w-[170px] ${cardClassName} border-slate-200/80 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.08),0_12px_24px_-8px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] backdrop-blur-md transition-transform hover:scale-[1.02] md:top-4 md:w-[185px]`}>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-sky-600 md:text-xs">{CARDS[1].title}</p>
-          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">{CARDS[1].description}</p>
-        </div>
-        <div className={`card-3d-right absolute right-0 top-1/2 w-[160px] ${cardClassName} border-slate-200/80 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.08),0_12px_24px_-8px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] backdrop-blur-md transition-transform hover:scale-[1.02] md:right-2 md:w-[175px]`}>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-sky-600 md:text-xs">{CARDS[2].title}</p>
-          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">{CARDS[2].description}</p>
-        </div>
-        <div className={`card-3d-bottom absolute bottom-2 left-1/2 w-[170px] ${cardClassName} border-slate-200/80 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.08),0_12px_24px_-8px_rgba(0,0,0,0.12),0_0_0_1px_rgba(0,0,0,0.04)] backdrop-blur-md transition-transform hover:scale-[1.02] md:w-[185px]`}>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-sky-600 md:text-xs">{CARDS[3].title}</p>
-          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">{CARDS[3].description}</p>
-        </div>
+      {/* Desktop: zona derecha solo imagen */}
+      <div className="relative hidden flex-1 bg-[#def1f8] bg-contain bg-center bg-no-repeat md:flex md:min-h-[380px] md:bg-[url('/landing-bg.jpeg')]" />
+    </section>
+
+    {/* Sección abajo: título centrado + 4 cards en fila (hay que hacer scroll) */}
+    <section className="w-full bg-[#def1f8] px-4 pt-6 pb-10 md:px-8 md:pt-6 md:pb-12">
+      <h2 className="mb-8 text-center text-2xl font-bold tracking-tight text-foreground md:text-3xl lg:text-6xl">
+        Sobre nosotros
+      </h2>
+      <div className="mx-auto grid w-full grid-cols-2 gap-3 px-3 md:grid-cols-4 md:gap-4 md:px-6">
+        {CARDS.map((c) => (
+          <div key={c.title} className={cardClassName}>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-sky-600 md:text-xs">{c.title}</p>
+            <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground md:text-sm">{c.description}</p>
+          </div>
+        ))}
       </div>
     </section>
+  </>
   );
 }
