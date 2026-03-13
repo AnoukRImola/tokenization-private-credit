@@ -89,27 +89,6 @@ export function InvestDialog({
     setSubmitting(true);
 
     try {
-      // Ensure USDC trustline exists before buying (core builds the transaction)
-      const trustlineRes = await httpClient.post("/trustline/add", {
-        address: walletAddress,
-      });
-
-      if (trustlineRes.data?.success && trustlineRes.data?.xdr) {
-        const signedTrustlineTx = await signTransaction({
-          unsignedTransaction: trustlineRes.data.xdr,
-          address: walletAddress,
-        });
-
-        const tx = TransactionBuilder.fromXDR(signedTrustlineTx ?? "", Networks.TESTNET);
-
-        const send = await server.sendTransaction(tx);
-        if (send.status === "ERROR") {
-          throw new Error(
-            `Soroban error: ${JSON.stringify(send.errorResult)}`,
-          );
-        }
-      }
-
       const tokenService = new TokenService();
 
       const payload: BuyTokenPayload = {
