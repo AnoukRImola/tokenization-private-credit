@@ -12,7 +12,7 @@ import { Button } from "@tokenization/ui/button";
 import { Input } from "@tokenization/ui/input";
 import { Label } from "@tokenization/ui/label";
 import { Loader2 } from "lucide-react";
-import { useFundRoi } from "../hooks/useFundRoi";
+import { useFundRoi } from "@/features/campaigns/hooks/useFundRoi";
 import { toast } from "sonner";
 
 interface FundRoiDialogProps {
