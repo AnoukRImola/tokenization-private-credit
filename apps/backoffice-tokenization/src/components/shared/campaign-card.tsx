@@ -77,7 +77,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           ) : null}
         </div>
       }
-      progress={{ label: "Dinero asignado", value: progressValue }}
+      progress={{ label: "Dinero recaudado", value: progressValue }}
     />
   );
 }
