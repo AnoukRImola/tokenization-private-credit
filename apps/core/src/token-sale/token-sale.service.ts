@@ -8,7 +8,7 @@ import { SetAdminDto } from './dto/set-admin.dto';
 
 @Injectable()
 export class TokenSaleService {
-  constructor(private readonly soroban: SorobanService) {}
+  constructor(private readonly soroban: SorobanService) { }
 
   // ── Writes ──
 
@@ -23,7 +23,6 @@ export class TokenSaleService {
         amount: toMicroUSDC(dto.amount),
       },
       dto.callerPublicKey,
-      'token-sale',
     );
   }
 
@@ -36,7 +35,6 @@ export class TokenSaleService {
         new_max_per_investor: toMicroUSDC(dto.newMaxPerInvestor),
       },
       dto.callerPublicKey,
-      'token-sale',
     );
   }
 
@@ -46,7 +44,6 @@ export class TokenSaleService {
       'set_token',
       { new_token: dto.newToken },
       dto.callerPublicKey,
-      'token-sale',
     );
   }
 
@@ -56,13 +53,12 @@ export class TokenSaleService {
       'set_admin',
       { new_admin: dto.newAdmin },
       dto.callerPublicKey,
-      'token-sale',
     );
   }
 
   // ── Reads ──
 
   getAdmin(contractId: string, callerPublicKey: string): Promise<unknown> {
-    return this.soroban.readContractState(contractId, 'get_admin', {}, callerPublicKey, 'token-sale');
+    return this.soroban.readContractState(contractId, 'get_admin', {}, callerPublicKey);
   }
 }

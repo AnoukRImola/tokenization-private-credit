@@ -46,6 +46,7 @@ export type InvestmentFromApi = {
     description: string | null;
     status: string;
     escrowId: string;
+    poolSize: number;
     tokenFactoryId: string | null;
     tokenSaleId: string | null;
     vaultId: string | null;

@@ -31,6 +31,14 @@ export class CampaignsController {
     return this.campaignsService.create(dto);
   }
 
+  @Patch('by-vault/:vaultId/status')
+  updateStatusByVaultId(
+    @Param('vaultId') vaultId: string,
+    @Body() dto: UpdateCampaignStatusDto,
+  ) {
+    return this.campaignsService.updateStatusByVaultId(vaultId, dto);
+  }
+
   @Patch(':id/status')
   updateStatus(@Param('id') id: string, @Body() dto: UpdateCampaignStatusDto) {
     return this.campaignsService.updateStatus(id, dto);

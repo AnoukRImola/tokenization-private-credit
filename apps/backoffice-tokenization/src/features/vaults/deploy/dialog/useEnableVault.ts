@@ -8,6 +8,8 @@ import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { SendTransactionService } from "@/lib/sendTransactionService";
 import { toastSuccessWithTx } from "@/lib/toastWithTx";
+import { updateCampaignStatusByVaultId } from "@/features/campaigns/services/campaigns.api";
+import { useQueryClient } from "@tanstack/react-query";
 
 export type EnableVaultFormValues = {
   vaultContractAddress: string;
@@ -19,6 +21,7 @@ type UseEnableVaultParams = {
 
 export function useEnableVault(params?: UseEnableVaultParams) {
   const { walletAddress } = useWalletContext();
+  const queryClient = useQueryClient();
 
   const form = useForm<EnableVaultFormValues>({
     defaultValues: {
@@ -66,6 +69,16 @@ export function useEnableVault(params?: UseEnableVaultParams) {
       }
 
       toastSuccessWithTx("Vault enabled successfully", submitResponse.hash);
+
+      try {
+        await updateCampaignStatusByVaultId(
+          values.vaultContractAddress,
+          "CLAIMABLE",
+        );
+        await queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+      } catch {
+        // Campaign may not exist or vaultId not linked; status update is best-effort
+      }
 
       setResponse(enableResponse);
 

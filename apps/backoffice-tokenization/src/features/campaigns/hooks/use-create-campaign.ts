@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { useEscrowsMutations } from "@tokenization/tw-blocks-shared/src/tanstack/useEscrowsMutations";
 import {
@@ -112,6 +113,7 @@ const TOTAL_STEPS = 3;
 
 export function useCreateCampaign() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { walletAddress } = useWalletContext();
   const { deployEscrow } = useEscrowsMutations();
   const [step, setStep] = useState(1);
@@ -288,6 +290,8 @@ export function useCreateCampaign() {
         saveFlowState({ campaignDbId: created.id });
         setPhaseStatus(1, "success");
 
+        await queryClient.invalidateQueries({ queryKey: ["campaigns"] });
+
         setTimeout(() => {
           clearFlowState();
           router.push("/campaigns");
@@ -298,7 +302,7 @@ export function useCreateCampaign() {
       setPhaseStatus(currentPhase, "error", message);
       setDeployFailedAt(currentPhase);
     }
-  }, [walletAddress, router]);
+  }, [walletAddress, router, queryClient]);
 
   const retryDeploy = useCallback(() => {
     if (deployFailedAt === null) return;

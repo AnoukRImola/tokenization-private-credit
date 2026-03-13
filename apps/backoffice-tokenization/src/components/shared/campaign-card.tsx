@@ -6,7 +6,7 @@ import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
 import { CampaignCard as SharedCampaignCard } from "@tokenization/ui/campaign-card";
 import { cn } from "@tokenization/shared/lib/utils";
-import { Landmark } from "lucide-react";
+import { Banknote, CheckCircle, Circle, Landmark } from "lucide-react";
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
@@ -39,9 +39,12 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
     staleTime: 1000 * 60 * 5,
   });
 
-  const milestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
-  const assigned = milestones.reduce((sum, m) => sum + fromStroops(m.amount ?? 0), 0);
-  const progressValue = campaign.poolSize > 0 ? Math.min(100, (assigned / campaign.poolSize) * 100) : 0;
+  const allMilestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
+  const visibleMilestones = allMilestones.slice(1);
+  const assigned = allMilestones.reduce((sum, m) => sum + fromStroops(m.amount ?? 0), 0);
+  const loansCompleted = visibleMilestones.filter((m) => m.status === "Approved").length;
+  const totalLoans = visibleMilestones.length;
+  const progressValue = totalLoans > 0 ? Math.min(100, (loansCompleted / totalLoans) * 100) : 0;
 
   return (
     <SharedCampaignCard
@@ -68,16 +71,36 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
+            <span className="font-bold">Pool Size:</span> USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
           </span>
-          {campaign.vaultId ? (
-            <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[280px]" title={campaign.vaultId}>
-              Vault: {campaign.vaultId}
-            </span>
-          ) : null}
         </div>
       }
-      progress={{ label: "Dinero recaudado", value: progressValue }}
-    />
+      progress={{ label: "Loans Completed", value: progressValue }}
+    >
+      {visibleMilestones.length > 0 ? (
+        <>
+          <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
+            Loans
+          </p>
+          <ul className="flex flex-col gap-1">
+            {visibleMilestones.map((m, i) => (
+              <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                {m.flags?.approved ? (
+                  <CheckCircle className="size-3.5 text-green-500 shrink-0" />
+                ) : m.flags?.released ? (
+                  <Banknote className="size-3.5 text-blue-500 shrink-0" />
+                ) : (
+                  <Circle className="size-3.5 shrink-0" />
+                )}
+                <span className="truncate">{m.description || `Loan ${i + 1}`}</span>
+                <span className="ml-auto font-medium">{m.amount} USDC</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <p className="text-xs text-muted-foreground">No loans available.</p>
+      )}
+    </SharedCampaignCard>
   );
 }

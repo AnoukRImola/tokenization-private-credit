@@ -24,6 +24,8 @@ function toCampaign(inv: InvestmentFromApi): Campaign {
     investedAmount: Number(inv.usdcAmount),
     currency: "USDC",
     vaultId: inv.campaign.vaultId ?? null,
+    escrowId: inv.campaign.escrowId,
+    poolSize: Number(inv.campaign.poolSize),
   };
 }
 
