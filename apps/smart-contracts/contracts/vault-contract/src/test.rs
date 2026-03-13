@@ -17,12 +17,13 @@ fn create_usdc_token<'a>(e: &Env, admin: &Address) -> (TokenClient<'a>, TokenAdm
 }
 
 fn create_token_factory<'a>(e: &Env, mint_authority: &Address) -> FactoryTokenClient<'a> {
+    let escrow_contract = Address::generate(e);
     let token_contract = e.register(
         FactoryToken,
         (
             String::from_str(e, "TestToken"),
             String::from_str(e, "TST"),
-            String::from_str(e, ""),
+            escrow_contract,
             7_u32,
             mint_authority,
         ),

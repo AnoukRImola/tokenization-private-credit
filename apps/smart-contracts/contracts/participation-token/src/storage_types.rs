@@ -27,6 +27,6 @@ pub enum DataKey {
     Balance(Address),
     State(Address),
     // Immutable metadata keys (set only once at initialization)
-    EscrowId,
+    EscrowContract,
     MintAuthority,
 }

@@ -51,12 +51,13 @@ fn test_deploy_participation_token() {
     let deployer = setup_deployer(&env, &admin);
 
     let salt = BytesN::from_array(&env, &[1u8; 32]);
+    let escrow_contract = Address::generate(&env);
 
     let token_addr = deployer.deploy_participation_token(
         &salt,
         &String::from_str(&env, "TestToken"),
         &String::from_str(&env, "TST"),
-        &String::from_str(&env, "escrow-001"),
+        &escrow_contract,
         &7u32,
         &mint_authority,
     );
@@ -130,7 +131,6 @@ fn test_deploy_all() {
             vault_salt,
             token_name: String::from_str(&env, "CampaignToken"),
             token_symbol: String::from_str(&env, "CAMP"),
-            escrow_id: String::from_str(&env, "escrow-001"),
             decimal: 7u32,
             escrow_contract,
             vault_admin,
