@@ -7,7 +7,7 @@ import { SetAdminDto } from './dto/set-admin.dto';
 
 @Controller('token-sale')
 export class TokenSaleController {
-  constructor(private readonly tokenSaleService: TokenSaleService) {}
+  constructor(private readonly tokenSaleService: TokenSaleService) { }
 
   // ── POST endpoints (writes) ──
 

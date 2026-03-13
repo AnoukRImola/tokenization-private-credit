@@ -4,8 +4,10 @@ import type { CampaignStatus } from "../types/campaign.types";
 
 const STATUS_OPTIONS: { value: CampaignStatus | "all"; label: string }[] = [
   { value: "all", label: "All" },
-  { value: "READY", label: "Ready" },
-  { value: "PENDING", label: "Pending" },
+  { value: "FUNDRAISING", label: "Fundraising" },
+  { value: "ACTIVE", label: "Active" },
+  { value: "REPAYMENT", label: "Repayment" },
+  { value: "CLAIMABLE", label: "Claimable" },
   { value: "CLOSED", label: "Closed" },
 ];
 

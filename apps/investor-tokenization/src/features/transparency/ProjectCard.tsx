@@ -6,22 +6,18 @@ import { Button } from "@tokenization/ui/button";
 import { CampaignCard as SharedCampaignCard } from "@tokenization/ui/campaign-card";
 import { cn } from "@tokenization/shared/lib/utils";
 import { ExternalLink, Rocket } from "lucide-react";
-import {
-  formatCurrency,
-} from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import type {
   GetEscrowsFromIndexerResponse as Escrow,
   MultiReleaseMilestone,
 } from "@trustless-work/escrow/types";
 import { InvestDialog } from "@/features/tokens/components/InvestDialog";
 import { SelectedEscrowProvider } from "@/features/tokens/context/SelectedEscrowContext";
+import { CAMPAIGN_STATUS_CONFIG } from "@/features/roi/constants/campaign-status";
+import type { CampaignFromApi } from "./types";
 
 export type ProjectCardProps = {
-  escrow: Escrow | undefined;
-  escrowId: string;
-  tokenSale?: string;
-  tokenFactory?: string;
-  imageSrc?: string;
+  campaign: CampaignFromApi;
+  escrow?: Escrow;
   isLoading?: boolean;
 };
 
@@ -65,51 +61,43 @@ function LoadingSkeleton() {
 }
 
 export const ProjectCard = ({
+  campaign,
   escrow,
-  escrowId,
-  tokenSale,
-  imageSrc,
   isLoading = false,
 }: ProjectCardProps) => {
-  const title = escrow?.title ?? "Loading...";
-  const description = escrow?.description ?? "";
+  const { name, description, status, escrowId, tokenSaleId } = campaign;
   const progress = getProgress(escrow);
-  const isActive = escrow?.isActive === true;
+  const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
   const escrowExplorerUrl = `https://stellar.expert/explorer/testnet/contract/${escrowId}`;
 
   if (isLoading) {
     return <LoadingSkeleton />;
   }
 
-  const statusLabel = isActive ? "Active" : "Fundraising";
-  const statusClassName = isActive
-    ? "bg-success-bg text-success border-success/30"
-    : "bg-yellow-50 text-yellow-700 border-yellow-200";
-
   return (
     <SharedCampaignCard
-      title={`#${escrowId.slice(0, 3).toUpperCase()} ${title}`}
+      title={`#${campaign.id.slice(0, 3).toUpperCase()} ${name}`}
       description={description || "No description"}
       statusBadge={
         <Badge
           variant="outline"
-          className={cn("text-xs font-semibold uppercase tracking-wide", statusClassName)}
+          className={cn("text-xs font-semibold uppercase tracking-wide", statusCfg.className)}
         >
-          {statusLabel}
+          {statusCfg.label}
         </Badge>
       }
       actions={
-        tokenSale ? (
+        tokenSaleId ? (
           <SelectedEscrowProvider
             value={{
               escrow,
               escrowId,
-              tokenSaleContractId: tokenSale,
-              imageSrc,
+              tokenSaleContractId: tokenSaleId,
+              campaignId: campaign.id,
             }}
           >
             <InvestDialog
-              tokenSaleContractId={tokenSale}
+              tokenSaleContractId={tokenSaleId}
               triggerLabel="Invest"
             />
           </SelectedEscrowProvider>

@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -10,11 +12,12 @@ async function bootstrap() {
   app.enableCors({
     origin: ['http://localhost:3000', 'http://localhost:3001'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-api-key'],
   });
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 
   app.useGlobalGuards(new ApiKeyGuard());
   await app.listen(process.env.PORT ?? 4000);
+  console.log(`Core API is running on port ${process.env.PORT ?? 4000}`);
 }
 bootstrap();
