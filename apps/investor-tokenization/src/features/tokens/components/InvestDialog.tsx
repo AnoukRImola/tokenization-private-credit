@@ -32,7 +32,8 @@ import { MultiReleaseMilestone } from "@trustless-work/escrow";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { fromStroops } from "@/utils/adjustedAmounts";
-import axios from "axios";
+import { httpClient } from "@/lib/httpClient";
+import { Networks, rpc, TransactionBuilder } from "@stellar/stellar-sdk";
 
 type InvestFormValues = {
   amount: number;
@@ -67,6 +68,11 @@ export function InvestDialog({
 
   const onSubmit = async (values: InvestFormValues) => {
     setErrorMessage(null);
+
+    const server = new rpc.Server(
+      "https://soroban-testnet.stellar.org",
+    );
+
     if (!walletAddress) {
       setErrorMessage("Please connect your wallet to continue.");
       return;
@@ -83,8 +89,8 @@ export function InvestDialog({
     setSubmitting(true);
 
     try {
-      // Ensure USDC trustline exists before buying
-      const trustlineRes = await axios.post("/api/trustline/add", {
+      // Ensure USDC trustline exists before buying (core builds the transaction)
+      const trustlineRes = await httpClient.post("/trustline/add", {
         address: walletAddress,
       });
 
@@ -93,13 +99,13 @@ export function InvestDialog({
           unsignedTransaction: trustlineRes.data.xdr,
           address: walletAddress,
         });
-        const sender = new SendTransactionService();
-        const trustlineResult = await sender.sendTransaction({
-          signedXdr: signedTrustlineTx,
-        });
-        if (trustlineResult.status !== "SUCCESS") {
+
+        const tx = TransactionBuilder.fromXDR(signedTrustlineTx ?? "", Networks.TESTNET);
+
+        const send = await server.sendTransaction(tx);
+        if (send.status === "ERROR") {
           throw new Error(
-            trustlineResult.message ?? "Failed to add USDC trustline.",
+            `Soroban error: ${JSON.stringify(send.errorResult)}`,
           );
         }
       }
@@ -127,25 +133,23 @@ export function InvestDialog({
         address: walletAddress,
       });
 
-      const sender = new SendTransactionService();
-      const submitResponse = await sender.sendTransaction({
-        signedXdr: signedTxXdr,
-      });
+      const tx = TransactionBuilder.fromXDR(signedTxXdr ?? "", Networks.TESTNET);
 
-      if (submitResponse.status !== "SUCCESS") {
+      const send = await server.sendTransaction(tx);
+      if (send.status === "ERROR") {
         throw new Error(
-          submitResponse.message ?? "Transaction submission failed."
+          `Soroban error: ${JSON.stringify(send.errorResult)}`,
         );
       }
 
-      if (selected.campaignId && submitResponse.hash) {
+      if (selected.campaignId && send.hash) {
         try {
           await createInvestment({
             campaignId: selected.campaignId,
             investorAddress: walletAddress,
             usdcAmount: values.amount,
             tokenAmount: values.amount,
-            txHash: submitResponse.hash,
+            txHash: send.hash ?? "",
           });
         } catch (dbError) {
           console.error("Failed to save investment to database:", dbError);
@@ -228,131 +232,131 @@ export function InvestDialog({
       <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
         <DialogTitle className="sr-only">Invest</DialogTitle>
         <Form {...form}>
-            <form
-              className="space-y-6"
-              onSubmit={form.handleSubmit(onSubmit)}
-            >
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem className="space-y-2">
-                    <FormLabel className="text-base font-semibold">
-                      Amount (USDC)
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type="number"
-                          inputMode="decimal"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          className="h-14 text-xl pr-20 rounded-xl border-muted bg-muted/30"
-                          {...field}
-                          value={
-                            Number.isNaN(field.value as number) ||
-                              field.value === ("" as unknown as number)
-                              ? ""
-                              : String(field.value)
-                          }
-                          onChange={(e) => {
-                            const next =
-                              e.target.value === ""
-                                ? ("" as unknown as number)
-                                : Number(e.target.value);
-                            field.onChange(next);
-                          }}
-                        />
-                        <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-cyan-500">
-                          USDC
-                        </span>
-                      </div>
-                    </FormControl>
-                    <p className="text-xs text-muted-foreground">
-                      Available balance:{" "}
-                      <span className="font-medium">
-                        {totalAmount > 0
-                          ? `${totalAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })} ${currency}`
-                          : `0.00 ${currency}`}
+          <form
+            className="space-y-6"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <FormField
+              control={form.control}
+              name="amount"
+              render={({ field }) => (
+                <FormItem className="space-y-2">
+                  <FormLabel className="text-base font-semibold">
+                    Amount (USDC)
+                  </FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        min="0"
+                        placeholder="0.00"
+                        className="h-14 text-xl pr-20 rounded-xl border-muted bg-muted/30"
+                        {...field}
+                        value={
+                          Number.isNaN(field.value as number) ||
+                            field.value === ("" as unknown as number)
+                            ? ""
+                            : String(field.value)
+                        }
+                        onChange={(e) => {
+                          const next =
+                            e.target.value === ""
+                              ? ("" as unknown as number)
+                              : Number(e.target.value);
+                          field.onChange(next);
+                        }}
+                      />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-cyan-500">
+                        USDC
                       </span>
-                    </p>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="rounded-xl border bg-muted/30 px-4 py-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Estimated Yield
-                  </span>
-                  <p className="mt-1 text-lg font-bold text-teal-600">
-                    {expectedReturn}% APY
+                    </div>
+                  </FormControl>
+                  <p className="text-xs text-muted-foreground">
+                    Available balance:{" "}
+                    <span className="font-medium">
+                      {totalAmount > 0
+                        ? `${totalAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })} ${currency}`
+                        : `0.00 ${currency}`}
+                    </span>
                   </p>
-                </div>
-                <div className="rounded-xl border bg-muted/30 px-4 py-3">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    Term Length
-                  </span>
-                  <p className="mt-1 text-lg font-bold text-foreground">
-                    {loanDuration} Months
-                  </p>
-                </div>
-              </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <div className="rounded-xl border border-teal-200 bg-linear-to-br from-teal-50 to-cyan-50 p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Your investment</span>
-                  <span className="text-sm font-semibold text-foreground">
-                    {safeAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
-                    Estimated return ({expectedReturn}% &times; {loanDuration}mo)
-                  </span>
-                  <span className="text-sm font-semibold text-teal-600">
-                    +{estimatedReturn.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
-                  </span>
-                </div>
-                <div className="border-t border-teal-200 pt-3 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-foreground">Total at maturity</span>
-                  <span className="text-lg font-bold text-teal-700">
-                    {totalAtMaturity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-                <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
-                <p className="text-sm text-amber-800">
-                  <span className="font-semibold">Disclaimer:</span> Please
-                  review your investment amount carefully. Once confirmed, these
-                  amounts are not editable and the transaction is final.
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-xl border bg-muted/30 px-4 py-3">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Estimated Yield
+                </span>
+                <p className="mt-1 text-lg font-bold text-teal-600">
+                  {expectedReturn}% APY
                 </p>
               </div>
-
-              {errorMessage ? (
-                <p className="text-sm text-destructive" role="alert">
-                  {errorMessage}
+              <div className="rounded-xl border bg-muted/30 px-4 py-3">
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Term Length
+                </span>
+                <p className="mt-1 text-lg font-bold text-foreground">
+                  {loanDuration} Months
                 </p>
-              ) : null}
+              </div>
+            </div>
 
-              <Button
-                type="submit"
-                disabled={isSubmitDisabled}
-                className="h-12 w-full rounded-xl bg-cyan-500 text-base font-semibold text-white hover:bg-cyan-600"
-              >
-                {submitting ? "Processing..." : "Confirm Investment"}
-              </Button>
+            <div className="rounded-xl border border-teal-200 bg-linear-to-br from-teal-50 to-cyan-50 p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Your investment</span>
+                <span className="text-sm font-semibold text-foreground">
+                  {safeAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">
+                  Estimated return ({expectedReturn}% &times; {loanDuration}mo)
+                </span>
+                <span className="text-sm font-semibold text-teal-600">
+                  +{estimatedReturn.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                </span>
+              </div>
+              <div className="border-t border-teal-200 pt-3 flex items-center justify-between">
+                <span className="text-sm font-semibold text-foreground">Total at maturity</span>
+                <span className="text-lg font-bold text-teal-700">
+                  {totalAtMaturity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
+                </span>
+              </div>
+            </div>
 
-              <p className="text-center text-xs text-muted-foreground">
-                By clicking confirm, you agree to the Terms of Service and
-                Investment Agreement.
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+              <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
+              <p className="text-sm text-amber-800">
+                <span className="font-semibold">Disclaimer:</span> Please
+                review your investment amount carefully. Once confirmed, these
+                amounts are not editable and the transaction is final.
               </p>
-            </form>
-          </Form>
+            </div>
+
+            {errorMessage ? (
+              <p className="text-sm text-destructive" role="alert">
+                {errorMessage}
+              </p>
+            ) : null}
+
+            <Button
+              type="submit"
+              disabled={isSubmitDisabled}
+              className="h-12 w-full rounded-xl bg-cyan-500 text-base font-semibold text-white hover:bg-cyan-600"
+            >
+              {submitting ? "Processing..." : "Confirm Investment"}
+            </Button>
+
+            <p className="text-center text-xs text-muted-foreground">
+              By clicking confirm, you agree to the Terms of Service and
+              Investment Agreement.
+            </p>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

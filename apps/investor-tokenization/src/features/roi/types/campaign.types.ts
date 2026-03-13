@@ -35,4 +35,6 @@ export type Campaign = {
   investedAmount: number;
   currency: string;
   vaultId: string | null;
+  escrowId: string;
+  poolSize: number;
 };
