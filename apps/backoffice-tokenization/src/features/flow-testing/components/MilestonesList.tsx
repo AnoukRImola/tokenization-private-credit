@@ -1,6 +1,7 @@
 import { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import { MilestoneRow } from "./MilestoneRow";
 import { UseFormReturn } from "react-hook-form";
+import { fromStroops } from "@/lib/utils";
 
 interface MilestonesListProps {
   milestones: MultiReleaseMilestone[];
@@ -44,7 +45,7 @@ export function MilestonesList({
       {milestones.map((milestone, index) => {
         const isApproved = milestone.flags?.approved === true;
         const isReleased = milestone.flags?.released === true;
-        const milestoneAmount = Number(milestone.amount || 0);
+        const milestoneAmount = fromStroops(milestone.amount || 0);
         const insufficientFunds = escrowBalance < milestoneAmount;
 
         return (
