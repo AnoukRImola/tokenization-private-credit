@@ -5,10 +5,6 @@ export class AvailabilityForExchangeDto {
   @IsNotEmpty()
   contractId: string;
 
-  @IsString()
-  @IsNotEmpty()
-  admin: string;
-
   @IsBoolean()
   @IsNotEmpty()
   enabled: boolean;

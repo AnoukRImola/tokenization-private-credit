@@ -3,11 +3,19 @@ import { IsString, IsNotEmpty } from 'class-validator';
 export class DeployParticipationTokenDto {
   @IsString()
   @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  symbol: string;
+
+  @IsString()
+  @IsNotEmpty()
   escrowContractId: string;
 
   @IsString()
   @IsNotEmpty()
-  tokenContractId: string;
+  mintAuthority: string;
 
   @IsString()
   @IsNotEmpty()

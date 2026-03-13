@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
-import { Progress } from "@tokenization/ui/progress";
+import { CampaignCard as SharedCampaignCard } from "@tokenization/ui/campaign-card";
 import { cn } from "@tokenization/shared/lib/utils";
 import { Landmark } from "lucide-react";
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
@@ -44,15 +44,10 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
   const progress = campaign.poolSize > 0 ? Math.min(100, (assigned / campaign.poolSize) * 100) : 0;
 
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-4 rounded-xl border border-border bg-card p-5",
-        "shadow-card hover:shadow-hover",
-        "transition-shadow duration-200"
-      )}
-    >
-      {/* Top row: status + action */}
-      <div className="flex items-center justify-between">
+    <SharedCampaignCard
+      title={`#${id.slice(0, 3).toUpperCase()} ${title}`}
+      description={description}
+      statusBadge={
         <Badge
           variant="outline"
           className={cn("text-xs font-semibold uppercase tracking-wide", statusCfg.className)}
