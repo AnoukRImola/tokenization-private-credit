@@ -4,7 +4,6 @@ use soroban_sdk::{contractevent, Address, Env};
 #[derive(Clone, Debug)]
 pub struct BuyEvent {
     pub payer: Address,
-    pub beneficiary: Address,
     pub amount: i128,
     pub usdc: Address,
 }
