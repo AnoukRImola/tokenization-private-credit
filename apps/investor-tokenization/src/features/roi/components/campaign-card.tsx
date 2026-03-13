@@ -6,7 +6,13 @@ import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
 import { CampaignCard as SharedCampaignCard } from "@tokenization/ui/campaign-card";
 import { cn } from "@tokenization/shared/lib/utils";
-import { Banknote, CheckCircle, Circle, ExternalLink, FileText } from "lucide-react";
+import {
+  Banknote,
+  CheckCircle,
+  Circle,
+  ExternalLink,
+  FileText,
+} from "lucide-react";
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "../types/campaign.types";
@@ -25,14 +31,24 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
 
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
 
-  const { data: escrowData } = useQuery({
+  type EscrowFromIndexer = {
+    milestones?: MultiReleaseMilestone[];
+    [key: string]: unknown;
+  };
+
+  const { data: escrowData } = useQuery<EscrowFromIndexer | null>({
     queryKey: ["escrow", escrowId],
-    queryFn: async () => {
+    queryFn: async (): Promise<EscrowFromIndexer | null> => {
       const data = (await getEscrowByContractIds({
         contractIds: [escrowId],
         validateOnChain: true,
-      })) as { [key: string]: unknown }[] | undefined;
-      return data?.[0] ?? null;
+      })) as unknown;
+
+      if (!Array.isArray(data) || data.length === 0) {
+        return null;
+      }
+
+      return data[0] as EscrowFromIndexer;
     },
     enabled: !!escrowId,
     staleTime: 1000 * 60 * 5,
