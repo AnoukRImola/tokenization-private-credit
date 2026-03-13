@@ -38,6 +38,17 @@ export async function updateCampaignStatus(
   return data;
 }
 
+export async function updateCampaignStatusByVaultId(
+  vaultId: string,
+  status: string,
+): Promise<unknown> {
+  const { data } = await httpClient.patch(
+    `/campaigns/by-vault/${vaultId}/status`,
+    { status },
+  );
+  return data;
+}
+
 export async function createCampaign(params: {
   name: string;
   description: string;

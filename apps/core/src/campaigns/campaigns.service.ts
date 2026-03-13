@@ -14,7 +14,11 @@ const ALLOWED_TRANSITIONS: Record<CampaignStatus, CampaignStatus[]> = {
   [CampaignStatus.FUNDRAISING]: [CampaignStatus.ACTIVE, CampaignStatus.PAUSED],
   [CampaignStatus.ACTIVE]: [CampaignStatus.REPAYMENT, CampaignStatus.PAUSED],
   [CampaignStatus.REPAYMENT]: [CampaignStatus.CLAIMABLE, CampaignStatus.PAUSED],
-  [CampaignStatus.CLAIMABLE]: [CampaignStatus.CLOSED, CampaignStatus.PAUSED],
+  [CampaignStatus.CLAIMABLE]: [
+    CampaignStatus.CLOSED,
+    CampaignStatus.PAUSED,
+    CampaignStatus.FUNDRAISING,
+  ],
   [CampaignStatus.CLOSED]: [],
   [CampaignStatus.PAUSED]: [],
 };
@@ -90,6 +94,27 @@ export class CampaignsService {
       where: { id },
       data,
     });
+  }
+
+  async findOneByVaultId(vaultId: string) {
+    const campaign = await this.prisma.campaign.findFirst({
+      where: { vaultId },
+      include: { investments: true },
+    });
+    if (!campaign) {
+      throw new NotFoundException(
+        `Campaign with vaultId ${vaultId} not found`,
+      );
+    }
+    return campaign;
+  }
+
+  async updateStatusByVaultId(
+    vaultId: string,
+    dto: UpdateCampaignStatusDto,
+  ) {
+    const campaign = await this.findOneByVaultId(vaultId);
+    return this.updateStatus(campaign.id, dto);
   }
 
   private validateStatusTransition(
