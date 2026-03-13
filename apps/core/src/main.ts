@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
@@ -16,5 +18,6 @@ async function bootstrap() {
 
   app.useGlobalGuards(new ApiKeyGuard());
   await app.listen(process.env.PORT ?? 4000);
+  console.log(`Core API is running on port ${process.env.PORT ?? 4000}`);
 }
 bootstrap();

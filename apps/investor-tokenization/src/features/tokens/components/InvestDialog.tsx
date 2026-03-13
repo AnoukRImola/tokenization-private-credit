@@ -5,11 +5,8 @@ import { useForm } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogTrigger,
-  DialogClose,
 } from "@tokenization/ui/dialog";
 import {
   Form,
@@ -30,16 +27,10 @@ import { SendTransactionService } from "@/lib/sendTransactionService";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { useSelectedEscrow } from "@/features/tokens/context/SelectedEscrowContext";
-import { InvestmentService } from "@/features/investments/services/investment.service";
-import { Card } from "@tokenization/ui/card";
-import { cn } from "@/lib/utils";
+import { createInvestment } from "@/features/investments/services/investment.service";
 import { MultiReleaseMilestone } from "@trustless-work/escrow";
-import { BalanceProgressBar } from "@tokenization/tw-blocks-shared/src/escrows/indicators/balance-progress/bar/BalanceProgress";
-import { formatAddress } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
-import { CircleCheckBig } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { Button as ShadButton } from "@tokenization/ui/button";
-import Link from "next/link";
+import { toast } from "sonner";
 
 type InvestFormValues = {
   amount: number;
@@ -59,10 +50,6 @@ export function InvestDialog({
   const { walletAddress } = useWalletContext();
   const [open, setOpen] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
-  const [successMessage, setSuccessMessage] = React.useState<string | null>(
-    null
-  );
-  const [txHash, setTxHash] = React.useState<string | null>(null);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const selected = useSelectedEscrow();
   const queryClient = useQueryClient();
@@ -74,7 +61,6 @@ export function InvestDialog({
 
   const onSubmit = async (values: InvestFormValues) => {
     setErrorMessage(null);
-    setSuccessMessage(null);
     if (!walletAddress) {
       setErrorMessage("Please connect your wallet to continue.");
       return;
@@ -125,7 +111,20 @@ export function InvestDialog({
         );
       }
 
-      setTxHash(submitResponse.hash ?? null);
+      if (selected.campaignId && submitResponse.hash) {
+        try {
+          await createInvestment({
+            campaignId: selected.campaignId,
+            investorAddress: walletAddress,
+            usdcAmount: values.amount,
+            tokenAmount: values.amount,
+            txHash: submitResponse.hash,
+          });
+        } catch (dbError) {
+          console.error("Failed to save investment to database:", dbError);
+        }
+      }
+
       // Refresh the escrow balance using TanStack Query
       const balanceQueryKey = ["escrows", [selected.escrowId]] as const;
       const singleEscrowKey = ["escrow", selected.escrowId] as const;
@@ -142,8 +141,9 @@ export function InvestDialog({
       await queryClient.invalidateQueries({ queryKey: ["escrows-by-ids"] });
       await queryClient.refetchQueries({ queryKey: ["escrows-by-ids"] });
 
-      setSuccessMessage("Your investment transaction was sent successfully.");
+      toast.success("Investment completed successfully.");
       form.reset({ amount: 0 });
+      setOpen(false);
     } catch (err) {
       let message =
         err instanceof Error
@@ -199,97 +199,9 @@ export function InvestDialog({
           {triggerLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent
-        className={`${successMessage ? "sm:max-w-4xl" : "sm:max-w-lg"} max-h-[80vh] overflow-y-auto`}
-      >
-        {successMessage ? (
-          <div className="w-full overflow-hidden p-4 md:p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 p-4 md:p-6">
-              {/* Left Column: Image */}
-              <div className="flex items-center justify-center">
-                {selected.imageSrc ? (
-                  <img
-                    className="max-h-80 w-auto transition duration-300 object-cover"
-                    src={selected.imageSrc as string}
-                    loading="lazy"
-                    decoding="async"
-                    alt={
-                      selected.escrow?.title || "Background of a beautiful view"
-                    }
-                  />
-                ) : (
-                  <div className="w-full h-48 md:h-64 rounded-lg bg-muted flex items-center justify-center border border-border">
-                    <span className="text-muted-foreground text-sm">
-                      No image
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column: Information */}
-              <div className="flex flex-col justify-center space-y-4">
-                <h2 className="flex items-center gap-2 text-xl md:text-2xl font-bold text-foreground">
-                  <CircleCheckBig className="w-6 h-6 md:w-10 md:h-10 text-green-600 shrink-0" />{" "}
-                  Investment Successful!
-                </h2>
-                <p className="text-sm md:text-base text-muted-foreground line-clamp-3">
-                  Your investment transaction was sent successfully.
-                </p>
-
-                <div className="pt-2">
-                  <Link
-                    href={`https://stellar.expert/explorer/testnet${txHash ? `/tx/${txHash}` : ""}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <ShadButton variant="outline" size="sm">
-                      View Transaction
-                    </ShadButton>
-                  </Link>
-                </div>
-
-                {/* Title */}
-                <div>
-                  <h3 className="text-xl md:text-2xl font-bold text-foreground line-clamp-2">
-                    {selected.escrow?.title || "No title"}
-                  </h3>
-                </div>
-
-                {/* Description - Truncated */}
-                {selected.escrow?.description && (
-                  <div>
-                    <p className="text-sm md:text-base text-muted-foreground line-clamp-3">
-                      {selected.escrow?.description}
-                    </p>
-                  </div>
-                )}
-
-                {/* Amount and Balance */}
-                <BalanceProgressBar
-                  contractId={selected.escrowId ?? ""}
-                  target={totalAmount ?? 0}
-                  currency={selected.escrow?.trustline?.symbol ?? "USDC"}
-                />
-
-                {/* Metadata */}
-                <div className="text-xs md:text-sm text-muted-foreground pt-2 border-t border-border">
-                  <p>
-                    <span className="font-bold">ID:</span>{" "}
-                    {formatAddress(selected.escrowId)}
-                  </p>
-
-                  {selected.tokenSaleContractId && (
-                    <p>
-                      <span className="font-bold">Contract Sale:</span>{" "}
-                      {formatAddress(selected.tokenSaleContractId)}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <Form {...form}>
+      <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogTitle className="sr-only">Invest</DialogTitle>
+        <Form {...form}>
             <form
               className="space-y-6"
               onSubmit={form.handleSubmit(onSubmit)}
@@ -415,7 +327,6 @@ export function InvestDialog({
               </p>
             </form>
           </Form>
-        )}
       </DialogContent>
     </Dialog>
   );

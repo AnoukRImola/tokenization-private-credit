@@ -5,15 +5,10 @@ import { useQuery } from "@tanstack/react-query";
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { GetEscrowsFromIndexerResponse } from "@trustless-work/escrow/types";
 import { ProjectCard } from "./ProjectCard";
+import { fetchCampaigns } from "./services/campaign.service";
+import type { CampaignFromApi, CampaignStatus } from "./types";
 
-const data = [
-  {
-    escrowId: "CCZHTYVLK6R2QMIFBTEN65ZVCSFBD3L5TXYCZJT5WTXE63ABYXBBCSEB",
-    tokenSale: "CC2AGB3AW5IITDIPEZGVX6XT5RTDIVINRZL7F6KZPIHEWN2GRXL5CRCT",
-    tokenFactory: "CDJTII2GR2FY6Q4NDJGZI7NW2SHQ7GR5Y2H7B7Q253PTZZAZZ25TFYYU",
-    src: "/escrows/car.png",
-  },
-];
+const HIDDEN_STATUSES: CampaignStatus[] = ["DRAFT", "PAUSED"];
 
 interface ProjectListProps {
   search?: string;
@@ -22,9 +17,23 @@ interface ProjectListProps {
 
 export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) => {
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
-  const escrowIds = data.map((d) => d.escrowId);
 
-  const { data: escrowsList, isLoading } = useQuery({
+  const { data: campaigns = [], isLoading: isCampaignsLoading } = useQuery({
+    queryKey: ["campaigns"],
+    queryFn: fetchCampaigns,
+  });
+
+  const visibleCampaigns = useMemo(
+    () => campaigns.filter((c) => !HIDDEN_STATUSES.includes(c.status)),
+    [campaigns],
+  );
+
+  const escrowIds = useMemo(
+    () => visibleCampaigns.map((c) => c.escrowId).filter(Boolean),
+    [visibleCampaigns],
+  );
+
+  const { data: escrowsList, isLoading: isEscrowsLoading } = useQuery({
     queryKey: ["escrows-by-ids", escrowIds],
     queryFn: async () => {
       const result = await getEscrowByContractIds({
@@ -41,36 +50,35 @@ export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) =
     enabled: escrowIds.length > 0,
   });
 
-  const escrowsById =
-    escrowsList && Array.isArray(escrowsList)
-      ? escrowsList.reduce(
-          (acc, item, idx) => {
-            const key =
-              (item as { contractId?: string })?.contractId ?? escrowIds[idx];
-            if (key) acc[key] = item;
-            return acc;
-          },
-          {} as Record<string, GetEscrowsFromIndexerResponse>
-        )
-      : {};
+  const escrowsById = useMemo(() => {
+    if (!escrowsList || !Array.isArray(escrowsList)) return {};
+    return escrowsList.reduce(
+      (acc, item, idx) => {
+        const key =
+          (item as { contractId?: string })?.contractId ?? escrowIds[idx];
+        if (key) acc[key] = item;
+        return acc;
+      },
+      {} as Record<string, GetEscrowsFromIndexerResponse>,
+    );
+  }, [escrowsList, escrowIds]);
 
-  const filteredData = useMemo(() => {
-    return data.filter((item) => {
-      const escrow = escrowsById[item.escrowId];
+  const filteredCampaigns = useMemo(() => {
+    return visibleCampaigns.filter((campaign) => {
       if (search) {
         const q = search.toLowerCase();
-        const title = (escrow?.title ?? "").toLowerCase();
-        const desc = (escrow?.description ?? "").toLowerCase();
-        if (!title.includes(q) && !desc.includes(q)) return false;
+        const name = (campaign.name ?? "").toLowerCase();
+        const desc = (campaign.description ?? "").toLowerCase();
+        if (!name.includes(q) && !desc.includes(q)) return false;
       }
-      if (filter === "READY") return escrow?.isActive === true;
-      if (filter === "PENDING") return !escrow?.isActive;
-      if (filter === "CLOSED") return false;
+      if (filter !== "all" && campaign.status !== filter) return false;
       return true;
     });
-  }, [search, filter, escrowsById]);
+  }, [search, filter, visibleCampaigns]);
 
-  if (!isLoading && filteredData.length === 0) {
+  const isLoading = isCampaignsLoading || isEscrowsLoading;
+
+  if (!isLoading && filteredCampaigns.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-text-muted">
         <p className="text-sm">No campaigns available.</p>
@@ -80,20 +88,22 @@ export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) =
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-      {filteredData.map((item) => {
-        const escrow = escrowsById[item.escrowId];
-        return (
-          <ProjectCard
-            key={item.escrowId}
-            escrowId={item.escrowId}
-            tokenSale={item.tokenSale}
-            tokenFactory={item.tokenFactory}
-            imageSrc={item.src}
-            escrow={escrow}
-            isLoading={isLoading}
-          />
-        );
-      })}
+      {isCampaignsLoading
+        ? Array.from({ length: 4 }).map((_, i) => (
+            <ProjectCard
+              key={`skeleton-${i}`}
+              campaign={{} as CampaignFromApi}
+              isLoading
+            />
+          ))
+        : filteredCampaigns.map((campaign) => (
+            <ProjectCard
+              key={campaign.id}
+              campaign={campaign}
+              escrow={escrowsById[campaign.escrowId]}
+              isLoading={isEscrowsLoading}
+            />
+          ))}
     </div>
   );
 };
