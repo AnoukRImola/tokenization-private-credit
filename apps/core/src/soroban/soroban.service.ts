@@ -6,12 +6,14 @@ import { TOKEN_SALE_ERRORS, VAULT_ERRORS } from './contract-errors.map';
 @Injectable()
 export class SorobanService {
   private readonly rpcUrl: string;
+  private readonly rpcServer: rpc.Server;
   private readonly networkPassphrase: string;
   private readonly contractErrorMaps: Map<string, Record<number, { name: string; message: string }>>;
   private readonly logger = new Logger(SorobanService.name);
 
   constructor() {
     this.rpcUrl = process.env.SOROBAN_RPC_URL!;
+    this.rpcServer = new rpc.Server(this.rpcUrl, { allowHttp: true });
     this.networkPassphrase = Networks.TESTNET;
     this.contractErrorMaps = new Map([
       [process.env.TOKEN_SALE_CONTRACT_ID!, TOKEN_SALE_ERRORS],
@@ -54,6 +56,11 @@ export class SorobanService {
     this.assertSimulationSuccess(tx.simulation, contractId);
 
     return tx.toXDR();
+  }
+
+  async getLatestLedgerSequence(): Promise<number> {
+    const ledger = await this.rpcServer.getLatestLedger();
+    return ledger.sequence;
   }
 
   async readContractState(

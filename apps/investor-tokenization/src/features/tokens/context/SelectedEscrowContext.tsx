@@ -7,6 +7,7 @@ export type SelectedEscrowValue = {
   escrow: Escrow | undefined;
   escrowId: string;
   tokenSaleContractId?: string;
+  tokenFactoryId?: string;
   imageSrc?: string;
   campaignId?: string;
 };

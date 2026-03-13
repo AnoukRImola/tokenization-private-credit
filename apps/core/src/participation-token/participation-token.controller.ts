@@ -3,6 +3,7 @@ import { ParticipationTokenService } from './participation-token.service';
 import { MintDto } from './dto/mint.dto';
 import { SetAdminDto } from './dto/set-admin.dto';
 import { ApproveDto } from './dto/approve.dto';
+import { ApproveForTrustlineDto } from './dto/approve-for-trustline.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { TransferFromDto } from './dto/transfer-from.dto';
 import { BurnDto } from './dto/burn.dto';
@@ -29,6 +30,13 @@ export class ParticipationTokenController {
   @Post('approve')
   async approve(@Body() dto: ApproveDto) {
     const unsignedXdr = await this.participationTokenService.approve(dto);
+    return { unsignedXdr };
+  }
+
+  @Post('approve-for-trustline')
+  async approveForTrustline(@Body() dto: ApproveForTrustlineDto) {
+    const unsignedXdr =
+      await this.participationTokenService.approveForTrustline(dto);
     return { unsignedXdr };
   }
 

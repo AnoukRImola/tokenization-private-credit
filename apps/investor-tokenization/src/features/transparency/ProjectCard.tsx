@@ -31,6 +31,16 @@ function getTotalLoans(escrow: Escrow | undefined): number {
   return getVisibleMilestones(escrow).length;
 }
 
+function getLoansCompleted(escrow: Escrow | undefined): number {
+  return getVisibleMilestones(escrow).filter((m) => m.status === "Approved").length;
+}
+
+function getProgress(escrow: Escrow | undefined): number {
+  const total = getTotalLoans(escrow);
+  if (total === 0) return 0;
+  return Math.min((getLoansCompleted(escrow) / total) * 100, 100);
+}
+
 function LoadingSkeleton() {
   return (
     <div
@@ -58,7 +68,9 @@ export const ProjectCard = ({
   escrow,
   isLoading = false,
 }: ProjectCardProps) => {
-  const { name, description, status, escrowId, tokenSaleId } = campaign;
+  const { name, description, status, escrowId, tokenSaleId, tokenFactoryId } =
+    campaign;
+  const progress = getProgress(escrow);
   const totalLoans = getTotalLoans(escrow);
   const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
   const escrowExplorerUrl = `https://stellar.expert/explorer/testnet/contract/${escrowId}`;
@@ -103,6 +115,7 @@ export const ProjectCard = ({
               escrow,
               escrowId,
               tokenSaleContractId: tokenSaleId,
+              tokenFactoryId: tokenFactoryId ?? undefined,
               campaignId: campaign.id,
             }}
           >
