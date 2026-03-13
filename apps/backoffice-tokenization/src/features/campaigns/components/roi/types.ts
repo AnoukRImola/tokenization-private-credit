@@ -12,7 +12,6 @@ export interface RoiTableProps {
 
 export interface RoiTableRowProps {
   campaign: Campaign;
-  balance: number;
   onAddFunds: (campaign: Campaign) => void;
 }
 
