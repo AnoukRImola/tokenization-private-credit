@@ -41,7 +41,7 @@ const footerItems: AppSidebarFooterItem[] = [
   {
     label: "Documentation",
     icon: BookOpen,
-    href: "https://docs.example.com",
+    href: "https://interactuar.gitbook.io/interactuar-x-trustless/",
     tooltip: "View documentation",
   },
 ];
