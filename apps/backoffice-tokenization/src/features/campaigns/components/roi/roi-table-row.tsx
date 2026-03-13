@@ -11,13 +11,15 @@ import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
 import { formatCurrency } from "@/lib/utils";
 import { getVaultIsEnabled } from "@/features/campaigns/services/campaigns.api";
+import { useVaultUsdcBalance } from "@/features/campaigns/hooks/useVaultUsdcBalance";
 import { ToggleVaultButton } from "@/features/campaigns/components/roi/ToggleVaultButton";
 import type { RoiTableRowProps } from "./types";
 
-export function RoiTableRow({ campaign, balance, onAddFunds }: RoiTableRowProps) {
+export function RoiTableRow({ campaign, onAddFunds }: RoiTableRowProps) {
   const statusCfg = CAMPAIGN_STATUS_CONFIG[campaign.status];
   const { walletAddress } = useWalletContext();
   const [vaultEnabled, setVaultEnabled] = useState<boolean | null>(null);
+  const { balance } = useVaultUsdcBalance(campaign.vaultId);
 
   useEffect(() => {
     if (!campaign.vaultId || !walletAddress) return;
@@ -43,7 +45,7 @@ export function RoiTableRow({ campaign, balance, onAddFunds }: RoiTableRowProps)
 
       <TableCell>
         <span className="text-sm font-semibold text-foreground">
-          ${formatCurrency(balance / 10_000_000, 2)}
+          ${formatCurrency(Number(balance) / 10_000_000, 2)}
         </span>
       </TableCell>
 
