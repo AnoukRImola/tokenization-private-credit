@@ -70,11 +70,6 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           <span className="text-xs font-bold text-foreground">
             USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
           </span>
-          {campaign.vaultId ? (
-            <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[280px]" title={campaign.vaultId}>
-              Vault: {campaign.vaultId}
-            </span>
-          ) : null}
         </div>
       }
       progress={{ label: "Dinero recaudado", value: progressValue }}
