@@ -2,7 +2,7 @@
 
 import { StatItem } from "@/components/shared/stat-item";
 import { RoiTable } from "@/features/campaigns/components/roi/roi-table";
-import { FundRoiDialog } from "@/features/flow-roi/components/FundRoiDialog";
+import { FundRoiDialog } from "@/features/campaigns/components/roi/FundRoiDialog";
 import { useRoi } from "@/features/campaigns/hooks/use-roi";
 import { useCampaigns } from "@/features/campaigns/hooks/use-campaigns";
 

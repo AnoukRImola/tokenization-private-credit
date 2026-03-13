@@ -10,8 +10,8 @@ import { ArrowUpCircle, Landmark } from "lucide-react";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
 import { formatCurrency } from "@/lib/utils";
-import { getVaultIsEnabled } from "@/features/flow-roi/services/roi.service";
-import { ToggleVaultButton } from "@/features/flow-roi/components/ToggleVaultButton";
+import { getVaultIsEnabled } from "@/features/campaigns/services/campaigns.api";
+import { ToggleVaultButton } from "@/features/campaigns/components/roi/ToggleVaultButton";
 import type { RoiTableRowProps } from "./types";
 
 export function RoiTableRow({ campaign, balance, onAddFunds }: RoiTableRowProps) {
