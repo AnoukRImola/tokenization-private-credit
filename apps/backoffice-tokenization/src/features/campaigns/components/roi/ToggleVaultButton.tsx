@@ -2,7 +2,7 @@
 
 import { Button } from "@tokenization/ui/button";
 import { Loader2, Power } from "lucide-react";
-import { useToggleVault } from "../hooks/useToggleVault";
+import { useToggleVault } from "@/features/campaigns/hooks/useToggleVault";
 import { toast } from "sonner";
 
 interface ToggleVaultButtonProps {
@@ -15,17 +15,18 @@ interface ToggleVaultButtonProps {
 export function ToggleVaultButton({
   vaultId,
   currentlyEnabled,
-  campaignId,
   onToggled,
 }: ToggleVaultButtonProps) {
+  const nextState = !currentlyEnabled;
+
   const { execute, isSubmitting, error } = useToggleVault({
-    onSuccess: (newEnabled) => {
-      toast.success(newEnabled ? "Vault enabled" : "Vault disabled");
-      onToggled(newEnabled);
+    onSuccess: () => {
+      toast.success(
+        currentlyEnabled ? "Vault disabled" : "Vault enabled",
+      );
+      onToggled(nextState);
     },
   });
-
-  const nextState = !currentlyEnabled;
 
   return (
     <>
@@ -34,7 +35,7 @@ export function ToggleVaultButton({
         variant={currentlyEnabled ? "destructive" : "outline"}
         className="cursor-pointer h-8"
         disabled={isSubmitting || currentlyEnabled === null}
-        onClick={() => execute(vaultId, nextState, campaignId)}
+        onClick={() => execute(vaultId, nextState)}
       >
         {isSubmitting ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />

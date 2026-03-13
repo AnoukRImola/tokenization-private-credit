@@ -3,12 +3,11 @@
 import { useState } from "react";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
-import { submitAndExtractAddress } from "@/features/flow-testing/services/soroban.service";
-import { enableVault } from "../services/roi.service";
-import { updateCampaignStatus } from "@/features/campaigns/services/campaigns.api";
+import { submitAndExtractAddress } from "@/features/campaigns/services/soroban.service";
+import { enableVault } from "@/features/campaigns/services/campaigns.api";
 
 interface UseToggleVaultParams {
-  onSuccess?: (newEnabled: boolean) => void;
+  onSuccess?: () => void;
 }
 
 export function useToggleVault({ onSuccess }: UseToggleVaultParams = {}) {
@@ -16,7 +15,7 @@ export function useToggleVault({ onSuccess }: UseToggleVaultParams = {}) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const execute = async (vaultContractId: string, enabled: boolean, campaignId?: string) => {
+  const execute = async (vaultContractId: string, enabled: boolean) => {
     if (!walletAddress) {
       setError("Wallet not connected");
       return;
@@ -40,11 +39,7 @@ export function useToggleVault({ onSuccess }: UseToggleVaultParams = {}) {
 
       await submitAndExtractAddress(signedXdr);
 
-      if (enabled && campaignId) {
-        await updateCampaignStatus(campaignId, "CLAIMABLE").catch(() => null);
-      }
-
-      onSuccess?.(enabled);
+      onSuccess?.();
     } catch (e) {
       const message = e instanceof Error ? e.message : "Unexpected error";
       setError(message);

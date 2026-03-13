@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
-import { submitAndExtractAddress } from "@/features/flow-testing/services/soroban.service";
-import { buildUsdcTransferXdr } from "../services/transfer.service";
+import { submitAndExtractAddress } from "@/features/campaigns/services/soroban.service";
+import { buildUsdcTransferXdr } from "@/features/campaigns/services/transfer.service";
 
 interface UseFundRoiParams {
   onSuccess?: () => void;

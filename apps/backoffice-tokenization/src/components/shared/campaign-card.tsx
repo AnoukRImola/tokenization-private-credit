@@ -11,7 +11,7 @@ import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, fromStroops } from "@/lib/utils";
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -39,10 +39,9 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
     staleTime: 1000 * 60 * 5,
   });
 
-  // const milestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
-  // const assigned = milestones.reduce((sum, m) => sum + Number(m.amount ?? 0), 0);
-  const raised = escrowData?.balance ?? 0;
-  const progressValue = campaign.poolSize > 0 ? Math.min(100, (raised / campaign.poolSize) * 100) : 0;
+  const milestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
+  const assigned = milestones.reduce((sum, m) => sum + fromStroops(m.amount ?? 0), 0);
+  const progressValue = campaign.poolSize > 0 ? Math.min(100, (assigned / campaign.poolSize) * 100) : 0;
 
   return (
     <SharedCampaignCard
@@ -67,9 +66,16 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
         ) : undefined
       }
       footer={
-        <span className="text-xs font-bold text-foreground">
-          USDC {formatCurrency(raised)} / USDC {formatCurrency(campaign.poolSize)}
-        </span>
+        <div className="flex flex-col gap-1">
+          <span className="text-xs font-bold text-foreground">
+            USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
+          </span>
+          {campaign.vaultId ? (
+            <span className="text-[10px] text-muted-foreground font-mono truncate max-w-[280px]" title={campaign.vaultId}>
+              Vault: {campaign.vaultId}
+            </span>
+          ) : null}
+        </div>
       }
       progress={{ label: "Dinero recaudado", value: progressValue }}
     />
