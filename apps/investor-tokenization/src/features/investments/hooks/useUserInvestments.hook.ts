@@ -10,7 +10,7 @@ export const useUserInvestments = () => {
 
   return useQuery<InvestmentFromApi[]>({
     queryKey: ["user-investments", walletAddress],
-    queryFn: () => fetchMyInvestments(walletAddress),
+    queryFn: () => fetchMyInvestments(walletAddress!),
     enabled: Boolean(walletAddress),
     staleTime: 1000 * 60 * 2,
   });
