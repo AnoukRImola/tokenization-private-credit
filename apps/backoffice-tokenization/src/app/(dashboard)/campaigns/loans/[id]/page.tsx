@@ -12,9 +12,9 @@ export default async function CampaignLoansPage({ params }: Props) {
     <div className="flex flex-col gap-6">
       <SectionTitle
         title="Manejar Préstamos"
-        description={`Administra los hitos y préstamos de la campaña #${id.slice(0, 3).toUpperCase()}.`}
+        description="Administra los hitos y préstamos de la campaña."
       />
-      <ManageLoansView />
+      <ManageLoansView contractId={id} />
     </div>
   );
 }

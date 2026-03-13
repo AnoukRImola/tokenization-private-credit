@@ -1,15 +1,28 @@
-export type CampaignStatus = "active" | "completed" | "pending" | "draft" | "cancelled";
+export type CampaignStatus =
+  | "DRAFT"
+  | "FUNDRAISING"
+  | "ACTIVE"
+  | "REPAYMENT"
+  | "CLAIMABLE"
+  | "CLOSED"
+  | "PAUSED";
 
 export interface Campaign {
   id: string;
-  title: string;
-  description: string;
+  name: string;
+  description: string | null;
   status: CampaignStatus;
-  targetAmount: number;
-  raisedAmount: number;
-  startDate: string;
-  endDate: string;
+  issuerAddress: string;
+  escrowId: string;
+  poolSize: number;
+  loanDuration: number;
+  expectedReturn: number;
+  loanSize: number;
+  vaultId: string | null;
+  tokenSaleId: string | null;
+  tokenFactoryId: string | null;
   createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateCampaignFormValues {

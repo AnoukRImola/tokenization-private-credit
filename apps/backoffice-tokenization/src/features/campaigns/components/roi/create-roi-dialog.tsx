@@ -1,6 +1,5 @@
 "use client";
 
-import type { UseFormReturn } from "react-hook-form";
 import {
   Dialog,
   DialogContent,
@@ -21,15 +20,7 @@ import { Input } from "@tokenization/ui/input";
 import { Button } from "@tokenization/ui/button";
 import { ArrowRight, Info } from "lucide-react";
 import { numericInputKeyDown, parseNumericInput } from "@/lib/numeric-input";
-import type { RoiFormValues } from "@/features/campaigns/hooks/use-roi";
-import type { Campaign } from "@/features/campaigns/types/campaign.types";
-
-interface CreateRoiDialogProps {
-  campaign: Campaign | null;
-  form: UseFormReturn<RoiFormValues>;
-  onClose: () => void;
-  onSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
-}
+import type { CreateRoiDialogProps, RoiFormValues } from "./types";
 
 export function CreateRoiDialog({
   campaign,

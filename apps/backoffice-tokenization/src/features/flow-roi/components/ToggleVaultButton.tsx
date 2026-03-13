@@ -8,20 +8,20 @@ import { toast } from "sonner";
 interface ToggleVaultButtonProps {
   vaultId: string;
   currentlyEnabled: boolean | null;
-  onToggled: () => void;
+  campaignId?: string;
+  onToggled: (newEnabled: boolean) => void;
 }
 
 export function ToggleVaultButton({
   vaultId,
   currentlyEnabled,
+  campaignId,
   onToggled,
 }: ToggleVaultButtonProps) {
   const { execute, isSubmitting, error } = useToggleVault({
-    onSuccess: () => {
-      toast.success(
-        currentlyEnabled ? "Vault disabled" : "Vault enabled",
-      );
-      onToggled();
+    onSuccess: (newEnabled) => {
+      toast.success(newEnabled ? "Vault enabled" : "Vault disabled");
+      onToggled(newEnabled);
     },
   });
 
@@ -34,7 +34,7 @@ export function ToggleVaultButton({
         variant={currentlyEnabled ? "destructive" : "outline"}
         className="cursor-pointer h-8"
         disabled={isSubmitting || currentlyEnabled === null}
-        onClick={() => execute(vaultId, nextState)}
+        onClick={() => execute(vaultId, nextState, campaignId)}
       >
         {isSubmitting ? (
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
