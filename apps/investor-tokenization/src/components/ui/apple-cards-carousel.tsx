@@ -403,6 +403,7 @@ export const Card = ({
                           escrow,
                           escrowId: card.escrowId,
                           tokenSaleContractId: card.tokenSale,
+                          tokenFactoryId: card.tokenFactory,
                           imageSrc: card.src,
                           campaignId: card.campaignId,
                         }}

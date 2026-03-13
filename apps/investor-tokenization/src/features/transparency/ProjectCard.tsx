@@ -68,7 +68,8 @@ export const ProjectCard = ({
   escrow,
   isLoading = false,
 }: ProjectCardProps) => {
-  const { name, description, status, escrowId, tokenSaleId } = campaign;
+  const { name, description, status, escrowId, tokenSaleId, tokenFactoryId } =
+    campaign;
   const progress = getProgress(escrow);
   const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
   const escrowExplorerUrl = `https://stellar.expert/explorer/testnet/contract/${escrowId}`;
@@ -113,6 +114,7 @@ export const ProjectCard = ({
               escrow,
               escrowId,
               tokenSaleContractId: tokenSaleId,
+              tokenFactoryId: tokenFactoryId ?? undefined,
               campaignId: campaign.id,
             }}
           >

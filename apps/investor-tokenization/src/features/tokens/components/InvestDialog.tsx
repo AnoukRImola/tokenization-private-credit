@@ -23,7 +23,15 @@ import {
   TokenService,
   type BuyTokenPayload,
 } from "@/features/tokens/services/token.service";
-import { SendTransactionService } from "@/lib/sendTransactionService";
+import { addToken } from "@stellar/freighter-api";
+
+const SOROBAN_RPC_URL =
+  process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ??
+  "https://soroban-testnet.stellar.org";
+const NETWORK_PASSPHRASE =
+  process.env.NEXT_PUBLIC_STELLAR_NETWORK_PASSPHRASE ??
+  "Test SDF Network ; September 2015";
+
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { useSelectedEscrow } from "@/features/tokens/context/SelectedEscrowContext";
@@ -32,7 +40,6 @@ import { MultiReleaseMilestone } from "@trustless-work/escrow";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { fromStroops } from "@/utils/adjustedAmounts";
-import { httpClient } from "@/lib/httpClient";
 import { Networks, rpc, TransactionBuilder } from "@stellar/stellar-sdk";
 
 type InvestFormValues = {
@@ -57,8 +64,12 @@ export function InvestDialog({
   const { walletAddress } = useWalletContext();
   const [open, setOpen] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
+  const [submitStep, setSubmitStep] = React.useState<
+    "idle" | "trustline" | "buy"
+  >("idle");
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const selected = useSelectedEscrow();
+  const tokenFactoryId = selected.tokenFactoryId;
   const queryClient = useQueryClient();
 
   const form = useForm<InvestFormValues>({
@@ -69,9 +80,7 @@ export function InvestDialog({
   const onSubmit = async (values: InvestFormValues) => {
     setErrorMessage(null);
 
-    const server = new rpc.Server(
-      "https://soroban-testnet.stellar.org",
-    );
+    const server = new rpc.Server(SOROBAN_RPC_URL);
 
     if (!walletAddress) {
       setErrorMessage("Please connect your wallet to continue.");
@@ -91,6 +100,23 @@ export function InvestDialog({
     try {
       const tokenService = new TokenService();
 
+      // Step 1: Add token to Freighter if tokenFactoryId is available
+      if (tokenFactoryId) {
+        setSubmitStep("trustline");
+        const addTokenResult = await addToken({
+          contractId: tokenFactoryId,
+          networkPassphrase: NETWORK_PASSPHRASE,
+        });
+
+        if (addTokenResult.error) {
+          throw new Error(
+            addTokenResult.error ?? "Failed to add token to Freighter.",
+          );
+        }
+      }
+
+      // Step 2: Buy tokens
+      setSubmitStep("buy");
       const payload: BuyTokenPayload = {
         tokenSaleContractId,
         usdcAddress: DEFAULT_USDC_ADDRESS,
@@ -103,7 +129,7 @@ export function InvestDialog({
 
       if (!buyResponse?.success || !buyResponse?.xdr) {
         throw new Error(
-          buyResponse?.message ?? "Failed to build buy transaction."
+          buyResponse?.message ?? "Failed to build buy transaction.",
         );
       }
 
@@ -172,7 +198,15 @@ export function InvestDialog({
       setErrorMessage(message);
     } finally {
       setSubmitting(false);
+      setSubmitStep("idle");
     }
+  };
+
+  const getSubmitButtonText = () => {
+    if (!submitting) return "Confirm Investment";
+    if (submitStep === "trustline") return "Adding token to wallet...";
+    if (submitStep === "buy") return "Completing investment...";
+    return "Processing...";
   };
 
   const totalAmount = React.useMemo(() => {
@@ -327,7 +361,7 @@ export function InvestDialog({
               disabled={isSubmitDisabled}
               className="h-12 w-full rounded-xl bg-cyan-500 text-base font-semibold text-white hover:bg-cyan-600"
             >
-              {submitting ? "Processing..." : "Confirm Investment"}
+              {getSubmitButtonText()}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">
