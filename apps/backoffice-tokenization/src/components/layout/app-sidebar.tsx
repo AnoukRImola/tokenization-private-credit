@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { TrendingUp, Wallet } from "lucide-react";
+import { BookOpen, TrendingUp, Wallet } from "lucide-react";
 import {
   AppSidebar as SharedAppSidebar,
   type AppSidebarNavItem,
+  type AppSidebarFooterItem,
   type AppSidebarLogoConfig,
 } from "@tokenization/ui/app-sidebar";
 import { SidebarWalletButton } from "@tokenization/ui/sidebar-wallet-button";
@@ -36,11 +37,21 @@ const navItems: AppSidebarNavItem[] = [
   },
 ];
 
+const footerItems: AppSidebarFooterItem[] = [
+  {
+    label: "Documentation",
+    icon: BookOpen,
+    href: "https://docs.example.com",
+    tooltip: "View documentation",
+  },
+];
+
 export function AppSidebar() {
   return (
     <SharedAppSidebar
       navItems={navItems}
       logo={logo}
+      footerItems={footerItems}
       footerContent={<SidebarWalletButton />}
     />
   );
