@@ -82,7 +82,7 @@ export function CampaignCard({ campaign, onSeeEscrow }: CampaignCardProps) {
             <span className="text-[10px] font-semibold uppercase tracking-widest text-text-muted">
               Préstamos completados
             </span>
-            <span className="text-xs font-bold text-foreground">{progress}%</span>
+            <span className="p-1 text-xs font-bold text-foreground">{progress}%</span>
           </div>
           <Progress value={progress} className="h-1.5 w-full" />
         </div>

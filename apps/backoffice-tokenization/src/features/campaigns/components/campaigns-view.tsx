@@ -33,7 +33,7 @@ export function CampaignsView() {
   if (isError) {
     return (
       <div className="flex items-center justify-center py-16 text-destructive text-sm">
-        No se pudieron cargar las campañas. Verifique que el servidor esté activo.
+        No se pudieron cargar las campañas.
       </div>
     );
   }
