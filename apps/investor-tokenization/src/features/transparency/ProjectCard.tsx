@@ -137,7 +137,7 @@ export const ProjectCard = ({
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">Pool Size:</span> {formatCurrency(assigned, "USDC")} / {formatCurrency(poolSize, "USDC")}
+            <span className="font-bold">Pool Size:</span> {formatCurrency(Number(assigned), "USDC")} / {formatCurrency(Number(poolSize), "USDC")}
           </span>
         </div>
       }
