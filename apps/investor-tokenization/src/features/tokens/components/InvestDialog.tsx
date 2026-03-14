@@ -364,9 +364,9 @@ export function InvestDialog({
               {getSubmitButtonText()}
             </Button>
 
-            <p className="text-center text-xs text-muted-foreground">
+            {/* <p className="text-center text-xs text-muted-foreground">
               {t("termsAgreement")}
-            </p>
+            </p> */}
           </form>
         </Form>
       </DialogContent>
