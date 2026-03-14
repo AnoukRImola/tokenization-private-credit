@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Dialog,
   DialogContent,
@@ -10,7 +12,8 @@ import { Button } from "@tokenization/ui/button";
 import { type DeployTokenResponse } from "@/features/tokens/services/token.service";
 import { CheckCircle } from "lucide-react";
 import { useCopy } from "@tokenization/tw-blocks-shared/src/helpers/useCopy";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 type TokenizeEscrowSuccessDialogProps = {
   open: boolean;
@@ -22,6 +25,8 @@ export function TokenizeEscrowSuccessDialog(
   props: TokenizeEscrowSuccessDialogProps
 ) {
   const { open, onOpenChange, response } = props;
+  const t = useTranslations("tokens");
+  const tCommon = useTranslations("common");
 
   const { copiedKeyId, copyToClipboard } = useCopy();
 
@@ -31,12 +36,12 @@ export function TokenizeEscrowSuccessDialog(
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-700" />
-            Token Deployment Successful
+            {t("deploySuccess")}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="tokenFactoryAddress">Token Factory Address</Label>
+            <Label htmlFor="tokenFactoryAddress">{t("tokenFactoryAddress")}</Label>
             <div className="flex gap-2">
               <Input
                 id="tokenFactoryAddress"
@@ -51,7 +56,7 @@ export function TokenizeEscrowSuccessDialog(
                   className="cursor-pointer"
                   onClick={() => copyToClipboard(response.tokenFactoryAddress)}
                 >
-                  {copiedKeyId ? "Copied!" : "Copy"}
+                  {copiedKeyId ? t("copied") : t("copy")}
                 </Button>
               ) : null}
             </div>
@@ -63,13 +68,13 @@ export function TokenizeEscrowSuccessDialog(
                   rel="noopener noreferrer"
                   className="hover:underline"
                 >
-                  View Transaction
+                  {tCommon("viewTransaction")}
                 </Link>
               </div>
             ) : null}
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="tokenSaleAddress">Token Sale Address</Label>
+            <Label htmlFor="tokenSaleAddress">{t("tokenSaleAddress")}</Label>
             <div className="flex gap-2">
               <Input
                 id="tokenSaleAddress"
@@ -84,7 +89,7 @@ export function TokenizeEscrowSuccessDialog(
                   className="cursor-pointer"
                   onClick={() => copyToClipboard(response.tokenSaleAddress)}
                 >
-                  {copiedKeyId ? "Copied!" : "Copy"}
+                  {copiedKeyId ? t("copied") : t("copy")}
                 </Button>
               ) : null}
             </div>
@@ -96,7 +101,7 @@ export function TokenizeEscrowSuccessDialog(
                   rel="noopener noreferrer"
                   className="hover:underline"
                 >
-                  View Transaction
+                  {tCommon("viewTransaction")}
                 </Link>
               </div>
             ) : null}

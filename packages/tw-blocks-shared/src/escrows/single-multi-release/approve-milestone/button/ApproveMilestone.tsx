@@ -13,6 +13,7 @@ import {
 } from "@tokenization/tw-blocks-shared/src/handle-errors/handle";
 import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
 import { Loader2 } from "lucide-react";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 type ApproveMilestoneButtonProps = {
   milestoneIndex: number | string;
@@ -21,6 +22,7 @@ type ApproveMilestoneButtonProps = {
 export const ApproveMilestoneButton = ({
   milestoneIndex,
 }: ApproveMilestoneButtonProps) => {
+  const { t } = useSharedTranslation();
   const { approveMilestone } = useEscrowsMutations();
   const { selectedEscrow, updateEscrow } = useEscrowContext();
   const { walletAddress } = useWalletContext();
@@ -93,10 +95,10 @@ export const ApproveMilestoneButton = ({
       {isSubmitting ? (
         <div className="flex items-center">
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="ml-2">Approving...</span>
+          <span className="ml-2">{t("escrow.approve.approving")}</span>
         </div>
       ) : (
-        "Approve Milestone"
+        t("escrow.approve.trigger")
       )}
     </Button>
   );

@@ -28,8 +28,10 @@ import {
   formatCurrency,
   formatTimestamp,
 } from "../../../helpers/format.helper";
+import { useSharedTranslation } from "../../../i18n/TranslationProvider";
 
 export const EscrowsBySignerCards = () => {
+  const { t } = useSharedTranslation();
   const {
     walletAddress,
     data,
@@ -92,10 +94,10 @@ export const EscrowsBySignerCards = () => {
   function getSingleReleaseStatus(
     flags: { disputed?: boolean; resolved?: boolean; released?: boolean } = {}
   ) {
-    if (flags.disputed) return { label: "Disputed", variant: "destructive" };
-    if (flags.resolved) return { label: "Resolved", variant: "outline" };
-    if (flags.released) return { label: "Released", variant: "outline" };
-    return { label: "Working", variant: "outline" };
+    if (flags.disputed) return { label: t("escrow.cards.disputed"), variant: "destructive" };
+    if (flags.resolved) return { label: t("escrow.cards.resolvedTooltip"), variant: "outline" };
+    if (flags.released) return { label: t("escrow.cards.releasedTooltip"), variant: "outline" };
+    return { label: t("escrow.filters.working"), variant: "outline" };
   }
 
   const currentSort = sorting?.[0];
@@ -156,7 +158,7 @@ export const EscrowsBySignerCards = () => {
         <div className="w-full py-2 sm:py-4">
           <div className="mb-2 sm:mb-3 flex items-center justify-end gap-2">
             <span className="hidden sm:block text-xs text-muted-foreground">
-              Sort
+              {t("escrow.cards.sort")}
             </span>
             <Button
               className="cursor-pointer"
@@ -164,7 +166,7 @@ export const EscrowsBySignerCards = () => {
               size="sm"
               onClick={() => setSort("createdAt")}
             >
-              Created {sortField === "createdAt" ? (sortDesc ? "▼" : "▲") : ""}
+              {t("escrow.filters.created")} {sortField === "createdAt" ? (sortDesc ? "▼" : "▲") : ""}
             </Button>
             <Button
               className="cursor-pointer"
@@ -172,7 +174,7 @@ export const EscrowsBySignerCards = () => {
               size="sm"
               onClick={() => setSort("updatedAt")}
             >
-              Updated {sortField === "updatedAt" ? (sortDesc ? "▼" : "▲") : ""}
+              {t("escrow.filters.updated")} {sortField === "updatedAt" ? (sortDesc ? "▼" : "▲") : ""}
             </Button>
             <Button
               className="cursor-pointer"
@@ -180,7 +182,7 @@ export const EscrowsBySignerCards = () => {
               size="sm"
               onClick={() => setSort("amount")}
             >
-              Amount {sortField === "amount" ? (sortDesc ? "▼" : "▲") : ""}
+              {t("escrow.filters.amount")} {sortField === "amount" ? (sortDesc ? "▼" : "▲") : ""}
             </Button>
             <Button
               className="cursor-pointer"
@@ -189,7 +191,7 @@ export const EscrowsBySignerCards = () => {
               onClick={clearSort}
               disabled={!currentSort}
             >
-              Reset
+              {t("escrow.cards.reset")}
             </Button>
           </div>
           <div className="mt-2 sm:mt-4 overflow-x-auto">
@@ -198,11 +200,10 @@ export const EscrowsBySignerCards = () => {
                 <div className="p-6 md:p-8 flex flex-col items-center justify-center text-center">
                   <Wallet className="h-8 w-8 md:h-12 md:w-12 text-primary mb-3" />
                   <h3 className="font-medium text-foreground mb-2">
-                    Connect your wallet
+                    {t("escrow.cards.connectWallet")}
                   </h3>
                   <p className="text-sm text-muted-foreground max-w-sm">
-                    To continue, connect your wallet and authorize the
-                    application.
+                    {t("escrow.cards.connectWalletDesc")}
                   </p>
                 </div>
               </div>
@@ -211,7 +212,7 @@ export const EscrowsBySignerCards = () => {
                 <div className="p-6 md:p-8 flex flex-col items-center justify-center text-center">
                   <Loader2 className="h-6 w-6 md:h-8 md:w-8 animate-spin text-primary mb-3" />
                   <p className="text-sm text-muted-foreground">
-                    Loading escrows…
+                    {t("escrow.cards.loading")}
                   </p>
                 </div>
               </div>
@@ -220,15 +221,14 @@ export const EscrowsBySignerCards = () => {
                 <div className="p-6 md:p-8 flex flex-col items-center justify-center text-center">
                   <AlertTriangle className="h-8 w-8 md:h-10 md:w-10 text-destructive mb-3" />
                   <h3 className="font-medium text-foreground mb-2">
-                    Error loading data
+                    {t("escrow.cards.errorTitle")}
                   </h3>
                   <p className="text-sm text-muted-foreground max-w-sm mb-4">
-                    An error occurred while loading the information. Please try
-                    again.
+                    {t("escrow.cards.errorDesc")}
                   </p>
                   <Button variant="outline" size="sm" onClick={handleRefresh}>
                     <RefreshCw className="h-4 w-4 mr-2" />
-                    Retry
+                    {t("escrow.cards.retry")}
                   </Button>
                 </div>
               </div>
@@ -237,10 +237,10 @@ export const EscrowsBySignerCards = () => {
                 <div className="p-6 md:p-8 flex flex-col items-center justify-center text-center">
                   <FileX className="h-8 w-8 md:h-10 md:w-10 text-muted-foreground/60 mb-3" />
                   <h3 className="font-medium text-foreground mb-2">
-                    No data available
+                    {t("escrow.cards.noDataTitle")}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    No escrows found for the selected filters.
+                    {t("escrow.cards.noDataDesc")}
                   </p>
                 </div>
               </div>
@@ -264,7 +264,7 @@ export const EscrowsBySignerCards = () => {
                             variant={isActive ? "default" : "destructive"}
                             className="shrink-0"
                           >
-                            {isActive ? "Active" : "Inactive"}
+                            {isActive ? t("escrow.filters.active") : t("escrow.filters.inactive")}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
@@ -276,7 +276,7 @@ export const EscrowsBySignerCards = () => {
                         {/* Amount Section */}
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
-                            <span className="text-sm font-medium">Amount</span>
+                            <span className="text-sm font-medium">{t("escrow.filters.amount")}</span>
                             <span className="font-semibold">
                               {escrow.type === "single-release"
                                 ? formatCurrency(
@@ -299,7 +299,7 @@ export const EscrowsBySignerCards = () => {
                           {escrow.balance !== undefined && (
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-muted-foreground">
-                                Balance
+                                {t("escrow.cards.balance")}
                               </span>
                               <span className="font-medium text-green-800 dark:text-green-600">
                                 {formatCurrency(
@@ -312,7 +312,7 @@ export const EscrowsBySignerCards = () => {
 
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">
-                              Platform Fee
+                              {t("escrow.cards.platformFee")}
                             </span>
                             <span className="text-muted-foreground">
                               {escrow.platformFee}%
@@ -328,7 +328,7 @@ export const EscrowsBySignerCards = () => {
                             <div className="flex items-center gap-2">
                               <Goal className="h-4 w-4 text-muted-foreground" />
                               <span className="text-sm font-medium">
-                                Milestones
+                                {t("escrow.cards.milestones")}
                               </span>
                             </div>
                             <ul className="list-disc list-inside flex flex-col gap-1">
@@ -365,7 +365,7 @@ export const EscrowsBySignerCards = () => {
                                                   />
                                                 </TooltipTrigger>
                                                 <TooltipContent>
-                                                  Disputed
+                                                  {t("escrow.cards.disputed")}
                                                 </TooltipContent>
                                               </Tooltip>
                                             )}
@@ -381,7 +381,7 @@ export const EscrowsBySignerCards = () => {
                                                   />
                                                 </TooltipTrigger>
                                                 <TooltipContent>
-                                                  Resolved
+                                                  {t("escrow.cards.resolvedTooltip")}
                                                 </TooltipContent>
                                               </Tooltip>
                                             )}
@@ -397,7 +397,7 @@ export const EscrowsBySignerCards = () => {
                                                   />
                                                 </TooltipTrigger>
                                                 <TooltipContent>
-                                                  Released
+                                                  {t("escrow.cards.releasedTooltip")}
                                                 </TooltipContent>
                                               </Tooltip>
                                             )}
@@ -423,7 +423,7 @@ export const EscrowsBySignerCards = () => {
                                                     />
                                                   </TooltipTrigger>
                                                   <TooltipContent>
-                                                    Pending Release
+                                                    {t("escrow.cards.pendingReleaseTooltip")}
                                                   </TooltipContent>
                                                 </Tooltip>
                                               )}
@@ -435,7 +435,7 @@ export const EscrowsBySignerCards = () => {
 
                               {escrow.milestones.length > 3 && (
                                 <li className="text-xs">
-                                  {escrow.milestones.length - 3} more
+                                  {t("escrow.cards.more", { count: escrow.milestones.length - 3 })}
                                 </li>
                               )}
                             </ul>
@@ -478,7 +478,7 @@ export const EscrowsBySignerCards = () => {
                               !escrow.flags?.resolved &&
                               !escrow.flags?.disputed && (
                                 <Badge variant="outline" className="text-xs">
-                                  Pending Release
+                                  {t("escrow.cards.pendingReleaseTooltip")}
                                 </Badge>
                               )}
 
@@ -487,7 +487,7 @@ export const EscrowsBySignerCards = () => {
                                 escrow.milestones as MultiReleaseMilestone[]
                               ) && (
                                 <Badge variant="outline" className="text-xs">
-                                  Finished
+                                  {t("escrow.cards.finished")}
                                 </Badge>
                               )}
                             {escrow.type === "multi-release" &&
@@ -495,7 +495,7 @@ export const EscrowsBySignerCards = () => {
                                 escrow.milestones as MultiReleaseMilestone[]
                               ) && (
                                 <Badge variant="outline" className="text-xs">
-                                  Working
+                                  {t("escrow.filters.working")}
                                 </Badge>
                               )}
                           </div>
@@ -514,7 +514,7 @@ export const EscrowsBySignerCards = () => {
 
           <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="text-xs sm:text-sm text-muted-foreground">
-              Page {page}
+              {t("escrow.cards.page", { page })}
             </div>
             <div className="flex items-center gap-2 self-end sm:self-auto">
               <Button
@@ -522,7 +522,7 @@ export const EscrowsBySignerCards = () => {
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1 || isFetching}
               >
-                Previous
+                {t("escrow.cards.previous")}
               </Button>
               <Button
                 variant="outline"
@@ -533,7 +533,7 @@ export const EscrowsBySignerCards = () => {
                   ((nextData?.length ?? 0) === 0 && !isFetchingNext)
                 }
               >
-                Next
+                {t("escrow.cards.next")}
               </Button>
             </div>
           </div>

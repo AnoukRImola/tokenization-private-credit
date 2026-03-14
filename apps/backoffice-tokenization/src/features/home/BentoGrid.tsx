@@ -11,8 +11,69 @@ import {
 } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import { ClipboardCopyIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export function BentoGridThirdDemo() {
+  const t = useTranslations("home");
+
+  const items = [
+    {
+      title: t("bentoDeployTitle"),
+      description: (
+        <span className="text-sm">
+          {t("bentoDeployDesc")}
+        </span>
+      ),
+      header: <SkeletonOne />,
+      className: "md:col-span-1",
+      icon: <ClipboardCopyIcon className="h-4 w-4 text-neutral-500" />,
+    },
+    {
+      title: t("bentoApprovalsTitle"),
+      description: (
+        <span className="text-sm">
+          {t("bentoApprovalsDesc")}
+        </span>
+      ),
+      header: <SkeletonTwo />,
+      className: "md:col-span-1",
+      icon: <IconFileBroken className="h-4 w-4 text-neutral-500" />,
+    },
+    {
+      title: t("bentoReleasesTitle"),
+      description: (
+        <span className="text-sm">
+          {t("bentoReleasesDesc")}
+        </span>
+      ),
+      header: <SkeletonThree />,
+      className: "md:col-span-1",
+      icon: <IconSignature className="h-4 w-4 text-neutral-500" />,
+    },
+    {
+      title: t("bentoDisputeTitle"),
+      description: (
+        <span className="text-sm">
+          {t("bentoDisputeDesc")}
+        </span>
+      ),
+      header: <SkeletonFour t={t} />,
+      className: "md:col-span-2",
+      icon: <IconTableColumn className="h-4 w-4 text-neutral-500" />,
+    },
+    {
+      title: t("bentoMonitorTitle"),
+      description: (
+        <span className="text-sm">
+          {t("bentoMonitorDesc")}
+        </span>
+      ),
+      header: <SkeletonFive t={t} />,
+      className: "md:col-span-1",
+      icon: <IconBoxAlignRightFilled className="h-4 w-4 text-neutral-500" />,
+    },
+  ];
+
   return (
     <BentoGrid className="max-w-4xl mx-auto md:auto-rows-[20rem]">
       {items.map((item, i) => (
@@ -160,7 +221,7 @@ const SkeletonThree = () => {
     </motion.div>
   );
 };
-const SkeletonFour = () => {
+const SkeletonFour = ({ t }: { t: (key: string) => string }) => {
   const first = {
     initial: {
       x: 20,
@@ -200,10 +261,10 @@ const SkeletonFour = () => {
           className="rounded-full h-10 w-10"
         />
         <p className="sm:text-sm text-xs text-center font-semibold text-neutral-500 mt-4">
-          Deploy core contracts for each project
+          {t("bentoDeployCards")}
         </p>
         <p className="border border-red-500 bg-red-100 dark:bg-red-900/20 text-red-600 text-xs rounded-full px-2 py-0.5 mt-4">
-          Setup
+          {t("bentoSetup")}
         </p>
       </motion.div>
       <motion.div className="h-full relative z-20 w-1/3 rounded-2xl bg-white p-4 dark:bg-black dark:border-white/[0.1] border border-neutral-200 flex flex-col items-center justify-center">
@@ -215,10 +276,10 @@ const SkeletonFour = () => {
           className="rounded-full h-10 w-10"
         />
         <p className="sm:text-sm text-xs text-center font-semibold text-neutral-500 mt-4">
-          Review and approve project milestones
+          {t("bentoApproveCards")}
         </p>
         <p className="border border-green-500 bg-green-100 dark:bg-green-900/20 text-green-600 text-xs rounded-full px-2 py-0.5 mt-4">
-          Approval
+          {t("bentoApproval")}
         </p>
       </motion.div>
       <motion.div
@@ -233,16 +294,16 @@ const SkeletonFour = () => {
           className="rounded-full h-10 w-10"
         />
         <p className="sm:text-sm text-xs text-center font-semibold text-neutral-500 mt-4">
-          Release escrow funds as milestones are completed
+          {t("bentoReleaseCards")}
         </p>
         <p className="border border-orange-500 bg-orange-100 dark:bg-orange-900/20 text-orange-600 text-xs rounded-full px-2 py-0.5 mt-4">
-          Release
+          {t("bentoRelease")}
         </p>
       </motion.div>
     </motion.div>
   );
 };
-const SkeletonFive = () => {
+const SkeletonFive = ({ t }: { t: (key: string) => string }) => {
   const variants = {
     initial: {
       x: 0,
@@ -286,78 +347,16 @@ const SkeletonFive = () => {
           className="rounded-full h-10 w-10"
         />
         <p className="text-xs text-neutral-500">
-          Manage deployments, configure milestones, and run on-chain releases.
+          {t("bentoManageCards")}
         </p>
       </motion.div>
       <motion.div
         variants={variantsSecond}
         className="flex flex-row rounded-full border border-neutral-100 dark:border-white/[0.2] p-2 items-center justify-end space-x-2 w-3/4 ml-auto bg-white dark:bg-black"
       >
-        <p className="text-xs text-neutral-500">Operations</p>
+        <p className="text-xs text-neutral-500">{t("bentoOperations")}</p>
         <div className="h-6 w-6 rounded-full bg-gradient-to-r from-pink-500 to-violet-500 shrink-0" />
       </motion.div>
     </motion.div>
   );
 };
-const items = [
-  {
-    title: "Deploy Core Contracts",
-    description: (
-      <span className="text-sm">
-        Set up the Escrow, Token Sale, and Participation Token that power the
-        project&apos;s funding flow.
-      </span>
-    ),
-    header: <SkeletonOne />,
-    className: "md:col-span-1",
-    icon: <ClipboardCopyIcon className="h-4 w-4 text-neutral-500" />,
-  },
-  {
-    title: "Milestone Approvals",
-    description: (
-      <span className="text-sm">
-        Review and approve project milestones to authorize on-chain fund
-        releases.
-      </span>
-    ),
-    header: <SkeletonTwo />,
-    className: "md:col-span-1",
-    icon: <IconFileBroken className="h-4 w-4 text-neutral-500" />,
-  },
-  {
-    title: "Escrow Releases",
-    description: (
-      <span className="text-sm">
-        Trigger controlled USDC releases as each milestone is completed and
-        validated.
-      </span>
-    ),
-    header: <SkeletonThree />,
-    className: "md:col-span-1",
-    icon: <IconSignature className="h-4 w-4 text-neutral-500" />,
-  },
-  {
-    title: "Dispute Management",
-    description: (
-      <span className="text-sm">
-        Pause releases, review evidence, and resolve issues when project
-        conditions are not met.
-      </span>
-    ),
-    header: <SkeletonFour />,
-    className: "md:col-span-2",
-    icon: <IconTableColumn className="h-4 w-4 text-neutral-500" />,
-  },
-  {
-    title: "Project & Contract Monitoring",
-    description: (
-      <span className="text-sm">
-        View contract addresses, escrow balances, sale status, and real-time
-        project activity.
-      </span>
-    ),
-    header: <SkeletonFive />,
-    className: "md:col-span-1",
-    icon: <IconBoxAlignRightFilled className="h-4 w-4 text-neutral-500" />,
-  },
-];

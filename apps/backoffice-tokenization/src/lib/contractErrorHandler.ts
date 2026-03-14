@@ -60,14 +60,27 @@ const ERROR_MESSAGES_BY_CONTEXT: Record<
   "token-sale": TOKEN_SALE_ERROR_MESSAGES,
 };
 
+/** Maps contract context to the translation namespace prefix */
+const CONTEXT_TO_TRANSLATION_KEY: Record<string, string> = {
+  vault: "vault",
+  "token-sale": "tokenSale",
+};
+
 /**
- * Extracts and maps contract error codes to user-friendly messages
- * @param error - The raw error from Soroban
+ * Extracts and maps contract error codes to user-friendly messages.
+ *
+ * When a `t` function (from next-intl `useTranslations("contractErrors")`) is
+ * provided, translated messages are returned. Otherwise, the hardcoded English
+ * fallback maps are used.
+ *
+ * @param error   - The raw error from Soroban
  * @param context - Contract context ('vault' | 'token-sale') to select the correct error map
+ * @param t       - Optional translation function scoped to the "contractErrors" namespace
  */
 export function extractContractError(
   error: unknown,
   context?: "vault" | "token-sale",
+  t?: (key: string, values?: Record<string, unknown>) => string,
 ): {
   message: string;
   details: string;
@@ -80,6 +93,28 @@ export function extractContractError(
 
   if (errorCodeMatch) {
     const errorCode = parseInt(errorCodeMatch[1], 10);
+
+    // If a translation function is provided, try translated messages first
+    if (t && context) {
+      const translationKey = CONTEXT_TO_TRANSLATION_KEY[context];
+      if (translationKey) {
+        const key = `${translationKey}.${errorCode}`;
+        try {
+          const translated = t(key);
+          // next-intl returns the key itself when it cannot find a translation
+          if (translated && translated !== key) {
+            return {
+              message: t("title"),
+              details: translated,
+            };
+          }
+        } catch {
+          // fall through to hardcoded map
+        }
+      }
+    }
+
+    // Fallback to hardcoded error maps
     const errorMap = context
       ? ERROR_MESSAGES_BY_CONTEXT[context]
       : undefined;
@@ -87,20 +122,22 @@ export function extractContractError(
 
     if (humanMessage) {
       return {
-        message: "Contract Error",
+        message: t ? t("title") : "Contract Error",
         details: humanMessage,
       };
     }
 
     return {
-      message: "Contract Error",
-      details: `Contract error code ${errorCode}`,
+      message: t ? t("title") : "Contract Error",
+      details: t
+        ? t("unknownCode", { code: errorCode })
+        : `Contract error code ${errorCode}`,
     };
   }
 
   // Generic error response if no specific error code found
   return {
-    message: "Contract Error",
+    message: t ? t("title") : "Contract Error",
     details: errorString,
   };
 }

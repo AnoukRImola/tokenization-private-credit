@@ -1,10 +1,14 @@
 import { toast } from "sonner";
 import { Button } from "@tokenization/ui/button";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 const EXPLORER_BASE = "https://stellar.expert/explorer/testnet";
 
-export function toastSuccessWithTx(message: string, txHash?: string) {
+export function toastSuccessWithTx(
+  message: string,
+  txHash?: string,
+  viewTransactionLabel: string = "View Transaction",
+) {
   const href = txHash ? `${EXPLORER_BASE}/tx/${txHash}` : EXPLORER_BASE;
 
   toast.custom(
@@ -13,7 +17,7 @@ export function toastSuccessWithTx(message: string, txHash?: string) {
         <span className="text-sm">{message}</span>
         <Link href={href} target="_blank" rel="noopener noreferrer">
           <Button variant="outline" size="sm">
-            View Transaction
+            {viewTransactionLabel}
           </Button>
         </Link>
       </div>

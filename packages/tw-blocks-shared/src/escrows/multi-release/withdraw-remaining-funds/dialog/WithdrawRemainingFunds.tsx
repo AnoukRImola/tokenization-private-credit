@@ -20,8 +20,10 @@ import { Loader2, Trash2 } from "lucide-react";
 import { useWithdrawRemainingFunds } from "./useWithdrawRemainingFunds";
 import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
 import { formatCurrency } from "../../../../helpers/format.helper";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 export const WithdrawRemainingFundsDialog = () => {
+  const { t } = useSharedTranslation();
   const [open, setOpen] = React.useState(false);
   const {
     form,
@@ -46,12 +48,12 @@ export const WithdrawRemainingFundsDialog = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" className="cursor-pointer w-full">
-          Withdraw Remaining
+          {t("escrow.withdraw.trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent className="!w-full sm:!max-w-3xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Withdraw Remaining Funds</DialogTitle>
+          <DialogTitle>{t("escrow.withdraw.title")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit}>
@@ -164,10 +166,10 @@ export const WithdrawRemainingFundsDialog = () => {
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="ml-2">Withdrawing...</span>
+                    <span className="ml-2">{t("escrow.withdraw.submitting")}</span>
                   </div>
                 ) : (
-                  "Withdraw"
+                  t("escrow.withdraw.submit")
                 )}
               </Button>
             </div>

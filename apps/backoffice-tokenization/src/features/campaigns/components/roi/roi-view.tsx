@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { RoiTable } from "@/features/campaigns/components/roi/roi-table";
 import { FundRoiDialog } from "@/features/campaigns/components/roi/FundRoiDialog";
 import { UpdateRoiDialog } from "@/features/campaigns/components/roi/UpdateRoiDialog";
@@ -7,6 +8,7 @@ import { useRoi } from "@/features/campaigns/hooks/use-roi";
 import { useCampaigns } from "@/features/campaigns/hooks/use-campaigns";
 
 export function RoiView() {
+  const t = useTranslations("roi");
   const { data: campaigns = [] } = useCampaigns();
   const {
     fundsDialogCampaign,
@@ -25,7 +27,7 @@ export function RoiView() {
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-foreground">
-            Campaña de ROI Activas
+            {t("activeCampaigns")}
           </h3>
         </div>
 

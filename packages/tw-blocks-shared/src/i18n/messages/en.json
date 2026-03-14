@@ -1,0 +1,208 @@
+{
+  "wallet": {
+    "connect": "Connect Wallet",
+    "testnet": "Testnet",
+    "address": "Address",
+    "copied": "Copied",
+    "copy": "Copy",
+    "disconnect": "Disconnect"
+  },
+  "escrow": {
+    "filters": {
+      "title": "Filters",
+      "refresh": "Refresh",
+      "clear": "Clear",
+      "search": "Search",
+      "searchPlaceholder": "Search title...",
+      "engagementId": "Engagement ID",
+      "engagementIdPlaceholder": "Engagement ID",
+      "amountRange": "Amount Range",
+      "min": "Min",
+      "max": "Max",
+      "type": "Type",
+      "selectType": "Select type",
+      "allTypes": "All types",
+      "singleRelease": "Single release",
+      "multiRelease": "Multi release",
+      "status": "Status",
+      "selectStatus": "Select status",
+      "allStatuses": "All statuses",
+      "working": "Working",
+      "pendingRelease": "Pending release",
+      "released": "Released",
+      "resolved": "Resolved",
+      "inDispute": "In dispute",
+      "dateRange": "Date Range",
+      "activeOnchain": "Active / OnChain",
+      "active": "Active",
+      "inactive": "Inactive",
+      "onChain": "OnChain",
+      "sortBy": "Sort By",
+      "orderBy": "Order by",
+      "created": "Created",
+      "updated": "Updated",
+      "amount": "Amount",
+      "direction": "Direction",
+      "descending": "Descending",
+      "ascending": "Ascending"
+    },
+    "cards": {
+      "sort": "Sort",
+      "reset": "Reset",
+      "connectWallet": "Connect your wallet",
+      "connectWalletDesc": "To continue, connect your wallet and authorize the application.",
+      "loading": "Loading escrows…",
+      "errorTitle": "Error loading data",
+      "errorDesc": "An error occurred while loading the information. Please try again.",
+      "retry": "Retry",
+      "noDataTitle": "No data available",
+      "noDataDesc": "No escrows found for the selected filters.",
+      "balance": "Balance",
+      "platformFee": "Platform Fee",
+      "milestones": "Milestones",
+      "more": "{count} more",
+      "page": "Page {page}",
+      "previous": "Previous",
+      "next": "Next",
+      "disputed": "Disputed",
+      "resolvedTooltip": "Resolved",
+      "releasedTooltip": "Released",
+      "pendingReleaseTooltip": "Pending Release",
+      "finished": "Finished"
+    },
+    "details": {
+      "basicInfo": "Basic Information",
+      "noTrustline": "No Trustline",
+      "escrowId": "Escrow ID",
+      "roles": "Roles",
+      "engagementId": "Engagement ID",
+      "noEngagement": "No Engagement",
+      "typeLabel": "Type",
+      "multiRelease": "Multi Release",
+      "singleRelease": "Single Release",
+      "releaseDistribution": "Release Amount Distribution",
+      "totalAmount": "Total Amount",
+      "receiver": "Receiver",
+      "platformFee": "Platform Fee",
+      "trustlessWork": "Trustless Work",
+      "statusLabel": "Status",
+      "inDispute": "In Dispute",
+      "seeDetails": "See Details",
+      "amountLabel": "Amount",
+      "balanceLabel": "Balance"
+    },
+    "entities": {
+      "title": "Entities",
+      "receivers": "Receivers"
+    },
+    "milestoneCard": {
+      "disputed": "Disputed",
+      "released": "Released",
+      "resolved": "Resolved",
+      "approved": "Approved",
+      "evidenceProvided": "Evidence provided",
+      "viewDetails": "View Details"
+    },
+    "milestones": {
+      "title": "Milestones",
+      "noMilestones": "No milestones available"
+    },
+    "successRelease": {
+      "title": "Release Successful",
+      "description": "Funds were distributed successfully to the corresponding parties."
+    },
+    "initialize": {
+      "trigger": "Initialize",
+      "title": "Initialize Escrow",
+      "multiReleaseTitle": "Multi Release Escrow",
+      "multiReleaseDesc": "Fill out the form to initialize a multi release escrow",
+      "autofill": "Autofill",
+      "titleLabel": "Title",
+      "titlePlaceholder": "Escrow title",
+      "engagementLabel": "Engagement",
+      "engagementPlaceholder": "Enter identifier",
+      "trustlineLabel": "Trustline",
+      "selectTrustline": "Select trustline",
+      "platformFeeLabel": "Platform Fee",
+      "platformFeePlaceholder": "Enter platform fee",
+      "approverLabel": "Approver",
+      "approverPlaceholder": "Enter approver address",
+      "serviceProviderLabel": "Service Provider",
+      "serviceProviderPlaceholder": "Enter service provider address",
+      "releaseSignerLabel": "Release Signer",
+      "releaseSignerPlaceholder": "Enter release signer address",
+      "disputeResolverLabel": "Dispute Resolver",
+      "disputeResolverPlaceholder": "Enter dispute resolver address",
+      "platformLabel": "Platform",
+      "platformPlaceholder": "Enter platform address",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Escrow description",
+      "milestonesLabel": "Milestones",
+      "milestoneDescLabel": "Description",
+      "milestoneReceiverLabel": "Receiver",
+      "milestoneAmountLabel": "Amount",
+      "milestoneDescPlaceholder": "Milestone description",
+      "milestoneReceiverPlaceholder": "Enter receiver address",
+      "milestoneAmountPlaceholder": "Enter amount",
+      "addItem": "Add Item",
+      "deploying": "Deploying...",
+      "deploy": "Deploy"
+    },
+    "update": {
+      "trigger": "Update",
+      "title": "Update Escrow",
+      "submitting": "Updating...",
+      "submit": "Update"
+    },
+    "fund": {
+      "trigger": "Fund",
+      "title": "Fund Escrow",
+      "amountLabel": "Amount",
+      "amountPlaceholder": "Enter amount",
+      "submitting": "Funding...",
+      "submit": "Fund"
+    },
+    "release": {
+      "trigger": "Release",
+      "releasing": "Releasing...",
+      "release": "Release"
+    },
+    "dispute": {
+      "trigger": "Dispute",
+      "disputing": "Disputing...",
+      "dispute": "Dispute"
+    },
+    "resolve": {
+      "trigger": "Resolve Dispute",
+      "title": "Resolve Dispute",
+      "receiverPercentLabel": "Receiver Percentage",
+      "receiverPercentPlaceholder": "Enter percentage",
+      "submitting": "Resolving...",
+      "submit": "Resolve"
+    },
+    "approve": {
+      "trigger": "Approve",
+      "approving": "Approving...",
+      "approve": "Approve"
+    },
+    "changeStatus": {
+      "trigger": "Change Status",
+      "title": "Change Milestone Status",
+      "newStatusLabel": "New Status",
+      "selectStatus": "Select status",
+      "submitting": "Updating...",
+      "submit": "Update Status"
+    },
+    "withdraw": {
+      "trigger": "Withdraw Funds",
+      "title": "Withdraw Remaining Funds",
+      "description": "Withdraw the remaining funds from the escrow.",
+      "submitting": "Withdrawing...",
+      "submit": "Withdraw"
+    },
+    "actions": {
+      "title": "Actions",
+      "noActions": "No actions available"
+    }
+  }
+}

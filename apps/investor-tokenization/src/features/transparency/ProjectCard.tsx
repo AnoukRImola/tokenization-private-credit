@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
 import { CampaignCard as SharedCampaignCard } from "@tokenization/ui/campaign-card";
@@ -12,10 +12,10 @@ import type {
 } from "@trustless-work/escrow/types";
 import { InvestDialog } from "@/features/tokens/components/InvestDialog";
 import { SelectedEscrowProvider } from "@/features/tokens/context/SelectedEscrowContext";
-import { CAMPAIGN_STATUS_CONFIG } from "@/features/roi/constants/campaign-status";
+import { getCampaignStatusConfig } from "@/features/roi/constants/campaign-status";
 import type { CampaignFromApi } from "./types";
 import { fromStroops } from "@/utils/adjustedAmounts";
-import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
+import { useTranslations } from "next-intl";
 
 export type ProjectCardProps = {
   campaign: CampaignFromApi;
@@ -69,11 +69,13 @@ export const ProjectCard = ({
   escrow,
   isLoading = false,
 }: ProjectCardProps) => {
+  const t = useTranslations("campaigns");
+  const tCommon = useTranslations("common");
   const { name, description, status, escrowId, tokenSaleId, tokenFactoryId } =
     campaign;
   const progress = getProgress(escrow);
   const totalLoans = getTotalLoans(escrow);
-  const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
+  const statusCfg = getCampaignStatusConfig(t)[status];
   const escrowExplorerUrl = `https://stellar.expert/explorer/testnet/contract/${escrowId}`;
   const milestones = (escrow?.milestones ?? []) as MultiReleaseMilestone[];
   const assigned = milestones.reduce((sum, m) => sum + fromStroops(m.amount ?? 0), 0);
@@ -85,8 +87,8 @@ export const ProjectCard = ({
 
   return (
     <SharedCampaignCard
-      title={`${name}`}
-      description={description || "No description"}
+      title={`#${campaign.id.slice(0, 3).toUpperCase()} ${name}`}
+      description={description || tCommon("noDescription")}
       statusBadge={
         <>
           <div className="flex items-center gap-2">
@@ -122,7 +124,7 @@ export const ProjectCard = ({
           >
             <InvestDialog
               tokenSaleContractId={tokenSaleId}
-              triggerLabel="Invest"
+              triggerLabel={t("invest")}
               expectedReturn={campaign.expectedReturn}
               loanDuration={campaign.loanDuration}
             />
@@ -130,18 +132,18 @@ export const ProjectCard = ({
         ) : (
           <Button size="sm" className="cursor-pointer gap-1.5" disabled>
             <Rocket className="size-3.5" />
-            Invest
+            {t("invest")}
           </Button>
         )
       }
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">Pool Size:</span> {formatCurrency(Number(assigned), "USDC")} / {formatCurrency(Number(poolSize), "USDC")}
+            <span className="font-bold">{t("poolSize")}:</span> USDC {assigned.toLocaleString("en-US", { minimumFractionDigits: 2 })} / USDC {poolSize.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </span>
         </div>
       }
-      stat={{ label: "Loans", value: totalLoans }}
+      stat={{ label: t("loans"), value: totalLoans }}
     >
       {isLoading && !escrow ? (
         <div className="flex flex-col gap-2">
@@ -152,7 +154,7 @@ export const ProjectCard = ({
       ) : milestones.slice(1).length > 0 ? (
         <>
           <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-            Loans
+            {t("loans")}
           </p>
           <ul className="flex flex-col gap-1">
             {milestones.slice(1).map((m, i) => (
@@ -164,14 +166,14 @@ export const ProjectCard = ({
                 ) : (
                   <Circle className="size-3.5 shrink-0" />
                 )}
-                <span className="truncate">{m.description || `Loan ${i + 1}`}</span>
+                <span className="truncate">{m.description || t("loan", { index: i + 1 })}</span>
                 <span className="ml-auto font-medium">{m.amount} USDC</span>
               </li>
             ))}
           </ul>
         </>
       ) : (
-        <p className="text-xs text-muted-foreground">No loans available.</p>
+        <p className="text-xs text-muted-foreground">{t("noLoansAvailable")}</p>
       )}
     </SharedCampaignCard>
   );

@@ -8,8 +8,11 @@ import { Card } from "@tokenization/ui/card";
 import { Button } from "@tokenization/ui/button";
 import { Wallet, TrendingUp, DollarSign } from "lucide-react";
 import { useWallet } from "@tokenization/tw-blocks-shared/src/wallet-kit/useWallet";
+import { useTranslations } from "next-intl";
 
 export const InvestmentsView = () => {
+  const t = useTranslations("investments");
+  const tCommon = useTranslations("common");
   const { walletAddress } = useWalletContext();
   const { handleConnect } = useWallet();
 
@@ -24,13 +27,13 @@ export const InvestmentsView = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto text-center space-y-6">
-          <h2 className="text-2xl font-bold">My Investments</h2>
+          <h2 className="text-2xl font-bold">{t("title")}</h2>
           <p className="text-muted-foreground">
-            Connect your wallet to view your investments and track your portfolio.
+            {t("connectDescription")}
           </p>
           <Button onClick={handleConnect} size="lg">
             <Wallet className="w-4 h-4 mr-2" />
-            Connect Wallet
+            {tCommon("connectWallet")}
           </Button>
         </div>
       </div>
@@ -41,8 +44,8 @@ export const InvestmentsView = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto text-center space-y-6">
-          <h2 className="text-2xl font-bold">My Investments</h2>
-          <p className="text-muted-foreground">Loading your investments...</p>
+          <h2 className="text-2xl font-bold">{t("title")}</h2>
+          <p className="text-muted-foreground">{t("loadingYourInvestments")}</p>
         </div>
       </div>
     );
@@ -52,9 +55,9 @@ export const InvestmentsView = () => {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto text-center space-y-6">
-          <h2 className="text-2xl font-bold">My Investments</h2>
+          <h2 className="text-2xl font-bold">{t("title")}</h2>
           <p className="text-destructive">
-            Error loading investments: {error instanceof Error ? error.message : "Unknown error"}
+            {t("loadError", { message: error instanceof Error ? error.message : tCommon("unknownError") })}
           </p>
         </div>
       </div>
@@ -75,9 +78,9 @@ export const InvestmentsView = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-6xl mx-auto space-y-8">
         <div>
-          <h2 className="text-2xl font-bold">My Investments</h2>
+          <h2 className="text-2xl font-bold">{t("title")}</h2>
           <p className="text-muted-foreground">
-            View your current investments, expected revenue, and investment details.
+            {t("description")}
           </p>
         </div>
 
@@ -88,7 +91,7 @@ export const InvestmentsView = () => {
                 <TrendingUp className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Total Investments</p>
+                <p className="text-sm text-muted-foreground">{t("totalInvestments")}</p>
                 <p className="text-2xl font-bold">{investmentList.length}</p>
               </div>
             </div>
@@ -100,7 +103,7 @@ export const InvestmentsView = () => {
                 <Wallet className="w-5 h-5 text-green-500" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">Campaigns</p>
+                <p className="text-sm text-muted-foreground">{t("campaignsLabel")}</p>
                 <p className="text-2xl font-bold">{uniqueCampaigns}</p>
               </div>
             </div>
@@ -112,7 +115,7 @@ export const InvestmentsView = () => {
                 <DollarSign className="w-5 h-5 text-blue-500" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-muted-foreground">Total Invested</p>
+                <p className="text-sm text-muted-foreground">{t("totalInvested")}</p>
                 <p className="text-2xl font-bold">
                   {totalInvested.toLocaleString("en-US", {
                     minimumFractionDigits: 2,
@@ -128,9 +131,9 @@ export const InvestmentsView = () => {
         {investmentList.length === 0 ? (
           <Card className="p-12 text-center">
             <Wallet className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-semibold mb-2">No Investments Yet</h3>
+            <h3 className="text-lg font-semibold mb-2">{t("noInvestmentsTitle")}</h3>
             <p className="text-muted-foreground">
-              You don&apos;t have any investments yet. Start investing in projects to see them here.
+              {t("noInvestmentsDesc")}
             </p>
           </Card>
         ) : (

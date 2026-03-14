@@ -1,0 +1,133 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "error": "Error",
+    "cancel": "Cancelar",
+    "retry": "Reintentar",
+    "connectWallet": "Conectar Billetera",
+    "viewTransaction": "Ver Transacción",
+    "unknownError": "Error desconocido",
+    "noDescription": "Sin descripción"
+  },
+  "metadata": {
+    "title": "Inversor Tokenización",
+    "description": "Inversor Tokenización"
+  },
+  "nav": {
+    "campaigns": "Campañas",
+    "myInvestments": "Mis Inversiones"
+  },
+  "campaigns": {
+    "title": "Campañas",
+    "description": "Explora y apoya proyectos de emprendimiento local.",
+    "invest": "Invertir",
+    "poolSize": "Tamaño del Fondo",
+    "loansCompleted": "Préstamos Completados",
+    "loans": "Préstamos",
+    "noLoansAvailable": "No hay préstamos disponibles.",
+    "loan": "Préstamo {index}",
+    "searchPlaceholder": "Buscar campañas...",
+    "filterAll": "Todas",
+    "filterFundraising": "Recaudando",
+    "filterActive": "Activa",
+    "filterRepayment": "En Pago",
+    "filterClaimable": "Reclamable",
+    "filterClosed": "Cerrada",
+    "empty": "No se encontraron campañas.",
+    "loadingCampaigns": "Cargando campañas...",
+    "status": {
+      "DRAFT": "Borrador",
+      "FUNDRAISING": "Recaudando",
+      "ACTIVE": "Activa",
+      "REPAYMENT": "En Pago",
+      "CLAIMABLE": "Reclamable",
+      "CLOSED": "Cerrada",
+      "PAUSED": "Pausada"
+    }
+  },
+  "investments": {
+    "title": "Mis Inversiones",
+    "description": "Consulta tus inversiones actuales, rendimiento esperado y detalles de inversión.",
+    "connectDescription": "Conecta tu billetera para ver tus inversiones y seguir tu portafolio.",
+    "loadingInvestments": "Cargando tus inversiones...",
+    "loadError": "Error al cargar inversiones: {message}",
+    "totalInvestments": "Total de Inversiones",
+    "campaignsLabel": "Campañas",
+    "totalInvested": "Total Invertido",
+    "noInvestmentsTitle": "Sin Inversiones Aún",
+    "noInvestmentsDesc": "Aún no tienes inversiones. Comienza a invertir en proyectos para verlas aquí.",
+    "trackDescription": "Haz seguimiento a tus inversiones activas y reclama tus retornos.",
+    "loadingYourInvestments": "Cargando tus inversiones...",
+    "invested": "Invertido",
+    "tokens": "Tokens",
+    "received": "Recibido",
+    "expectedReturn": "Retorno Esperado",
+    "duration": "Duración",
+    "durationMonths": "{count} meses",
+    "investedOn": "Invertido el",
+    "txHash": "Hash de Tx",
+    "escrow": "Escrow"
+  },
+  "investDialog": {
+    "title": "Invertir",
+    "amountLabel": "Monto (USDC)",
+    "amountPlaceholder": "0.00",
+    "availableBalance": "Balance disponible",
+    "estimatedYield": "Rendimiento Estimado",
+    "termLength": "Plazo",
+    "months": "Meses",
+    "yourInvestment": "Tu inversión",
+    "estimatedReturn": "Retorno estimado ({rate}% &times; {duration}mo)",
+    "totalAtMaturity": "Total al vencimiento",
+    "disclaimer": "Por favor revisa el monto de tu inversión cuidadosamente. Una vez confirmado, estos montos no son editables y la transacción es final.",
+    "processing": "Procesando...",
+    "addingToken": "Agregando token a la billetera...",
+    "completingInvestment": "Completando inversión...",
+    "confirmInvestment": "Confirmar Inversión",
+    "termsAgreement": "Al hacer clic en confirmar, aceptas los Términos de Servicio y el Acuerdo de Inversión.",
+    "success": "Inversión completada exitosamente.",
+    "errors": {
+      "connectWallet": "Por favor conecta tu billetera para continuar.",
+      "missingTokenSale": "Falta el ID del contrato de token sale.",
+      "invalidAmount": "Ingresa un monto válido mayor a 0.",
+      "unexpectedError": "Error inesperado al procesar tu inversión.",
+      "insufficientBalance": "Balance insuficiente de USDC. Asegúrate de que tu billetera tenga suficiente USDC para completar esta transacción. Puedes obtener USDC de testnet en un faucet de Stellar testnet.",
+      "failedBuild": "No se pudo construir la transacción de compra."
+    }
+  },
+  "claimRoi": {
+    "title": "Reclamar ROI",
+    "description": "Consulta tu ROI para cada vault y reclama tus recompensas.",
+    "claimButton": "Reclamar ROI",
+    "vaultBalance": "Balance del Vault",
+    "yourTokenBalance": "Tu Balance de Tokens",
+    "yourClaimableRoi": "Tu ROI Reclamable",
+    "loadingVault": "Cargando información del vault...",
+    "noVaultAvailable": "Contrato de vault no disponible para esta campaña.",
+    "connectToClaim": "Por favor conecta tu billetera para reclamar ROI.",
+    "claimSuccess": "ROI reclamado exitosamente!",
+    "claimFailed": "Envío de transacción fallido.",
+    "buildFailed": "No se pudo construir la transacción de reclamo.",
+    "unexpectedError": "Error inesperado al reclamar ROI."
+  },
+  "contractErrors": {
+    "title": "Error de Contrato",
+    "unknownCode": "Código de error de contrato {code}",
+    "vault": {
+      "1": "Administrador no encontrado",
+      "2": "Solo el administrador puede cambiar la disponibilidad",
+      "3": "El intercambio está actualmente deshabilitado",
+      "4": "El beneficiario no tiene tokens para reclamar",
+      "5": "El vault no tiene suficiente USDC"
+    },
+    "tokenSale": {
+      "1": "Contrato escrow no encontrado",
+      "2": "Token de participación no encontrado",
+      "3": "Administrador no encontrado",
+      "4": "Solo el administrador puede establecer el token",
+      "5": "Tope máximo excedido — la campaña está completamente financiada",
+      "6": "Tope de inversor excedido — has alcanzado la inversión máxima",
+      "7": "El monto debe ser positivo"
+    }
+  }
+}

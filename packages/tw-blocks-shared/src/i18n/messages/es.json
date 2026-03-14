@@ -1,0 +1,208 @@
+{
+  "wallet": {
+    "connect": "Conectar Billetera",
+    "testnet": "Testnet",
+    "address": "Dirección",
+    "copied": "Copiado",
+    "copy": "Copiar",
+    "disconnect": "Desconectar"
+  },
+  "escrow": {
+    "filters": {
+      "title": "Filtros",
+      "refresh": "Actualizar",
+      "clear": "Limpiar",
+      "search": "Buscar",
+      "searchPlaceholder": "Buscar título...",
+      "engagementId": "ID de Contrato",
+      "engagementIdPlaceholder": "ID de Contrato",
+      "amountRange": "Rango de Monto",
+      "min": "Mín",
+      "max": "Máx",
+      "type": "Tipo",
+      "selectType": "Seleccionar tipo",
+      "allTypes": "Todos los tipos",
+      "singleRelease": "Liberación única",
+      "multiRelease": "Liberación múltiple",
+      "status": "Estado",
+      "selectStatus": "Seleccionar estado",
+      "allStatuses": "Todos los estados",
+      "working": "En progreso",
+      "pendingRelease": "Pendiente de liberación",
+      "released": "Liberado",
+      "resolved": "Resuelto",
+      "inDispute": "En disputa",
+      "dateRange": "Rango de Fechas",
+      "activeOnchain": "Activo / OnChain",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "onChain": "OnChain",
+      "sortBy": "Ordenar por",
+      "orderBy": "Ordenar por",
+      "created": "Creado",
+      "updated": "Actualizado",
+      "amount": "Monto",
+      "direction": "Dirección",
+      "descending": "Descendente",
+      "ascending": "Ascendente"
+    },
+    "cards": {
+      "sort": "Ordenar",
+      "reset": "Reiniciar",
+      "connectWallet": "Conecta tu billetera",
+      "connectWalletDesc": "Para continuar, conecta tu billetera y autoriza la aplicación.",
+      "loading": "Cargando escrows…",
+      "errorTitle": "Error al cargar datos",
+      "errorDesc": "Ocurrió un error al cargar la información. Por favor, intenta de nuevo.",
+      "retry": "Reintentar",
+      "noDataTitle": "Sin datos disponibles",
+      "noDataDesc": "No se encontraron escrows para los filtros seleccionados.",
+      "balance": "Balance",
+      "platformFee": "Comisión de Plataforma",
+      "milestones": "Hitos",
+      "more": "{count} más",
+      "page": "Página {page}",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "disputed": "En disputa",
+      "resolvedTooltip": "Resuelto",
+      "releasedTooltip": "Liberado",
+      "pendingReleaseTooltip": "Pendiente de liberación",
+      "finished": "Finalizado"
+    },
+    "details": {
+      "basicInfo": "Información Básica",
+      "noTrustline": "Sin Trustline",
+      "escrowId": "ID de Escrow",
+      "roles": "Roles",
+      "engagementId": "ID de Contrato",
+      "noEngagement": "Sin Contrato",
+      "typeLabel": "Tipo",
+      "multiRelease": "Liberación Múltiple",
+      "singleRelease": "Liberación Única",
+      "releaseDistribution": "Distribución del Monto de Liberación",
+      "totalAmount": "Monto Total",
+      "receiver": "Receptor",
+      "platformFee": "Comisión de Plataforma",
+      "trustlessWork": "Trustless Work",
+      "statusLabel": "Estado",
+      "inDispute": "En Disputa",
+      "seeDetails": "Ver Detalles",
+      "amountLabel": "Monto",
+      "balanceLabel": "Balance"
+    },
+    "entities": {
+      "title": "Entidades",
+      "receivers": "Receptores"
+    },
+    "milestoneCard": {
+      "disputed": "En disputa",
+      "released": "Liberado",
+      "resolved": "Resuelto",
+      "approved": "Aprobado",
+      "evidenceProvided": "Evidencia proporcionada",
+      "viewDetails": "Ver Detalles"
+    },
+    "milestones": {
+      "title": "Hitos",
+      "noMilestones": "No hay hitos disponibles"
+    },
+    "successRelease": {
+      "title": "Liberación Exitosa",
+      "description": "Los fondos fueron distribuidos exitosamente a las partes correspondientes."
+    },
+    "initialize": {
+      "trigger": "Inicializar",
+      "title": "Inicializar Escrow",
+      "multiReleaseTitle": "Escrow de Liberación Múltiple",
+      "multiReleaseDesc": "Completa el formulario para inicializar un escrow de liberación múltiple",
+      "autofill": "Autocompletar",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Título del escrow",
+      "engagementLabel": "Contrato",
+      "engagementPlaceholder": "Ingresa el identificador",
+      "trustlineLabel": "Trustline",
+      "selectTrustline": "Seleccionar trustline",
+      "platformFeeLabel": "Comisión de Plataforma",
+      "platformFeePlaceholder": "Ingresa la comisión",
+      "approverLabel": "Aprobador",
+      "approverPlaceholder": "Ingresa la dirección del aprobador",
+      "serviceProviderLabel": "Proveedor de Servicios",
+      "serviceProviderPlaceholder": "Ingresa la dirección del proveedor",
+      "releaseSignerLabel": "Firmante de Liberación",
+      "releaseSignerPlaceholder": "Ingresa la dirección del firmante",
+      "disputeResolverLabel": "Resolutor de Disputas",
+      "disputeResolverPlaceholder": "Ingresa la dirección del resolutor",
+      "platformLabel": "Plataforma",
+      "platformPlaceholder": "Ingresa la dirección de la plataforma",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Descripción del escrow",
+      "milestonesLabel": "Hitos",
+      "milestoneDescLabel": "Descripción",
+      "milestoneReceiverLabel": "Receptor",
+      "milestoneAmountLabel": "Monto",
+      "milestoneDescPlaceholder": "Descripción del hito",
+      "milestoneReceiverPlaceholder": "Ingresa la dirección del receptor",
+      "milestoneAmountPlaceholder": "Ingresa el monto",
+      "addItem": "Agregar Elemento",
+      "deploying": "Desplegando...",
+      "deploy": "Desplegar"
+    },
+    "update": {
+      "trigger": "Actualizar",
+      "title": "Actualizar Escrow",
+      "submitting": "Actualizando...",
+      "submit": "Actualizar"
+    },
+    "fund": {
+      "trigger": "Fondear",
+      "title": "Fondear Escrow",
+      "amountLabel": "Monto",
+      "amountPlaceholder": "Ingresa el monto",
+      "submitting": "Fondeando...",
+      "submit": "Fondear"
+    },
+    "release": {
+      "trigger": "Liberar",
+      "releasing": "Liberando...",
+      "release": "Liberar"
+    },
+    "dispute": {
+      "trigger": "Disputar",
+      "disputing": "Disputando...",
+      "dispute": "Disputar"
+    },
+    "resolve": {
+      "trigger": "Resolver Disputa",
+      "title": "Resolver Disputa",
+      "receiverPercentLabel": "Porcentaje del Receptor",
+      "receiverPercentPlaceholder": "Ingresa el porcentaje",
+      "submitting": "Resolviendo...",
+      "submit": "Resolver"
+    },
+    "approve": {
+      "trigger": "Aprobar",
+      "approving": "Aprobando...",
+      "approve": "Aprobar"
+    },
+    "changeStatus": {
+      "trigger": "Cambiar Estado",
+      "title": "Cambiar Estado del Hito",
+      "newStatusLabel": "Nuevo Estado",
+      "selectStatus": "Seleccionar estado",
+      "submitting": "Actualizando...",
+      "submit": "Actualizar Estado"
+    },
+    "withdraw": {
+      "trigger": "Retirar Fondos",
+      "title": "Retirar Fondos Restantes",
+      "description": "Retira los fondos restantes del escrow.",
+      "submitting": "Retirando...",
+      "submit": "Retirar"
+    },
+    "actions": {
+      "title": "Acciones",
+      "noActions": "Sin acciones disponibles"
+    }
+  }
+}

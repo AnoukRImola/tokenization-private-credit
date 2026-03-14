@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { useEscrowsMutations } from "@tokenization/tw-blocks-shared/src/tanstack/useEscrowsMutations";
@@ -29,10 +30,7 @@ const USDC_TESTNET_ADDRESS =
 
 const STORAGE_KEY = "campaigns-create-flow";
 
-const DEPLOY_PHASE_LABELS = [
-  "Creando token de participación y tokenizando",
-  "Últimos pasos...",
-];
+// Deploy phase labels are now generated from translations inside the hook.
 
 // --- Utility functions ---
 
@@ -52,17 +50,19 @@ function slugToSymbol(name: string): string {
   );
 }
 
-// --- Zod schema ---
+// --- Zod schema (built with translations) ---
 
-const campaignSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido"),
-  description: z.string().min(10, "La descripción debe tener al menos 10 caracteres"),
-  poolSize: z.coerce.number().positive("Debe ser mayor a 0"),
-  loanDuration: z.coerce.number().int().positive("Debe ser mayor a 0"),
-  expectedReturn: z.coerce.number().positive("Debe ser mayor a 0"),
-  loanSize: z.coerce.number().positive("Debe ser mayor a 0"),
-  tokenName: z.string().min(1, "El nombre del token es requerido"),
-});
+function createCampaignSchema(t: (key: string) => string) {
+  return z.object({
+    name: z.string().min(1, t("validation.nameRequired")),
+    description: z.string().min(10, t("validation.descriptionMin")),
+    poolSize: z.coerce.number().positive(t("validation.mustBePositive")),
+    loanDuration: z.coerce.number().int().positive(t("validation.mustBePositive")),
+    expectedReturn: z.coerce.number().positive(t("validation.mustBePositive")),
+    loanSize: z.coerce.number().positive(t("validation.mustBePositive")),
+    tokenName: z.string().min(1, t("validation.tokenNameRequired")),
+  });
+}
 
 // --- LocalStorage persistence ---
 
@@ -112,11 +112,20 @@ function clearFlowState() {
 const TOTAL_STEPS = 3;
 
 export function useCreateCampaign() {
+  const t = useTranslations("createCampaign");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const queryClient = useQueryClient();
   const { walletAddress } = useWalletContext();
   const { deployEscrow } = useEscrowsMutations();
   const [step, setStep] = useState(1);
+
+  const deployPhaseLabels = useMemo(() => [
+    t("deployPhase1"),
+    t("deployPhase2"),
+  ], [t]);
+
+  const campaignSchema = useMemo(() => createCampaignSchema(t), [t]);
 
   // --- Escrow state (Step 2) ---
   const [escrowStatus, setEscrowStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -125,7 +134,7 @@ export function useCreateCampaign() {
 
   // --- Deploy state (Step 3) ---
   const [deployPhases, setDeployPhases] = useState<PhaseState[]>(
-    DEPLOY_PHASE_LABELS.map(() => ({ status: "idle" as PhaseStatus, error: "" })),
+    Array.from({ length: 2 }, () => ({ status: "idle" as PhaseStatus, error: "" })),
   );
   const [deployFailedAt, setDeployFailedAt] = useState<number | null>(null);
 
@@ -297,7 +306,7 @@ export function useCreateCampaign() {
         }, 1500);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Error desconocido";
+      const message = err instanceof Error ? err.message : tCommon("unknownError");
       setPhaseStatus(currentPhase, "error", message);
       setDeployFailedAt(currentPhase);
     }
@@ -330,7 +339,7 @@ export function useCreateCampaign() {
     retryEscrow,
     // Deploy (Step 3)
     deployPhases,
-    deployPhaseLabels: DEPLOY_PHASE_LABELS,
+    deployPhaseLabels,
     deployFailedAt,
     runDeployAndCreate,
     retryDeploy,

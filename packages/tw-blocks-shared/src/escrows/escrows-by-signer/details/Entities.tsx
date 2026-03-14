@@ -6,12 +6,14 @@ import {
 } from "@trustless-work/escrow/types";
 import { EntityCard } from "./EntityCard";
 import { Separator } from "@tokenization/ui/separator";
+import { useSharedTranslation } from "../../../i18n/TranslationProvider";
 
 interface EntitiesProps {
   selectedEscrow: Escrow;
 }
 
 export const Entities = ({ selectedEscrow }: EntitiesProps) => {
+  const { t } = useSharedTranslation();
   const receivers =
     selectedEscrow.type === "single-release"
       ? (selectedEscrow.roles as { receiver?: string })?.receiver
@@ -25,7 +27,7 @@ export const Entities = ({ selectedEscrow }: EntitiesProps) => {
     <>
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold">Entities</h3>
+          <h3 className="text-lg font-semibold">{t("escrow.entities.title")}</h3>
         </div>
       </div>
 
@@ -58,7 +60,7 @@ export const Entities = ({ selectedEscrow }: EntitiesProps) => {
 
       <Separator className="my-4" />
 
-      <h2 className="text-lg font-semibold">Receivers</h2>
+      <h2 className="text-lg font-semibold">{t("escrow.entities.receivers")}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
         {receivers.map((r, idx) => (
           <EntityCard key={`receiver-${idx}-${r}`} type="receiver" entity={r} />

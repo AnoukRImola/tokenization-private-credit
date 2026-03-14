@@ -39,20 +39,24 @@ import {
 import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
 import { useChangeMilestoneStatus } from "@tokenization/tw-blocks-shared/src/escrows/single-multi-release/change-milestone-status/dialog/useChangeMilestoneStatus";
 import { numericInputKeyDown, parseNumericInput } from "@/lib/numeric-input";
-import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
-
-const addMilestoneSchema = z.object({
-  description: z.string().min(1, "La descripción es obligatoria"),
-  amount: z.coerce.number().positive("Debe ser mayor a 0"),
-});
-
-type AddMilestoneFormValues = z.infer<typeof addMilestoneSchema>;
+import { formatCurrency, fromStroops } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 interface ManageLoansViewProps {
   contractId: string;
 }
 
 export function ManageLoansView({ contractId }: ManageLoansViewProps) {
+  const t = useTranslations("loans");
+  const tCommon = useTranslations("common");
+
+  const addMilestoneSchema = z.object({
+    description: z.string().min(1, t("validation.descriptionRequired")),
+    amount: z.coerce.number().positive(t("validation.amountPositive")),
+  });
+
+  type AddMilestoneFormValues = z.infer<typeof addMilestoneSchema>;
+
   const { walletAddress } = useWalletContext();
   const { releaseFunds, approveMilestone, updateEscrow } = useEscrowsMutations();
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
@@ -82,7 +86,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
           contractIds: [escrowId],
           validateOnChain: true,
         })) as any;
-        if (!data || !data[0]) throw new Error("Escrow no encontrado");
+        if (!data || !data[0]) throw new Error(t("escrowNotFound"));
         setSelectedEscrow(data[0]);
       } catch (err) {
         setError(handleError(err as ErrorResponse).message);
@@ -112,7 +116,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
         type: "multi-release",
         address: walletAddress,
       });
-      toast.success(`Préstamo ${milestoneIndex + 1} aprobado`);
+      toast.success(t("loanApproved", { index: milestoneIndex + 1 }));
       await fetchEscrow(selectedEscrow.contractId);
     } catch (err) {
       toast.error(handleError(err as ErrorResponse).message);
@@ -135,7 +139,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
         type: "multi-release",
         address: walletAddress,
       });
-      toast.success(`Fondos del préstamo ${milestoneIndex + 1} liberados`);
+      toast.success(t("fundsReleased", { index: milestoneIndex + 1 }));
       await fetchEscrow(selectedEscrow.contractId);
     } catch (err) {
       toast.error(handleError(err as ErrorResponse).message);
@@ -198,7 +202,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
         address: walletAddress,
       });
 
-      toast.success("Préstamo agregado exitosamente");
+      toast.success(t("loanAddedSuccess"));
       form.reset();
       await fetchEscrow(selectedEscrow.contractId);
     } catch (err) {
@@ -223,7 +227,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
   if (error || !selectedEscrow) {
     return (
       <div className="flex items-center justify-center py-16 text-destructive text-sm">
-        {error || "Escrow no encontrado"}
+        {error || t("escrowNotFound")}
       </div>
     );
   }
@@ -236,11 +240,11 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
       {/* Milestones list */}
       <div className="flex flex-col gap-3">
         <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-          Beneficiarios
+          {t("beneficiaries")}
         </p>
 
         {milestones.length === 0 ? (
-          <p className="text-sm text-text-muted">No hay hitos registrados.</p>
+          <p className="text-sm text-text-muted">{t("noMilestones")}</p>
         ) : (
           milestones.map((milestone, index) => {
             const isApproved = milestone.flags?.approved === true;
@@ -265,7 +269,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                   </span>
                   {milestone.status && (
                     <span className="text-xs text-text-muted">
-                      Estado: {milestone.status}
+                      {t("status")}: {milestone.status}
                     </span>
                   )}
                   <span
@@ -278,11 +282,11 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                 {isReleased ? (
                   <div className="flex items-center gap-1.5 text-xs text-text-muted">
                     <CheckCircle2 className="size-4 text-green-500" />
-                    <span>Desembolsado</span>
+                    <span>{t("disbursed")}</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    {/* Edit → change status */}
+                    {/* Edit -> change status */}
                     <Button
                       type="button"
                       variant="ghost"
@@ -300,12 +304,12 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                         onClick={() => handleRelease(index)}
                         disabled={isReleased || releasingIndex !== null || insufficientFunds}
                         className="text-xs uppercase tracking-wide cursor-pointer"
-                        title={insufficientFunds ? "Fondos insuficientes en el escrow" : undefined}
+                        title={insufficientFunds ? t("insufficientFunds") : undefined}
                       >
                         {releasingIndex === index ? (
                           <Loader2 className="size-3.5 animate-spin" />
                         ) : (
-                          "Desembolsar"
+                          t("disburse")
                         )}
                       </Button>
                     ) : (
@@ -319,7 +323,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                         {approvingIndex === index ? (
                           <Loader2 className="size-3.5 animate-spin" />
                         ) : (
-                          "Aprobar"
+                          t("approve")
                         )}
                       </Button>
                     )}
@@ -338,7 +342,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Cambiar estado del préstamo</DialogTitle>
+            <DialogTitle>{t("changeLoanStatus")}</DialogTitle>
           </DialogHeader>
           <Form {...changeMilestoneStatusHook.form}>
             <form
@@ -354,10 +358,10 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Estado<span className="text-destructive ml-1">*</span>
+                      {t("statusLabel")}<span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Ej: completed" {...field} />
+                      <Input placeholder={t("statusPlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -368,9 +372,9 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                 name="evidence"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Evidencia</FormLabel>
+                    <FormLabel>{t("evidenceLabel")}</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Evidencia (opcional)" {...field} />
+                      <Textarea placeholder={t("evidencePlaceholder")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -384,7 +388,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                 {changeMilestoneStatusHook.isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "Actualizar"
+                  tCommon("update")
                 )}
               </Button>
             </form>
@@ -395,7 +399,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
       {/* Add new milestone */}
       <div className="flex flex-col gap-4">
         <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-          Agregar Nuevo Beneficiario
+          {t("addNewBeneficiary")}
         </p>
 
         <div className="rounded-xl border border-border bg-card p-6">
@@ -406,10 +410,10 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Descripción del Préstamo</FormLabel>
+                    <FormLabel>{t("loanDescription")}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Describe el propósito de este hito"
+                        placeholder={t("loanDescPlaceholder")}
                         className="resize-none"
                         rows={3}
                         {...field}
@@ -422,7 +426,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <span className="text-sm font-medium leading-none">Dirección ONG</span>
+                  <span className="text-sm font-medium leading-none">{t("ngoAddress")}</span>
                   <div className="flex items-center gap-2 rounded-lg border border-border bg-secondary/40 px-3 h-9">
                     <Wallet className="size-3.5 shrink-0 text-text-muted" />
                     {shortAddress ? (
@@ -430,7 +434,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                         {shortAddress}
                       </span>
                     ) : (
-                      <span className="text-xs text-text-muted italic">Sin wallet conectada</span>
+                      <span className="text-xs text-text-muted italic">{t("noWalletConnected")}</span>
                     )}
                   </div>
                 </div>
@@ -440,7 +444,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                   name="amount"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Monto (USDC)</FormLabel>
+                      <FormLabel>{t("amountUsdc")}</FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Input
@@ -471,7 +475,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                 {addingLoan ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "Crear Nuevo Hito"
+                  t("createNewMilestone")
                 )}
               </Button>
             </form>

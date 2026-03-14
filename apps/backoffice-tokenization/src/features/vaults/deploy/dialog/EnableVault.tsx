@@ -18,10 +18,12 @@ import {
 } from "@tokenization/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { useEnableVault } from "./useEnableVault";
+import { useTranslations } from "next-intl";
 
 
 export const EnableVaultDialog = () => {
   const [open, setOpen] = React.useState(false);
+  const t = useTranslations("vaults");
 
   const { form, isSubmitting, error, response, setResponse, handleSubmit } =
     useEnableVault({
@@ -35,28 +37,28 @@ export const EnableVaultDialog = () => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" type="button" className="cursor-pointer">
-            Enable Vault
+            {t("enableVault")}
           </Button>
         </DialogTrigger>
         <DialogContent className="!w-full sm:!max-w-lg max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Enable Vault</DialogTitle>
+            <DialogTitle>{t("enableVault")}</DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
               <FormField
                 control={form.control}
                 name="vaultContractAddress"
-                rules={{ required: "Vault contract address is required" }}
+                rules={{ required: t("validation.vaultAddressRequired") }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Vault Contract Address
+                      {t("vaultContractAddressLabel")}
                       <span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter vault contract ID (C...)"
+                        placeholder={t("vaultContractAddressPlaceholder")}
                         autoComplete="off"
                         {...field}
                       />
@@ -80,10 +82,10 @@ export const EnableVaultDialog = () => {
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="ml-2">Enabling...</span>
+                    <span className="ml-2">{t("enabling")}</span>
                   </div>
                 ) : (
-                  "Enable"
+                  t("enable")
                 )}
               </Button>
             </form>
@@ -93,5 +95,3 @@ export const EnableVaultDialog = () => {
     </>
   );
 };
-
-

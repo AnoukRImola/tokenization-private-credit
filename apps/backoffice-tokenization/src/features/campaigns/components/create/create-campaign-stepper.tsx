@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { cn } from "@tokenization/shared/lib/utils";
 import { Button } from "@tokenization/ui/button";
 import { useCreateCampaign } from "@/features/campaigns/hooks/use-create-campaign";
@@ -8,13 +9,9 @@ import { StepCampaignBasics } from "./step-campaign-basics";
 import { StepEscrowConfig } from "./step-escrow-config";
 import { StepCreateToken } from "./step-create-token";
 
-const STEPS = [
-  { number: 1, label: "Campaña Básica" },
-  { number: 2, label: "Inicializar Escrow" },
-  { number: 3, label: "Desplegar y Crear" },
-];
-
 export function CreateCampaignStepper() {
+  const t = useTranslations("createCampaign");
+  const tCommon = useTranslations("common");
   const router = useRouter();
   const {
     form,
@@ -36,12 +33,18 @@ export function CreateCampaignStepper() {
     retryDeploy,
   } = useCreateCampaign();
 
+  const STEPS = [
+    { number: 1, label: t("step1") },
+    { number: 2, label: t("step2") },
+    { number: 3, label: t("step3") },
+  ];
+
   if (!walletAddress) {
     return (
       <div className="flex flex-col gap-6 max-w-2xl">
         <div className="flex flex-col items-center justify-center gap-4 py-20">
           <p className="text-lg text-muted-foreground">
-            Conecta tu wallet para crear una campaña
+            {tCommon("connectWallet")}
           </p>
         </div>
       </div>
@@ -122,10 +125,10 @@ export function CreateCampaignStepper() {
             variant="outline"
             onClick={() => router.push("/campaigns")}
           >
-            Cancelar
+            {tCommon("cancel")}
           </Button>
           <Button type="button" onClick={nextStep}>
-            Siguiente →
+            {tCommon("next")}
           </Button>
         </div>
       )}

@@ -1,0 +1,133 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "connectWallet": "Connect Wallet",
+    "viewTransaction": "View Transaction",
+    "unknownError": "Unknown error",
+    "noDescription": "No description"
+  },
+  "metadata": {
+    "title": "Investor Tokenization",
+    "description": "Investor Tokenization"
+  },
+  "nav": {
+    "campaigns": "Campaigns",
+    "myInvestments": "My Investments"
+  },
+  "campaigns": {
+    "title": "Campaigns",
+    "description": "Browse and support local entrepreneurship projects.",
+    "invest": "Invest",
+    "poolSize": "Pool Size",
+    "loansCompleted": "Loans Completed",
+    "loans": "Loans",
+    "noLoansAvailable": "No loans available.",
+    "loan": "Loan {index}",
+    "searchPlaceholder": "Search campaigns...",
+    "filterAll": "All",
+    "filterFundraising": "Fundraising",
+    "filterActive": "Active",
+    "filterRepayment": "Repayment",
+    "filterClaimable": "Claimable",
+    "filterClosed": "Closed",
+    "empty": "No campaigns found.",
+    "loadingCampaigns": "Loading campaigns...",
+    "status": {
+      "DRAFT": "Draft",
+      "FUNDRAISING": "Fundraising",
+      "ACTIVE": "Active",
+      "REPAYMENT": "Repayment",
+      "CLAIMABLE": "Claimable",
+      "CLOSED": "Closed",
+      "PAUSED": "Paused"
+    }
+  },
+  "investments": {
+    "title": "My Investments",
+    "description": "View your current investments, expected revenue, and investment details.",
+    "connectDescription": "Connect your wallet to view your investments and track your portfolio.",
+    "loadingInvestments": "Loading your investments...",
+    "loadError": "Error loading investments: {message}",
+    "totalInvestments": "Total Investments",
+    "campaignsLabel": "Campaigns",
+    "totalInvested": "Total Invested",
+    "noInvestmentsTitle": "No Investments Yet",
+    "noInvestmentsDesc": "You don't have any investments yet. Start investing in projects to see them here.",
+    "trackDescription": "Track your active investments and claim your returns.",
+    "loadingYourInvestments": "Loading your investments...",
+    "invested": "Invested",
+    "tokens": "Tokens",
+    "received": "Received",
+    "expectedReturn": "Expected Return",
+    "duration": "Duration",
+    "durationMonths": "{count} months",
+    "investedOn": "Invested on",
+    "txHash": "Tx Hash",
+    "escrow": "Escrow"
+  },
+  "investDialog": {
+    "title": "Invest",
+    "amountLabel": "Amount (USDC)",
+    "amountPlaceholder": "0.00",
+    "availableBalance": "Available balance",
+    "estimatedYield": "Estimated Yield",
+    "termLength": "Term Length",
+    "months": "Months",
+    "yourInvestment": "Your investment",
+    "estimatedReturn": "Estimated return ({rate}% &times; {duration}mo)",
+    "totalAtMaturity": "Total at maturity",
+    "disclaimer": "Please review your investment amount carefully. Once confirmed, these amounts are not editable and the transaction is final.",
+    "processing": "Processing...",
+    "addingToken": "Adding token to wallet...",
+    "completingInvestment": "Completing investment...",
+    "confirmInvestment": "Confirm Investment",
+    "termsAgreement": "By clicking confirm, you agree to the Terms of Service and Investment Agreement.",
+    "success": "Investment completed successfully.",
+    "errors": {
+      "connectWallet": "Please connect your wallet to continue.",
+      "missingTokenSale": "Missing token sale contract id.",
+      "invalidAmount": "Enter a valid amount greater than 0.",
+      "unexpectedError": "Unexpected error while processing your investment.",
+      "insufficientBalance": "Insufficient USDC balance. Please ensure your wallet has enough USDC to complete this transaction. You can get testnet USDC from a Stellar testnet faucet.",
+      "failedBuild": "Failed to build buy transaction."
+    }
+  },
+  "claimRoi": {
+    "title": "Claim ROI",
+    "description": "View your ROI for each vault and claim your rewards.",
+    "claimButton": "Claim ROI",
+    "vaultBalance": "Vault Balance",
+    "yourTokenBalance": "Your Token Balance",
+    "yourClaimableRoi": "Your Claimable ROI",
+    "loadingVault": "Loading vault information...",
+    "noVaultAvailable": "Vault contract not available for this campaign.",
+    "connectToClaim": "Please connect your wallet to claim ROI.",
+    "claimSuccess": "ROI claimed successfully!",
+    "claimFailed": "Transaction submission failed.",
+    "buildFailed": "Failed to build claim transaction.",
+    "unexpectedError": "Unexpected error while claiming ROI."
+  },
+  "contractErrors": {
+    "title": "Contract Error",
+    "unknownCode": "Contract error code {code}",
+    "vault": {
+      "1": "Admin not found",
+      "2": "Only admin can change availability",
+      "3": "Exchange is currently disabled",
+      "4": "Beneficiary has no tokens to claim",
+      "5": "Vault does not have enough USDC"
+    },
+    "tokenSale": {
+      "1": "Escrow contract not found",
+      "2": "Participation token not found",
+      "3": "Admin not found",
+      "4": "Only admin can set token",
+      "5": "Hard cap exceeded – the campaign is fully funded",
+      "6": "Investor cap exceeded – you have reached the maximum investment",
+      "7": "Amount must be positive"
+    }
+  }
+}

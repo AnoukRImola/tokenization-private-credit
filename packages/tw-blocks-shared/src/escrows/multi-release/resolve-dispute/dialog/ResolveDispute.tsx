@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@tokenization/ui/select";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 export const ResolveDisputeDialog = ({
   showSelectMilestone = false,
@@ -35,6 +36,7 @@ export const ResolveDisputeDialog = ({
   showSelectMilestone?: boolean;
   milestoneIndex?: number | string;
 }) => {
+  const { t } = useSharedTranslation();
   const [open, setOpen] = React.useState(false);
   const {
     form,
@@ -70,12 +72,12 @@ export const ResolveDisputeDialog = ({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" className="cursor-pointer w-full">
-          Resolve Dispute
+          {t("escrow.resolve.trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent className="!w-full sm:!max-w-3xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Resolve Dispute</DialogTitle>
+          <DialogTitle>{t("escrow.resolve.title")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit}>
@@ -223,10 +225,10 @@ export const ResolveDisputeDialog = ({
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="ml-2">Resolving...</span>
+                    <span className="ml-2">{t("escrow.resolve.submitting")}</span>
                   </div>
                 ) : (
-                  "Resolve"
+                  t("escrow.resolve.submit")
                 )}
               </Button>
             </div>

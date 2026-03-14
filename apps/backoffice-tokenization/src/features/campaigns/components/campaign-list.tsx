@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
 import { CampaignCard } from "@/components/shared/campaign-card";
 
@@ -6,10 +9,12 @@ interface CampaignListProps {
 }
 
 export function CampaignList({ campaigns }: CampaignListProps) {
+  const t = useTranslations("campaigns");
+
   if (campaigns.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-text-muted">
-        <p className="text-sm">No hay campañas disponibles.</p>
+        <p className="text-sm">{t("empty")}</p>
       </div>
     );
   }

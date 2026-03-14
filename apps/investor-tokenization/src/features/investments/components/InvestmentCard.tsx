@@ -6,8 +6,11 @@ import {
   formatAddress,
 } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import { Calendar, DollarSign, ExternalLink, Coins } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import type { InvestmentFromApi } from "../services/investment.service";
+import { useTranslations } from "next-intl";
+import { getCampaignStatusConfig } from "@/features/roi/constants/campaign-status";
+import type { CampaignStatus } from "@/features/roi/types/campaign.types";
 
 type InvestmentCardProps = {
   investment: InvestmentFromApi;
@@ -24,10 +27,14 @@ const STATUS_VARIANT: Record<string, "default" | "secondary" | "outline" | "dest
 };
 
 export const InvestmentCard = ({ investment }: InvestmentCardProps) => {
+  const t = useTranslations("investments");
+  const tCampaigns = useTranslations("campaigns");
   const { campaign } = investment;
   const usdcAmount = Number(investment.usdcAmount);
   const tokenAmount = Number(investment.tokenAmount);
   const createdAt = new Date(investment.createdAt);
+  const statusConfig = getCampaignStatusConfig(tCampaigns);
+  const statusLabel = statusConfig[campaign.status as CampaignStatus]?.label ?? campaign.status;
 
   return (
     <Card className="w-full">
@@ -37,7 +44,7 @@ export const InvestmentCard = ({ investment }: InvestmentCardProps) => {
             {campaign.name}
           </CardTitle>
           <Badge variant={STATUS_VARIANT[campaign.status] ?? "outline"}>
-            {campaign.status}
+            {statusLabel}
           </Badge>
         </div>
         {campaign.description && (
@@ -53,7 +60,7 @@ export const InvestmentCard = ({ investment }: InvestmentCardProps) => {
             <div className="flex items-center gap-2 mb-1">
               <DollarSign className="w-4 h-4 text-muted-foreground" />
               <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Invested
+                {t("invested")}
               </span>
             </div>
             <p className="text-2xl font-bold">
@@ -69,7 +76,7 @@ export const InvestmentCard = ({ investment }: InvestmentCardProps) => {
             <div className="flex items-center gap-2 mb-1">
               <Coins className="w-4 h-4 text-muted-foreground" />
               <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                Tokens
+                {t("tokens")}
               </span>
             </div>
             <p className="text-2xl font-bold">
@@ -78,23 +85,23 @@ export const InvestmentCard = ({ investment }: InvestmentCardProps) => {
                 maximumFractionDigits: 2,
               })}
             </p>
-            <p className="text-xs text-muted-foreground">Received</p>
+            <p className="text-xs text-muted-foreground">{t("received")}</p>
           </div>
         </div>
 
         {campaign.expectedReturn > 0 && (
           <div className="rounded-xl border border-teal-200 bg-teal-50/50 px-4 py-3 dark:border-teal-900 dark:bg-teal-950/30">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Expected Return</span>
+              <span className="text-sm text-muted-foreground">{t("expectedReturn")}</span>
               <span className="text-sm font-semibold text-teal-700 dark:text-teal-400">
                 {Number(campaign.expectedReturn)}%
               </span>
             </div>
             {campaign.loanDuration > 0 && (
               <div className="flex items-center justify-between mt-1">
-                <span className="text-sm text-muted-foreground">Duration</span>
+                <span className="text-sm text-muted-foreground">{t("duration")}</span>
                 <span className="text-sm font-semibold">
-                  {campaign.loanDuration} months
+                  {t("durationMonths", { count: campaign.loanDuration })}
                 </span>
               </div>
             )}
@@ -105,7 +112,7 @@ export const InvestmentCard = ({ investment }: InvestmentCardProps) => {
           <div className="flex items-center justify-between text-xs text-muted-foreground">
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />
-              Invested on
+              {t("investedOn")}
             </span>
             <span>
               {createdAt.toLocaleDateString("en-US", {
@@ -117,7 +124,7 @@ export const InvestmentCard = ({ investment }: InvestmentCardProps) => {
           </div>
 
           <div className="flex items-center justify-between text-xs text-muted-foreground">
-            <span>Tx Hash</span>
+            <span>{t("txHash")}</span>
             <Link
               href={`https://stellar.expert/explorer/testnet/tx/${investment.txHash}`}
               target="_blank"
@@ -131,7 +138,7 @@ export const InvestmentCard = ({ investment }: InvestmentCardProps) => {
 
           {campaign.escrowId && (
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Escrow</span>
+              <span>{t("escrow")}</span>
               <Link
                 href={`https://stellar.expert/explorer/testnet/contract/${campaign.escrowId}`}
                 target="_blank"

@@ -29,6 +29,7 @@ import {
   formatRole,
 } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import { useCopy } from "@tokenization/tw-blocks-shared/src/helpers/useCopy";
+import { useSharedTranslation } from "../../../i18n/TranslationProvider";
 
 interface GeneralInformationProps {
   selectedEscrow: GetEscrowsFromIndexerResponse;
@@ -46,6 +47,7 @@ export const GeneralInformation = ({
   const { trustlessWorkAmount, receiverAmount, platformFeeAmount } =
     useEscrowAmountContext();
   const { copiedKeyId, copyToClipboard } = useCopy();
+  const { t } = useSharedTranslation();
 
   const totalAmount = useMemo(() => {
     if (!selectedEscrow) return 0;
@@ -66,41 +68,41 @@ export const GeneralInformation = ({
         <div className="flex flex-col md:flex-row w-full mdw-4/5 gap-4">
           {selectedEscrow.flags?.disputed && (
             <StatisticsCard
-              title="Status"
+              title={t("escrow.details.statusLabel")}
               icon={Ban}
               iconColor="text-destructive"
-              value="In Dispute"
+              value={t("escrow.details.inDispute")}
             />
           )}
 
           {selectedEscrow.flags?.released && (
             <StatisticsCard
-              title="Status"
+              title={t("escrow.details.statusLabel")}
               icon={CircleCheckBig}
               iconColor="text-green-800"
-              value="Released"
-              actionLabel="See Details"
+              value={t("escrow.milestoneCard.released")}
+              actionLabel={t("escrow.details.seeDetails")}
               onAction={() => dialogStates.successRelease.setIsOpen(true)}
             />
           )}
 
           {selectedEscrow.flags?.resolved && (
             <StatisticsCard
-              title="Status"
+              title={t("escrow.details.statusLabel")}
               icon={Handshake}
               iconColor="text-green-800"
-              value="Resolved"
+              value={t("escrow.milestoneCard.resolved")}
             />
           )}
 
           <StatisticsCard
-            title="Amount"
+            title={t("escrow.details.amountLabel")}
             icon={CircleDollarSign}
             value={formatCurrency(totalAmount, selectedEscrow.trustline?.symbol)}
           />
 
           <StatisticsCard
-            title="Balance"
+            title={t("escrow.details.balanceLabel")}
             icon={Wallet}
             value={formatCurrency(
               selectedEscrow.balance ?? 0,
@@ -128,7 +130,7 @@ export const GeneralInformation = ({
       >
         <div className="lg:col-span-3">
           <Card className="px-6 py-4 h-full">
-            <h3 className="text-lg font-semibold">Basic Information</h3>
+            <h3 className="text-lg font-semibold">{t("escrow.details.basicInfo")}</h3>
             <div className="grid gap-4">
               <div className="p-4 bg-muted/50 rounded-lg border">
                 <div className="flex items-center gap-3">
@@ -136,8 +138,8 @@ export const GeneralInformation = ({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-sm font-medium text-muted-foreground">
-                        {selectedEscrow.trustline?.symbol || "No Trustline"} |
-                        Escrow ID
+                        {selectedEscrow.trustline?.symbol || t("escrow.details.noTrustline")} |
+                        {t("escrow.details.escrowId")}
                       </span>
                       <button
                         onClick={() =>
@@ -164,7 +166,7 @@ export const GeneralInformation = ({
                   <div className="flex items-center gap-3 mb-3">
                     <Users className="h-5 w-5 text-primary flex-shrink-0" />
                     <span className="text-sm font-medium text-muted-foreground">
-                      Roles
+                      {t("escrow.details.roles")}
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -192,11 +194,11 @@ export const GeneralInformation = ({
                   <div className="flex items-center gap-3 mb-2">
                     <BriefcaseBusiness className="h-5 w-5 text-primary flex-shrink-0" />
                     <span className="text-sm font-medium text-muted-foreground">
-                      Engagement ID
+                      {t("escrow.details.engagementId")}
                     </span>
                   </div>
                   <span className="font-medium text-foreground">
-                    {selectedEscrow?.engagementId || "No Engagement"}
+                    {selectedEscrow?.engagementId || t("escrow.details.noEngagement")}
                   </span>
                 </div>
 
@@ -204,13 +206,13 @@ export const GeneralInformation = ({
                   <div className="flex items-center gap-3 mb-2">
                     <BookOpen className="h-5 w-5 text-primary flex-shrink-0" />
                     <span className="text-sm font-medium text-muted-foreground">
-                      Type
+                      {t("escrow.details.typeLabel")}
                     </span>
                   </div>
                   <span className="font-medium text-foreground">
                     {selectedEscrow?.type === "multi-release"
-                      ? "Multi Release"
-                      : "Single Release"}
+                      ? t("escrow.details.multiRelease")
+                      : t("escrow.details.singleRelease")}
                   </span>
                 </div>
               </div>
@@ -224,7 +226,7 @@ export const GeneralInformation = ({
             <div className="lg:col-span-1">
               <Card className="p-4 h-full">
                 <h3 className="text-lg font-semibold">
-                  Release Amount Distribution
+                  {t("escrow.details.releaseDistribution")}
                 </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
@@ -232,7 +234,7 @@ export const GeneralInformation = ({
                       <CircleDollarSign className="h-4 w-4 text-primary" />
                       <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">
-                          Total Amount
+                          {t("escrow.details.totalAmount")}
                         </span>
                         <span className="font-medium">
                           {formatCurrency(
@@ -251,7 +253,7 @@ export const GeneralInformation = ({
                         <Users className="h-4 w-4 text-primary" />
                         <div className="flex flex-col">
                           <span className="text-sm text-muted-foreground">
-                            Receiver
+                            {t("escrow.details.receiver")}
                           </span>
                           <span className="font-medium">
                             {formatCurrency(
@@ -271,7 +273,7 @@ export const GeneralInformation = ({
                         <Wallet className="h-4 w-4 text-primary" />
                         <div className="flex flex-col">
                           <span className="text-sm text-muted-foreground">
-                            Platform Fee
+                            {t("escrow.details.platformFee")}
                           </span>
                           <span className="font-medium">
                             {formatCurrency(
@@ -292,7 +294,7 @@ export const GeneralInformation = ({
                       <Wallet className="h-4 w-4 text-primary" />
                       <div className="flex flex-col">
                         <span className="text-sm text-muted-foreground">
-                          Trustless Work
+                          {t("escrow.details.trustlessWork")}
                         </span>
                         <span className="font-medium">
                           {formatCurrency(

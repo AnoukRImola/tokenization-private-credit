@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@tokenization/ui/button";
 import { Loader2, CheckCircle2, XCircle } from "lucide-react";
 
@@ -21,6 +22,8 @@ export function StepEscrowConfig({
   onRetry,
   onNext,
 }: Props) {
+  const t = useTranslations("createCampaign");
+  const tCommon = useTranslations("common");
   const hasTriggered = useRef(false);
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export function StepEscrowConfig({
       <div className="flex flex-col items-center justify-center gap-4 py-20">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
         <p className="text-lg text-muted-foreground">
-          Inicializando escrow...
+          {t("initializingEscrow")}
         </p>
       </div>
     );
@@ -46,7 +49,7 @@ export function StepEscrowConfig({
       <div className="flex flex-col items-center justify-center gap-4 py-20">
         <XCircle className="h-12 w-12 text-destructive" />
         <p className="text-lg font-semibold text-destructive">
-          Error al inicializar escrow
+          {t("escrowInitError")}
         </p>
         {escrowError && (
           <p className="text-sm text-muted-foreground max-w-md text-center">
@@ -60,7 +63,7 @@ export function StepEscrowConfig({
           }}
           className="cursor-pointer mt-2"
         >
-          Reintentar
+          {tCommon("retry")}
         </Button>
       </div>
     );
@@ -70,13 +73,13 @@ export function StepEscrowConfig({
     <div className="flex flex-col items-center justify-center gap-4 py-20">
       <CheckCircle2 className="h-12 w-12 text-green-500" />
       <p className="text-lg font-semibold">
-        Escrow inicializado exitosamente
+        {t("escrowInitSuccess")}
       </p>
       <Button
         onClick={onNext}
         className="cursor-pointer mt-4"
       >
-        Continuar
+        {tCommon("continue")}
       </Button>
     </div>
   );

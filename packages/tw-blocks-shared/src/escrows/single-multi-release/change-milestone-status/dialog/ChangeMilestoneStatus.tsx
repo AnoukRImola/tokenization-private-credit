@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@tokenization/ui/select";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 export const ChangeMilestoneStatusDialog = ({
   showSelectMilestone = false,
@@ -35,6 +36,7 @@ export const ChangeMilestoneStatusDialog = ({
   showSelectMilestone?: boolean;
   milestoneIndex?: number | string;
 }) => {
+  const { t } = useSharedTranslation();
   const { form, handleSubmit, isSubmitting } = useChangeMilestoneStatus();
   const { selectedEscrow } = useEscrowContext();
 
@@ -52,12 +54,12 @@ export const ChangeMilestoneStatusDialog = ({
     <Dialog>
       <DialogTrigger asChild>
         <Button type="button" className="cursor-pointer w-full">
-          Update Status
+          {t("escrow.changeStatus.trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Change Milestone Status</DialogTitle>
+          <DialogTitle>{t("escrow.changeStatus.title")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -115,10 +117,10 @@ export const ChangeMilestoneStatusDialog = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Status<span className="text-destructive ml-1">*</span>
+                      {t("escrow.changeStatus.newStatusLabel")}<span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter new status" {...field} />
+                      <Input placeholder={t("escrow.changeStatus.selectStatus")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -152,10 +154,10 @@ export const ChangeMilestoneStatusDialog = ({
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="ml-2">Updating...</span>
+                    <span className="ml-2">{t("escrow.changeStatus.submitting")}</span>
                   </div>
                 ) : (
-                  "Update"
+                  t("escrow.changeStatus.submit")
                 )}
               </Button>
             </div>

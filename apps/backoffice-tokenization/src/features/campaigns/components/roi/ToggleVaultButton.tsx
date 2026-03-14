@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Button } from "@tokenization/ui/button";
 import { Loader2, Power } from "lucide-react";
 import { useToggleVault } from "@/features/campaigns/hooks/useToggleVault";
@@ -17,12 +18,13 @@ export function ToggleVaultButton({
   currentlyEnabled,
   onToggled,
 }: ToggleVaultButtonProps) {
+  const t = useTranslations("roi");
   const nextState = !currentlyEnabled;
 
   const { execute, isSubmitting, error } = useToggleVault({
     onSuccess: () => {
       toast.success(
-        currentlyEnabled ? "Vault disabled" : "Vault enabled",
+        currentlyEnabled ? t("toggleVault.disabled") : t("toggleVault.enabled"),
       );
       onToggled(nextState);
     },
@@ -42,7 +44,7 @@ export function ToggleVaultButton({
         ) : (
           <>
             <Power className="h-3.5 w-3.5 mr-1" />
-            {currentlyEnabled ? "Disable" : "Enable"}
+            {currentlyEnabled ? t("toggleVault.disable") : t("toggleVault.enable")}
           </>
         )}
       </Button>

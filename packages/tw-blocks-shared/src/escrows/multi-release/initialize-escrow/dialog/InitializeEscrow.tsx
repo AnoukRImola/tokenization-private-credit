@@ -30,8 +30,10 @@ import {
   DialogTrigger,
 } from "@tokenization/ui/dialog";
 import { Separator } from "@tokenization/ui/separator";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 export const InitializeEscrowDialog = () => {
+  const { t } = useSharedTranslation();
   const [open, setOpen] = React.useState(false);
   const {
     form,
@@ -98,12 +100,12 @@ export const InitializeEscrowDialog = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" className="cursor-pointer">
-          Initialize
+          {t("escrow.initialize.trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent className="!w-full sm:!max-w-4xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Initialize Escrow</DialogTitle>
+          <DialogTitle>{t("escrow.initialize.title")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
@@ -116,11 +118,11 @@ export const InitializeEscrowDialog = () => {
                 <div className="flex items-center gap-2">
                   <div className="h-2 w-2 rounded-full bg-primary" />
                   <h2 className="text-xl font-semibold">
-                    Multi Release Escrow
+                    {t("escrow.initialize.multiReleaseTitle")}
                   </h2>
                 </div>
                 <p className="text-muted-foreground mt-1">
-                  Fill out the form to initialize a multi release escrow
+                  {t("escrow.initialize.multiReleaseDesc")}
                 </p>
               </Link>
               {process.env.NODE_ENV !== "production" && (
@@ -130,7 +132,7 @@ export const InitializeEscrowDialog = () => {
                   onClick={fillTemplateForm}
                   className="cursor-pointer"
                 >
-                  Autofill
+                  {t("escrow.initialize.autofill")}
                 </Button>
               )}
             </Card>
@@ -141,11 +143,11 @@ export const InitializeEscrowDialog = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Title<span className="text-destructive ml-1">*</span>
+                      {t("escrow.initialize.titleLabel")}<span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Escrow title"
+                        placeholder={t("escrow.initialize.titlePlaceholder")}
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
@@ -163,11 +165,11 @@ export const InitializeEscrowDialog = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Engagement<span className="text-destructive ml-1">*</span>
+                      {t("escrow.initialize.engagementLabel")}<span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter identifier"
+                        placeholder={t("escrow.initialize.engagementPlaceholder")}
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
@@ -187,7 +189,7 @@ export const InitializeEscrowDialog = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Trustline<span className="text-destructive ml-1">*</span>
+                      {t("escrow.initialize.trustlineLabel")}<span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
                       <Select
@@ -197,7 +199,7 @@ export const InitializeEscrowDialog = () => {
                         }}
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select trustline" />
+                          <SelectValue placeholder={t("escrow.initialize.selectTrustline")} />
                         </SelectTrigger>
                         <SelectContent>
                           {trustlineOptions
@@ -224,7 +226,7 @@ export const InitializeEscrowDialog = () => {
                 render={() => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Platform Fee
+                      {t("escrow.initialize.platformFeeLabel")}
                       <span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
@@ -234,7 +236,7 @@ export const InitializeEscrowDialog = () => {
                           size={18}
                         />
                         <Input
-                          placeholder="Enter platform fee"
+                          placeholder={t("escrow.initialize.platformFeePlaceholder")}
                           className="pl-10"
                           value={form.watch("platformFee")?.toString() || ""}
                           onChange={handlePlatformFeeChange}
@@ -255,13 +257,13 @@ export const InitializeEscrowDialog = () => {
                   <FormItem>
                     <FormLabel className="flex items-center justify-between">
                       <span className="flex items-center">
-                        Approver<span className="text-destructive ml-1">*</span>
+                        {t("escrow.initialize.approverLabel")}<span className="text-destructive ml-1">*</span>
                       </span>
                     </FormLabel>
 
                     <FormControl>
                       <Input
-                        placeholder="Enter approver address"
+                        placeholder={t("escrow.initialize.approverPlaceholder")}
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
@@ -280,14 +282,14 @@ export const InitializeEscrowDialog = () => {
                   <FormItem>
                     <FormLabel className="flex items-center justify-between">
                       <span className="flex items-center">
-                        Service Provider
+                        {t("escrow.initialize.serviceProviderLabel")}
                         <span className="text-destructive ml-1">*</span>
                       </span>
                     </FormLabel>
 
                     <FormControl>
                       <Input
-                        placeholder="Enter service provider address"
+                        placeholder={t("escrow.initialize.serviceProviderPlaceholder")}
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
@@ -308,14 +310,14 @@ export const InitializeEscrowDialog = () => {
                   <FormItem>
                     <FormLabel className="flex items-center justify-between">
                       <span className="flex items-center">
-                        Release Signer
+                        {t("escrow.initialize.releaseSignerLabel")}
                         <span className="text-destructive ml-1">*</span>
                       </span>
                     </FormLabel>
 
                     <FormControl>
                       <Input
-                        placeholder="Enter release signer address"
+                        placeholder={t("escrow.initialize.releaseSignerPlaceholder")}
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
@@ -334,14 +336,14 @@ export const InitializeEscrowDialog = () => {
                   <FormItem>
                     <FormLabel className="flex items-center justify-between">
                       <span className="flex items-center">
-                        Dispute Resolver
+                        {t("escrow.initialize.disputeResolverLabel")}
                         <span className="text-destructive ml-1">*</span>
                       </span>
                     </FormLabel>
 
                     <FormControl>
                       <Input
-                        placeholder="Enter dispute resolver address"
+                        placeholder={t("escrow.initialize.disputeResolverPlaceholder")}
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
@@ -362,14 +364,14 @@ export const InitializeEscrowDialog = () => {
                   <FormItem>
                     <FormLabel className="flex items-center justify-between">
                       <span className="flex items-center">
-                        Platform
+                        {t("escrow.initialize.platformLabel")}
                         <span className="text-destructive ml-1">*</span>
                       </span>
                     </FormLabel>
 
                     <FormControl>
                       <Input
-                        placeholder="Enter platform address"
+                        placeholder={t("escrow.initialize.platformPlaceholder")}
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
@@ -388,11 +390,11 @@ export const InitializeEscrowDialog = () => {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center">
-                    Description<span className="text-destructive ml-1">*</span>
+                    {t("escrow.initialize.descriptionLabel")}<span className="text-destructive ml-1">*</span>
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Escrow description"
+                      placeholder={t("escrow.initialize.descriptionPlaceholder")}
                       {...field}
                       onChange={(e) => {
                         field.onChange(e);
@@ -405,22 +407,22 @@ export const InitializeEscrowDialog = () => {
             />
 
             <div className="space-y-4">
-              <FormLabel className="flex items-center">Milestones</FormLabel>
+              <FormLabel className="flex items-center">{t("escrow.initialize.milestonesLabel")}</FormLabel>
 
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                 <div className="md:col-span-4">
                   <FormLabel className="flex items-center">
-                    Description<span className="text-destructive ml-1">*</span>
+                    {t("escrow.initialize.milestoneDescLabel")}<span className="text-destructive ml-1">*</span>
                   </FormLabel>
                 </div>
                 <div className="md:col-span-4">
                   <FormLabel className="flex items-center">
-                    Receiver<span className="text-destructive ml-1">*</span>
+                    {t("escrow.initialize.milestoneReceiverLabel")}<span className="text-destructive ml-1">*</span>
                   </FormLabel>
                 </div>
                 <div className="md:col-span-3">
                   <FormLabel className="flex items-center">
-                    Amount<span className="text-destructive ml-1">*</span>
+                    {t("escrow.initialize.milestoneAmountLabel")}<span className="text-destructive ml-1">*</span>
                   </FormLabel>
                 </div>
               </div>
@@ -430,7 +432,7 @@ export const InitializeEscrowDialog = () => {
                   <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                     <div className="md:col-span-4">
                       <Input
-                        placeholder="Milestone description"
+                        placeholder={t("escrow.initialize.milestoneDescPlaceholder")}
                         value={milestone.description}
                         onChange={(e) => {
                           const updatedMilestones = [...milestones];
@@ -442,7 +444,7 @@ export const InitializeEscrowDialog = () => {
 
                     <div className="md:col-span-4">
                       <Input
-                        placeholder="Enter receiver address"
+                        placeholder={t("escrow.initialize.milestoneReceiverPlaceholder")}
                         value={milestone.receiver}
                         onChange={(e) => {
                           const updatedMilestones = [...milestones];
@@ -459,7 +461,7 @@ export const InitializeEscrowDialog = () => {
                       />
                       <Input
                         className="pl-10"
-                        placeholder="Enter amount"
+                        placeholder={t("escrow.initialize.milestoneAmountPlaceholder")}
                         value={milestone.amount?.toString() || ""}
                         onChange={(e) => handleMilestoneAmountChange(index, e)}
                       />
@@ -492,7 +494,7 @@ export const InitializeEscrowDialog = () => {
                         onClick={handleAddMilestone}
                         type="button"
                       >
-                        Add Item
+                        {t("escrow.initialize.addItem")}
                       </Button>
                     </div>
                   )}
@@ -509,10 +511,10 @@ export const InitializeEscrowDialog = () => {
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="ml-2">Deploying...</span>
+                    <span className="ml-2">{t("escrow.initialize.deploying")}</span>
                   </div>
                 ) : (
-                  "Deploy"
+                  t("escrow.initialize.deploy")
                 )}
               </Button>
             </div>

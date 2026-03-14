@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
@@ -10,17 +11,18 @@ import { Banknote, CheckCircle, Circle, ExternalLink, Landmark } from "lucide-re
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
-import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
-import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
+import { getCampaignStatusConfig } from "@/features/campaigns/constants/campaign-status";
+import { formatCurrency } from "@/lib/utils";
 
 interface CampaignCardProps {
   campaign: Campaign;
 }
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
+  const t = useTranslations("campaigns");
   const { id, name, description, status, escrowId } = campaign;
 
-  const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
+  const statusCfg = getCampaignStatusConfig(t)[status];
   const isDraft = status === "DRAFT";
   const escrowExplorerUrl = `https://viewer.trustlesswork.com/${escrowId}`;
 
@@ -76,7 +78,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           <Button size="sm" className="cursor-pointer gap-1.5" asChild>
             <Link href={`/campaigns/loans/${escrowId}`}>
               <Landmark className="size-3.5" />
-              Manejar Préstamos
+              {t("manageLoans")}
             </Link>
           </Button>
         ) : undefined
@@ -84,16 +86,16 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">Pool Size:</span> {formatCurrency(Number(escrowData?.balance ?? 0), "USDC")} / {formatCurrency(Number(campaign.poolSize), "USDC")}
+            <span className="font-bold">{t("poolSize")}:</span> USDC {formatCurrency(escrowData?.balance ?? 0)} / USDC {formatCurrency(campaign.poolSize)}
           </span>
         </div>
       }
-      stat={{ label: "Loans", value: totalLoans }}
+      stat={{ label: t("loans"), value: totalLoans }}
     >
       {visibleMilestones.length > 0 ? (
         <>
           <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-            Loans
+            {t("loans")}
           </p>
           <ul className="flex flex-col gap-1">
             {visibleMilestones.map((m, i) => (
@@ -105,14 +107,14 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
                 ) : (
                   <Circle className="size-3.5 shrink-0" />
                 )}
-                <span className="truncate">{m.description || `Loan ${i + 1}`}</span>
+                <span className="truncate">{m.description || t("loan", { index: i + 1 })}</span>
                 <span className="ml-auto font-medium">{m.amount} USDC</span>
               </li>
             ))}
           </ul>
         </>
       ) : (
-        <p className="text-xs text-muted-foreground">No loans available.</p>
+        <p className="text-xs text-muted-foreground">{t("noLoansAvailable")}</p>
       )}
     </SharedCampaignCard>
   );

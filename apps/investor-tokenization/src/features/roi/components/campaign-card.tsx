@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
@@ -16,8 +16,9 @@ import {
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "../types/campaign.types";
-import { CAMPAIGN_STATUS_CONFIG } from "../constants/campaign-status";
+import { getCampaignStatusConfig } from "../constants/campaign-status";
 import { fromStroops } from "@/utils/adjustedAmounts";
+import { useTranslations } from "next-intl";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 
 interface CampaignCardProps {
@@ -26,8 +27,11 @@ interface CampaignCardProps {
 }
 
 export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
+  const t = useTranslations("campaigns");
+  const tCommon = useTranslations("common");
+  const tClaimRoi = useTranslations("claimRoi");
   const { title, description, status, id, escrowId, poolSize } = campaign;
-  const statusCfg = CAMPAIGN_STATUS_CONFIG[status];
+  const statusCfg = getCampaignStatusConfig(t)[status];
   const escrowExplorerUrl = `https://viewer.trustlesswork.com/${escrowId}`;
 
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
@@ -57,10 +61,6 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
 
   const allMilestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
   const visibleMilestones = allMilestones.slice(1);
-  const assigned = allMilestones.reduce(
-    (sum, m) => sum + fromStroops((m.amount as number) ?? 0),
-    0,
-  );
   const totalLoans = visibleMilestones.length;
 
   return (
@@ -104,21 +104,23 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
             onClick={() => onClaimRoi?.(id)}
           >
             <FileText className="size-3.5" />
-            Claim ROI
+            {tClaimRoi("claimButton")}
           </Button>
         ) : null
       }
       footer={
         <div className="flex flex-col gap-1">
-          <span className="font-bold">Pool Size:</span> {formatCurrency(Number((escrowData?.balance) ?? 0), "USDC")} / {formatCurrency(Number(campaign.poolSize), "USDC")}
+          <span className="text-xs font-bold text-foreground">
+            <span className="font-bold">{t("poolSize")}:</span> USDC {formatCurrency((escrowData?.balance as number) ?? 0, "USDC")} / USDC {formatCurrency(campaign.poolSize, "USDC")}
+          </span>
         </div>
       }
-      stat={{ label: "Loans", value: totalLoans }}
+      stat={{ label: t("loans"), value: totalLoans }}
     >
       {visibleMilestones.length > 0 ? (
         <>
           <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-            Loans
+            {t("loans")}
           </p>
           <ul className="flex flex-col gap-1">
             {visibleMilestones.map((m, i) => (
@@ -134,7 +136,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
                   <Circle className="size-3.5 shrink-0" />
                 )}
                 <span className="truncate">
-                  {m.description || `Loan ${i + 1}`}
+                  {m.description || t("loan", { index: i + 1 })}
                 </span>
                 <span className="ml-auto font-medium">{m.amount} USDC</span>
               </li>
@@ -142,7 +144,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
           </ul>
         </>
       ) : (
-        <p className="text-xs text-muted-foreground">No loans available.</p>
+        <p className="text-xs text-muted-foreground">{t("noLoansAvailable")}</p>
       )}
     </SharedCampaignCard>
   );

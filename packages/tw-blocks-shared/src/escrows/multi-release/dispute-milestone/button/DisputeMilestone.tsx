@@ -13,6 +13,7 @@ import {
 } from "@tokenization/tw-blocks-shared/src/handle-errors/handle";
 import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
 import { Loader2 } from "lucide-react";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 type DisputeMilestoneButtonProps = {
   milestoneIndex: number | string;
@@ -21,6 +22,7 @@ type DisputeMilestoneButtonProps = {
 export const DisputeMilestoneButton = ({
   milestoneIndex,
 }: DisputeMilestoneButtonProps) => {
+  const { t } = useSharedTranslation();
   const { startDispute } = useEscrowsMutations();
   const { selectedEscrow, updateEscrow } = useEscrowContext();
   const { walletAddress } = useWalletContext();
@@ -86,10 +88,10 @@ export const DisputeMilestoneButton = ({
       {isSubmitting ? (
         <div className="flex items-center">
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="ml-2">Disputing...</span>
+          <span className="ml-2">{t("escrow.dispute.disputing")}</span>
         </div>
       ) : (
-        "Dispute Milestone"
+        t("escrow.dispute.trigger")
       )}
     </Button>
   );

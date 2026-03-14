@@ -5,6 +5,7 @@ import { useWallet } from "./useWallet";
 import { useWalletContext } from "./WalletProvider";
 import { Popover, PopoverContent, PopoverTrigger } from "@tokenization/ui/popover";
 import { Check, Copy, LogOut, ChevronRight, Wallet } from "lucide-react";
+import { useSharedTranslation } from "../i18n/TranslationProvider";
 
 type WalletButtonProps = {
   /** Use "sidebar" for lighter styling inside a sidebar (no dark/black background) */
@@ -18,6 +19,7 @@ type WalletButtonProps = {
 export const WalletButton = ({ variant = "default" }: WalletButtonProps) => {
   const { handleConnect, handleDisconnect } = useWallet();
   const { walletAddress, walletName } = useWalletContext();
+  const { t } = useSharedTranslation();
   const [copied, setCopied] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
 
@@ -55,7 +57,7 @@ export const WalletButton = ({ variant = "default" }: WalletButtonProps) => {
         className={connectButtonClass}
       >
         <Wallet className="size-5 shrink-0" />
-        <span>Conectar Billetera</span>
+        <span>{t("wallet.connect")}</span>
       </button>
     );
   }
@@ -89,14 +91,14 @@ export const WalletButton = ({ variant = "default" }: WalletButtonProps) => {
             </div>
             <div>
               <p className="text-sm font-semibold leading-none">{walletName}</p>
-              <p className="text-xs text-text-muted mt-0.5">Testnet</p>
+              <p className="text-xs text-text-muted mt-0.5">{t("wallet.testnet")}</p>
             </div>
           </div>
         </div>
 
         {/* Address block */}
         <div className="px-4 py-3">
-          <p className="text-xs text-text-muted mb-1.5">Dirección</p>
+          <p className="text-xs text-text-muted mb-1.5">{t("wallet.address")}</p>
           <div className="rounded-lg bg-secondary px-3 py-2 border border-border">
             <p className="font-mono text-xs break-all leading-relaxed">
               {walletAddress}
@@ -115,12 +117,12 @@ export const WalletButton = ({ variant = "default" }: WalletButtonProps) => {
             {copied ? (
               <>
                 <Check className="size-3.5" />
-                Copiado
+                {t("wallet.copied")}
               </>
             ) : (
               <>
                 <Copy className="size-3.5" />
-                Copiar
+                {t("wallet.copy")}
               </>
             )}
           </button>
@@ -131,7 +133,7 @@ export const WalletButton = ({ variant = "default" }: WalletButtonProps) => {
             className="flex flex-1 items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-medium border border-border bg-transparent text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
           >
             <LogOut className="size-3.5" />
-            Desconectar
+            {t("wallet.disconnect")}
           </button>
         </div>
       </PopoverContent>

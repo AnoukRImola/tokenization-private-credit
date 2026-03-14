@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Dialog,
   DialogContent,
@@ -10,7 +12,8 @@ import { Button } from "@tokenization/ui/button";
 import { type DeployVaultResponse } from "@/features/vaults/services/vault.service";
 import { CheckCircle } from "lucide-react";
 import { useCopy } from "@tokenization/tw-blocks-shared/src/helpers/useCopy";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 type VaultDeploySuccessDialogProps = {
   open: boolean;
@@ -21,6 +24,8 @@ type VaultDeploySuccessDialogProps = {
 export function VaultDeploySuccessDialog(props: VaultDeploySuccessDialogProps) {
   const { open, onOpenChange, response } = props;
   const { copiedKeyId, copyToClipboard } = useCopy();
+  const t = useTranslations("vaults");
+  const tCommon = useTranslations("common");
 
   const address = response?.vaultContractAddress ?? "";
 
@@ -30,12 +35,12 @@ export function VaultDeploySuccessDialog(props: VaultDeploySuccessDialogProps) {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CheckCircle className="h-4 w-4 text-green-700" />
-            Vault Deployment Successful
+            {t("deploySuccess")}
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="vaultAddress">Vault Contract Address</Label>
+            <Label htmlFor="vaultAddress">{t("vaultContractAddress")}</Label>
             <div className="flex gap-2">
               <Input
                 id="vaultAddress"
@@ -50,7 +55,7 @@ export function VaultDeploySuccessDialog(props: VaultDeploySuccessDialogProps) {
                   className="cursor-pointer"
                   onClick={() => copyToClipboard(address)}
                 >
-                  {copiedKeyId ? "Copied!" : "Copy"}
+                  {copiedKeyId ? t("copied") : t("copy")}
                 </Button>
               ) : null}
             </div>
@@ -62,7 +67,7 @@ export function VaultDeploySuccessDialog(props: VaultDeploySuccessDialogProps) {
                   rel="noopener noreferrer"
                   className="hover:underline"
                 >
-                  View Transaction
+                  {tCommon("viewTransaction")}
                 </Link>
               </div>
             ) : null}

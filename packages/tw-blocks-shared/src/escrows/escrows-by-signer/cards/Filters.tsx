@@ -30,6 +30,7 @@ import {
   SelectItem as OrderSelectItem,
   SelectValue as OrderSelectValue,
 } from "@tokenization/ui/select";
+import { useSharedTranslation } from "../../../i18n/TranslationProvider";
 
 type FiltersProps = {
   // values
@@ -109,6 +110,7 @@ export const Filters = ({
   setOrderBy,
   setOrderDirection,
 }: FiltersProps) => {
+  const { t } = useSharedTranslation();
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -126,7 +128,7 @@ export const Filters = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="w-4 h-4 text-primary" />
-          <h3 className="font-semibold text-foreground">Filters</h3>
+          <h3 className="font-semibold text-foreground">{t("escrow.filters.title")}</h3>
         </div>
 
         <div className="flex items-center gap-2">
@@ -138,7 +140,7 @@ export const Filters = ({
             disabled={refreshDisabled}
           >
             <RefreshCcw className={refreshIconClass} />
-            <span className="hidden xs:inline">Refresh</span>
+            <span className="hidden xs:inline">{t("escrow.filters.refresh")}</span>
           </Button>
 
           <Button
@@ -148,7 +150,7 @@ export const Filters = ({
             onClick={onClearFilters}
           >
             <Trash2 className="w-3 h-3" />
-            <span className="hidden xs:inline">Clear</span>
+            <span className="hidden xs:inline">{t("escrow.filters.clear")}</span>
           </Button>
         </div>
       </div>
@@ -159,12 +161,12 @@ export const Filters = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Search
+              {t("escrow.filters.search")}
             </label>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search title..."
+                placeholder={t("escrow.filters.searchPlaceholder")}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="h-9 pl-9 text-sm border-border/60 focus:border-primary/60 bg-background/80 transition-colors w-full"
@@ -174,12 +176,12 @@ export const Filters = ({
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Engagement ID
+              {t("escrow.filters.engagementId")}
             </label>
             <div className="relative">
               <FilterIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Engagement ID"
+                placeholder={t("escrow.filters.engagementIdPlaceholder")}
                 value={engagementId}
                 onChange={(e) => setEngagementId(e.target.value)}
                 className="h-9 pl-9 text-sm border-border/60 focus:border-primary/60 bg-background/80 transition-colors w-full"
@@ -189,14 +191,14 @@ export const Filters = ({
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Amount Range
+              {t("escrow.filters.amountRange")}
             </label>
             <div className="w-full">
               <div className="flex items-center gap-2 w-full">
                 <div className="relative flex-1">
                   <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                   <Input
-                    placeholder="Min"
+                    placeholder={t("escrow.filters.min")}
                     type="number"
                     min="0"
                     value={minAmount}
@@ -208,7 +210,7 @@ export const Filters = ({
                 <div className="relative flex-1">
                   <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                   <Input
-                    placeholder="Max"
+                    placeholder={t("escrow.filters.max")}
                     type="number"
                     min="0"
                     value={maxAmount}
@@ -222,7 +224,7 @@ export const Filters = ({
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Type
+              {t("escrow.filters.type")}
             </label>
             <div className="w-full">
               <Select
@@ -230,12 +232,12 @@ export const Filters = ({
                 onValueChange={(v) => setType(v as typeof type)}
               >
                 <SelectTrigger className="h-9 text-sm border-border/60 bg-background/80 w-full">
-                  <SelectValue placeholder="Select type" />
+                  <SelectValue placeholder={t("escrow.filters.selectType")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All types</SelectItem>
-                  <SelectItem value="single-release">Single release</SelectItem>
-                  <SelectItem value="multi-release">Multi release</SelectItem>
+                  <SelectItem value="all">{t("escrow.filters.allTypes")}</SelectItem>
+                  <SelectItem value="single-release">{t("escrow.filters.singleRelease")}</SelectItem>
+                  <SelectItem value="multi-release">{t("escrow.filters.multiRelease")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -246,7 +248,7 @@ export const Filters = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Status
+              {t("escrow.filters.status")}
             </label>
             <div className="w-full">
               <Select
@@ -254,17 +256,17 @@ export const Filters = ({
                 onValueChange={(v) => setStatus(v as typeof status)}
               >
                 <SelectTrigger className="h-9 text-sm border-border/60 bg-background/80 w-full">
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder={t("escrow.filters.selectStatus")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All statuses</SelectItem>
-                  <SelectItem value="working">Working</SelectItem>
+                  <SelectItem value="all">{t("escrow.filters.allStatuses")}</SelectItem>
+                  <SelectItem value="working">{t("escrow.filters.working")}</SelectItem>
                   <SelectItem value="pendingRelease">
-                    Pending release
+                    {t("escrow.filters.pendingRelease")}
                   </SelectItem>
-                  <SelectItem value="released">Released</SelectItem>
-                  <SelectItem value="resolved">Resolved</SelectItem>
-                  <SelectItem value="inDispute">In dispute</SelectItem>
+                  <SelectItem value="released">{t("escrow.filters.released")}</SelectItem>
+                  <SelectItem value="resolved">{t("escrow.filters.resolved")}</SelectItem>
+                  <SelectItem value="inDispute">{t("escrow.filters.inDispute")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -272,7 +274,7 @@ export const Filters = ({
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Date Range
+              {t("escrow.filters.dateRange")}
             </label>
             <div className="w-full">
               <Popover>
@@ -306,7 +308,7 @@ export const Filters = ({
                           setDateRange({ from: undefined, to: undefined })
                         }
                       >
-                        Clear
+                        {t("escrow.filters.clear")}
                       </Button>
                     </div>
                   </div>
@@ -317,7 +319,7 @@ export const Filters = ({
 
           <div className="space-y-1.5">
             <label className="text-xs font-medium text-muted-foreground">
-              Active / OnChain
+              {t("escrow.filters.activeOnchain")}
             </label>
             <div className="w-full lg:w-auto lg:min-w-fit">
               <div className="grid grid-cols-2 gap-2 w-full lg:w-auto">
@@ -327,7 +329,7 @@ export const Filters = ({
                     onCheckedChange={(checked) => setIsActive(Boolean(checked))}
                   />
                   <span className="text-sm text-foreground font-medium whitespace-nowrap">
-                    Active
+                    {t("escrow.filters.active")}
                   </span>
                 </div>
                 <div className="flex items-center justify-center lg:justify-start gap-2 h-9 px-3 rounded-md border border-border/60 bg-background/80 w-full lg:w-auto">
@@ -338,7 +340,7 @@ export const Filters = ({
                     }
                   />
                   <span className="text-sm text-foreground font-medium whitespace-nowrap">
-                    OnChain
+                    {t("escrow.filters.onChain")}
                   </span>
                 </div>
               </div>
@@ -347,7 +349,7 @@ export const Filters = ({
 
           <div className="space-y-1.5 w-full lg:col-span-2">
             <label className="text-xs font-medium text-muted-foreground">
-              Sort By
+              {t("escrow.filters.sortBy")}
             </label>
             <div className="w-full">
               <div className="flex items-center gap-2 w-full">
@@ -357,16 +359,16 @@ export const Filters = ({
                     onValueChange={(v) => setOrderBy(v as typeof orderBy)}
                   >
                     <OrderSelectTrigger className="h-9 text-sm border-border/60 bg-background/80 w-full">
-                      <OrderSelectValue placeholder="Order by" />
+                      <OrderSelectValue placeholder={t("escrow.filters.orderBy")} />
                     </OrderSelectTrigger>
                     <OrderSelectContent>
                       <OrderSelectItem value="createdAt">
-                        Created
+                        {t("escrow.filters.created")}
                       </OrderSelectItem>
                       <OrderSelectItem value="updatedAt">
-                        Updated
+                        {t("escrow.filters.updated")}
                       </OrderSelectItem>
-                      <OrderSelectItem value="amount">Amount</OrderSelectItem>
+                      <OrderSelectItem value="amount">{t("escrow.filters.amount")}</OrderSelectItem>
                     </OrderSelectContent>
                   </OrderSelect>
                 </div>
@@ -378,11 +380,11 @@ export const Filters = ({
                     }
                   >
                     <OrderSelectTrigger className="h-9 text-sm border-border/60 bg-background/80 w-full">
-                      <OrderSelectValue placeholder="Direction" />
+                      <OrderSelectValue placeholder={t("escrow.filters.direction")} />
                     </OrderSelectTrigger>
                     <OrderSelectContent>
-                      <OrderSelectItem value="desc">Descending</OrderSelectItem>
-                      <OrderSelectItem value="asc">Ascending</OrderSelectItem>
+                      <OrderSelectItem value="desc">{t("escrow.filters.descending")}</OrderSelectItem>
+                      <OrderSelectItem value="asc">{t("escrow.filters.ascending")}</OrderSelectItem>
                     </OrderSelectContent>
                   </OrderSelect>
                 </div>
