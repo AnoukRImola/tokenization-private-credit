@@ -37,7 +37,7 @@ export default function RootLayout({
                 <EscrowDialogsProvider>
                   <EscrowAmountProvider>
                     {children}
-                    <Toaster position="top-right" />
+                    <Toaster position="top-right" richColors />
                   </EscrowAmountProvider>
                 </EscrowDialogsProvider>
               </EscrowProvider>

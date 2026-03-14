@@ -85,7 +85,7 @@ export const ProjectCard = ({
 
   return (
     <SharedCampaignCard
-      title={`#${campaign.id.slice(0, 3).toUpperCase()} ${name}`}
+      title={`${name}`}
       description={description || "No description"}
       statusBadge={
         <>
