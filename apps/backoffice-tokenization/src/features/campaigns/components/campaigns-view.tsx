@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { CampaignToolbar } from "./campaign-toolbar";
 import { CampaignList } from "./campaign-list";
 import { useCampaigns } from "@/features/campaigns/hooks/use-campaigns";
 import type { CampaignStatus } from "@/features/campaigns/types/campaign.types";
 
 export function CampaignsView() {
+  const t = useTranslations("campaigns");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<CampaignStatus | "all">("all");
   const { data: campaigns = [], isLoading, isError } = useCampaigns();
@@ -25,7 +27,7 @@ export function CampaignsView() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 text-text-muted text-sm">
-        Cargando campañas...
+        {t("loading")}
       </div>
     );
   }
@@ -33,7 +35,7 @@ export function CampaignsView() {
   if (isError) {
     return (
       <div className="flex items-center justify-center py-16 text-destructive text-sm">
-        No se pudieron cargar las campañas.
+        {t("loadError")}
       </div>
     );
   }

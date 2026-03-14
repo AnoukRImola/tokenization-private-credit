@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import { fromStroops } from "@/utils/adjustedAmounts";
 import { httpClient } from "@/lib/httpClient";
 import { Networks, rpc, TransactionBuilder } from "@stellar/stellar-sdk";
+import { useTranslations } from "next-intl";
 
 type InvestFormValues = {
   amount: number;
@@ -50,10 +51,11 @@ const DEFAULT_USDC_ADDRESS = process.env.NEXT_PUBLIC_DEFAULT_USDC_ADDRESS ?? "";
 
 export function InvestDialog({
   tokenSaleContractId,
-  triggerLabel = "Invest",
+  triggerLabel,
   expectedReturn = 8.5,
   loanDuration = 12,
 }: InvestDialogProps) {
+  const t = useTranslations("investDialog");
   const { walletAddress } = useWalletContext();
   const [open, setOpen] = React.useState(false);
   const [submitting, setSubmitting] = React.useState(false);
@@ -74,15 +76,15 @@ export function InvestDialog({
     );
 
     if (!walletAddress) {
-      setErrorMessage("Please connect your wallet to continue.");
+      setErrorMessage(t("errors.connectWallet"));
       return;
     }
     if (!tokenSaleContractId) {
-      setErrorMessage("Missing token sale contract id.");
+      setErrorMessage(t("errors.missingTokenSale"));
       return;
     }
     if (!values.amount || values.amount <= 0) {
-      setErrorMessage("Enter a valid amount greater than 0.");
+      setErrorMessage(t("errors.invalidAmount"));
       return;
     }
 
@@ -103,7 +105,7 @@ export function InvestDialog({
 
       if (!buyResponse?.success || !buyResponse?.xdr) {
         throw new Error(
-          buyResponse?.message ?? "Failed to build buy transaction."
+          buyResponse?.message ?? t("errors.failedBuild")
         );
       }
 
@@ -151,14 +153,14 @@ export function InvestDialog({
       await queryClient.invalidateQueries({ queryKey: ["escrows-by-ids"] });
       await queryClient.refetchQueries({ queryKey: ["escrows-by-ids"] });
 
-      toast.success("Investment completed successfully.");
+      toast.success(t("success"));
       form.reset({ amount: 0 });
       setOpen(false);
     } catch (err) {
       let message =
         err instanceof Error
           ? err.message
-          : "Unexpected error while processing your investment.";
+          : t("errors.unexpectedError");
 
       // Check if error is due to insufficient USDC balance
       if (
@@ -166,7 +168,7 @@ export function InvestDialog({
         message.includes("balance is not within") ||
         message.includes("insufficient balance")
       ) {
-        message = "Insufficient USDC balance. Please ensure your wallet has enough USDC to complete this transaction. You can get testnet USDC from a Stellar testnet faucet.";
+        message = t("errors.insufficientBalance");
       }
 
       setErrorMessage(message);
@@ -205,11 +207,11 @@ export function InvestDialog({
       <DialogTrigger asChild>
         <Button size="sm" className="cursor-pointer gap-1.5">
           <Rocket className="size-3.5" />
-          {triggerLabel}
+          {triggerLabel ?? t("title")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
-        <DialogTitle className="sr-only">Invest</DialogTitle>
+        <DialogTitle className="sr-only">{t("title")}</DialogTitle>
         <Form {...form}>
           <form
             className="space-y-6"
@@ -221,7 +223,7 @@ export function InvestDialog({
               render={({ field }) => (
                 <FormItem className="space-y-2">
                   <FormLabel className="text-base font-semibold">
-                    Amount (USDC)
+                    {t("amountLabel")}
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
@@ -230,7 +232,7 @@ export function InvestDialog({
                         inputMode="decimal"
                         step="0.01"
                         min="0"
-                        placeholder="0.00"
+                        placeholder={t("amountPlaceholder")}
                         className="h-14 text-xl pr-20 rounded-xl border-muted bg-muted/30"
                         {...field}
                         value={
@@ -253,7 +255,7 @@ export function InvestDialog({
                     </div>
                   </FormControl>
                   <p className="text-xs text-muted-foreground">
-                    Available balance:{" "}
+                    {t("availableBalance")}:{" "}
                     <span className="font-medium">
                       {totalAmount > 0
                         ? `${totalAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })} ${currency}`
@@ -268,7 +270,7 @@ export function InvestDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="rounded-xl border bg-muted/30 px-4 py-3">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Estimated Yield
+                  {t("estimatedYield")}
                 </span>
                 <p className="mt-1 text-lg font-bold text-teal-600">
                   {expectedReturn}% APY
@@ -276,31 +278,31 @@ export function InvestDialog({
               </div>
               <div className="rounded-xl border bg-muted/30 px-4 py-3">
                 <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Term Length
+                  {t("termLength")}
                 </span>
                 <p className="mt-1 text-lg font-bold text-foreground">
-                  {loanDuration} Months
+                  {loanDuration} {t("months")}
                 </p>
               </div>
             </div>
 
             <div className="rounded-xl border border-teal-200 bg-linear-to-br from-teal-50 to-cyan-50 p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Your investment</span>
+                <span className="text-sm text-muted-foreground">{t("yourInvestment")}</span>
                 <span className="text-sm font-semibold text-foreground">
                   {safeAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">
-                  Estimated return ({expectedReturn}% &times; {loanDuration}mo)
+                  {t("estimatedReturn", { rate: expectedReturn, duration: loanDuration })}
                 </span>
                 <span className="text-sm font-semibold text-teal-600">
                   +{estimatedReturn.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                 </span>
               </div>
               <div className="border-t border-teal-200 pt-3 flex items-center justify-between">
-                <span className="text-sm font-semibold text-foreground">Total at maturity</span>
+                <span className="text-sm font-semibold text-foreground">{t("totalAtMaturity")}</span>
                 <span className="text-lg font-bold text-teal-700">
                   {totalAtMaturity.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {currency}
                 </span>
@@ -310,9 +312,7 @@ export function InvestDialog({
             <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
               <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
               <p className="text-sm text-amber-800">
-                <span className="font-semibold">Disclaimer:</span> Please
-                review your investment amount carefully. Once confirmed, these
-                amounts are not editable and the transaction is final.
+                <span className="font-semibold">Disclaimer:</span> {t("disclaimer")}
               </p>
             </div>
 
@@ -327,12 +327,11 @@ export function InvestDialog({
               disabled={isSubmitDisabled}
               className="h-12 w-full rounded-xl bg-cyan-500 text-base font-semibold text-white hover:bg-cyan-600"
             >
-              {submitting ? "Processing..." : "Confirm Investment"}
+              {submitting ? t("processing") : t("confirmInvestment")}
             </Button>
 
             <p className="text-center text-xs text-muted-foreground">
-              By clicking confirm, you agree to the Terms of Service and
-              Investment Agreement.
+              {t("termsAgreement")}
             </p>
           </form>
         </Form>

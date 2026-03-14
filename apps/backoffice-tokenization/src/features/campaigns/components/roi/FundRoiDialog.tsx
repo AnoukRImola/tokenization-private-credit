@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -30,11 +31,12 @@ export function FundRoiDialog({
   vaultId,
   onFunded,
 }: FundRoiDialogProps) {
+  const t = useTranslations("roi");
   const [amount, setAmount] = useState("");
 
   const { execute, isSubmitting, error } = useFundRoi({
     onSuccess: () => {
-      toast.success("Vault funded successfully");
+      toast.success(t("fundRoi.success"));
       onFunded();
       onOpenChange(false);
       setAmount("");
@@ -52,21 +54,21 @@ export function FundRoiDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full! sm:max-w-lg!">
         <DialogHeader>
-          <DialogTitle>Fund ROI — {campaignName}</DialogTitle>
+          <DialogTitle>{t("fundRoi.title", { name: campaignName })}</DialogTitle>
           <DialogDescription>
-            Transfer USDC to the vault so investors can claim their returns.
+            {t("fundRoi.description")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="space-y-2">
-            <Label htmlFor="fundAmount">Amount (USDC)</Label>
+            <Label htmlFor="fundAmount">{t("fundRoi.amountLabel")}</Label>
             <Input
               id="fundAmount"
               type="number"
               step="0.01"
               min="0.01"
-              placeholder="e.g. 1000"
+              placeholder={t("fundRoi.amountPlaceholder")}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               disabled={isSubmitting}
@@ -75,7 +77,7 @@ export function FundRoiDialog({
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Vault:{" "}
+            {t("fundRoi.vaultLabel")}:{" "}
             <span className="font-mono text-foreground">{vaultId}</span>
           </p>
 
@@ -91,10 +93,10 @@ export function FundRoiDialog({
             {isSubmitting ? (
               <div className="flex items-center justify-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Funding Vault...</span>
+                <span>{t("fundRoi.funding")}</span>
               </div>
             ) : (
-              "Fund Vault"
+              t("fundRoi.submit")
             )}
           </Button>
         </form>

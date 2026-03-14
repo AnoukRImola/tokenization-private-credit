@@ -20,6 +20,7 @@ import { Badge } from "@tokenization/ui/badge";
 import { ChangeMilestoneStatusDialog } from "../../single-multi-release/change-milestone-status/dialog/ChangeMilestoneStatus";
 import { ApproveMilestoneButton } from "../../single-multi-release/approve-milestone/button/ApproveMilestone";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
+import { useSharedTranslation } from "../../../i18n/TranslationProvider";
 import { ReleaseMilestoneButton } from "../../multi-release/release-milestone/button/ReleaseMilestone";
 import { DisputeMilestoneButton } from "../../multi-release/dispute-milestone/button/DisputeMilestone";
 import { ResolveDisputeDialog } from "../../multi-release/resolve-dispute/dialog/ResolveDispute";
@@ -42,6 +43,7 @@ const MilestoneCardComponent = ({
   userRolesInEscrow,
   onViewDetails,
 }: MilestoneCardProps) => {
+  const { t } = useSharedTranslation();
   const getMilestoneStatusBadge = (
     milestone: SingleReleaseMilestone | MultiReleaseMilestone
   ) => {
@@ -49,7 +51,7 @@ const MilestoneCardComponent = ({
       return (
         <Badge variant="destructive">
           <CircleAlert className="h-3.5 w-3.5" />
-          <span>Disputed</span>
+          <span>{t("escrow.milestoneCard.disputed")}</span>
         </Badge>
       );
     }
@@ -57,7 +59,7 @@ const MilestoneCardComponent = ({
       return (
         <Badge variant="default">
           <CircleCheckBig className="h-3.5 w-3.5" />
-          <span>Released</span>
+          <span>{t("escrow.milestoneCard.released")}</span>
         </Badge>
       );
     }
@@ -69,7 +71,7 @@ const MilestoneCardComponent = ({
       return (
         <Badge variant="default">
           <Handshake className="h-3.5 w-3.5" />
-          <span>Resolved</span>
+          <span>{t("escrow.milestoneCard.resolved")}</span>
         </Badge>
       );
     }
@@ -80,7 +82,7 @@ const MilestoneCardComponent = ({
       return (
         <Badge variant="default">
           <CheckCheck className="h-3.5 w-3.5" />
-          <span>Approved</span>
+          <span>{t("escrow.milestoneCard.approved")}</span>
         </Badge>
       );
     }
@@ -208,7 +210,7 @@ const MilestoneCardComponent = ({
           <div className="flex items-center gap-2 p-2 border-primary/20 rounded-lg">
             <FileCheck2 className="w-4 h-4 text-primary flex-shrink-0" />
             <span className="text-xs text-muted-foreground font-medium">
-              Evidence provided
+              {t("escrow.milestoneCard.evidenceProvided")}
             </span>
           </div>
         )}
@@ -225,7 +227,7 @@ const MilestoneCardComponent = ({
           }}
         >
           <Eye className="w-3 h-3 mr-2 flex-shrink-0" />
-          View Details
+          {t("escrow.milestoneCard.viewDetails")}
         </Button>
       </CardContent>
     </Card>

@@ -3,6 +3,7 @@
 
 import { Card } from "@/components/ui/apple-cards-carousel";
 import { useVaultInfo } from "./hooks/useVaultInfo";
+import { useTranslations } from "next-intl";
 
 export type VaultCardProps = {
   vault: {
@@ -17,6 +18,7 @@ export type VaultCardProps = {
 
 // ! IMPORTANT: Not working
 export default function VaultCard({ vault, index }: VaultCardProps) {
+  const t = useTranslations("claimRoi");
   const { vaultContractId, src } = vault;
   const { data, isLoading } = useVaultInfo(vaultContractId);
 
@@ -34,26 +36,26 @@ export default function VaultCard({ vault, index }: VaultCardProps) {
 
             {isLoading ? (
               <p className="text-sm text-muted-foreground">
-                Loading vault information...
+                {t("loadingVault")}
               </p>
             ) : (
               <div className="flex flex-col gap-3">
                 <div>
-                  <h3 className="text-xl font-semibold">Vault Balance</h3>
+                  <h3 className="text-xl font-semibold">{t("vaultBalance")}</h3>
                   <p className="text-lg font-bold">
                     {data?.vaultUsdcBalance ?? 0} USDC
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-semibold">Your Token Balance</h3>
+                  <h3 className="text-xl font-semibold">{t("yourTokenBalance")}</h3>
                   <p className="text-lg font-bold">
                     {data?.userTokenBalance ?? 0} Tokens
                   </p>
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-semibold">Your Claimable ROI</h3>
+                  <h3 className="text-xl font-semibold">{t("yourClaimableRoi")}</h3>
                   <p className="text-lg font-bold">
                     {data?.claimableRoi ?? 0} USDC
                   </p>

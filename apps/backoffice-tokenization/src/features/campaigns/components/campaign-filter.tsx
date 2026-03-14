@@ -1,13 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { CampaignStatus } from "@/features/campaigns/types/campaign.types";
-
-const STATUS_OPTIONS: { value: CampaignStatus | "all"; label: string }[] = [
-  { value: "all", label: "Todas" },
-  { value: "FUNDRAISING", label: "Recaudando" },
-  { value: "ACTIVE", label: "Activa" },
-  { value: "CLOSED", label: "Cerrada" },
-];
 
 interface CampaignFilterProps {
   value: CampaignStatus | "all";
@@ -15,6 +9,15 @@ interface CampaignFilterProps {
 }
 
 export function CampaignFilter({ value, onChange }: CampaignFilterProps) {
+  const t = useTranslations("campaigns");
+
+  const STATUS_OPTIONS: { value: CampaignStatus | "all"; label: string }[] = [
+    { value: "all", label: t("filterAll") },
+    { value: "FUNDRAISING", label: t("filterFundraising") },
+    { value: "ACTIVE", label: t("filterActive") },
+    { value: "CLOSED", label: t("filterClosed") },
+  ];
+
   return (
     <div className="flex gap-2 flex-wrap">
       {STATUS_OPTIONS.map((option) => (

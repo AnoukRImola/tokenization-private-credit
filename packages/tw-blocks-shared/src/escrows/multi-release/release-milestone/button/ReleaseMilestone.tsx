@@ -15,6 +15,7 @@ import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/E
 import { useEscrowDialogs } from "@tokenization/tw-blocks-shared/src/providers/EscrowDialogsProvider";
 import { useEscrowAmountContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowAmountProvider";
 import { Loader2 } from "lucide-react";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 type ReleaseMilestoneButtonProps = {
   milestoneIndex: number | string;
@@ -23,6 +24,7 @@ type ReleaseMilestoneButtonProps = {
 export const ReleaseMilestoneButton = ({
   milestoneIndex,
 }: ReleaseMilestoneButtonProps) => {
+  const { t } = useSharedTranslation();
   const { releaseFunds } = useEscrowsMutations();
   const { selectedEscrow, updateEscrow } = useEscrowContext();
   const dialogStates = useEscrowDialogs();
@@ -108,10 +110,10 @@ export const ReleaseMilestoneButton = ({
       {isSubmitting ? (
         <div className="flex items-center">
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="ml-2">Releasing...</span>
+          <span className="ml-2">{t("escrow.release.releasing")}</span>
         </div>
       ) : (
-        "Release Milestone"
+        t("escrow.release.trigger")
       )}
     </Button>
   );

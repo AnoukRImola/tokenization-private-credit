@@ -18,8 +18,10 @@ import {
 } from "@tokenization/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { useFundEscrow } from "./useFundEscrow";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 export const FundEscrowDialog = () => {
+  const { t } = useSharedTranslation();
   const [open, setOpen] = React.useState(false);
   const { form, handleSubmit, isSubmitting } = useFundEscrow({
     onSuccess: () => setOpen(false),
@@ -29,12 +31,12 @@ export const FundEscrowDialog = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" className="cursor-pointer w-full">
-          Fund
+          {t("escrow.fund.trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Fund Escrow</DialogTitle>
+          <DialogTitle>{t("escrow.fund.title")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={handleSubmit}>
@@ -43,11 +45,11 @@ export const FundEscrowDialog = () => {
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>{t("escrow.fund.amountLabel")}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter amount"
+                      placeholder={t("escrow.fund.amountPlaceholder")}
                       {...field}
                     />
                   </FormControl>
@@ -65,10 +67,10 @@ export const FundEscrowDialog = () => {
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="ml-2">Funding...</span>
+                    <span className="ml-2">{t("escrow.fund.submitting")}</span>
                   </div>
                 ) : (
-                  "Fund"
+                  t("escrow.fund.submit")
                 )}
               </Button>
             </div>

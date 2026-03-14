@@ -60,14 +60,23 @@ const ERROR_MESSAGES_BY_CONTEXT: Record<
   "token-sale": TOKEN_SALE_ERROR_MESSAGES,
 };
 
+type TranslationFn = (key: string, values?: Record<string, unknown>) => string;
+
 /**
- * Extracts and maps contract error codes to user-friendly messages
+ * Extracts and maps contract error codes to user-friendly messages.
+ *
+ * When a translation function `t` is provided (from `useTranslations("contractErrors")`),
+ * it will use i18n keys like `t("vault.1")` or `t("tokenSale.5")`.
+ * Falls back to hardcoded English messages when `t` is not provided.
+ *
  * @param error - The raw error from Soroban
  * @param context - Contract context ('vault' | 'token-sale') to select the correct error map
+ * @param t - Optional translation function from useTranslations("contractErrors")
  */
 export function extractContractError(
   error: unknown,
   context?: "vault" | "token-sale",
+  t?: TranslationFn,
 ): {
   message: string;
   details: string;
@@ -80,6 +89,28 @@ export function extractContractError(
 
   if (errorCodeMatch) {
     const errorCode = parseInt(errorCodeMatch[1], 10);
+
+    // Try i18n first
+    if (t && context) {
+      const i18nContext = context === "token-sale" ? "tokenSale" : context;
+      const translatedMessage = t(`${i18nContext}.${errorCode}`);
+
+      // next-intl returns the key path when translation is missing
+      if (translatedMessage && !translatedMessage.includes(`${i18nContext}.${errorCode}`)) {
+        return {
+          message: t("title"),
+          details: translatedMessage,
+        };
+      }
+
+      // Fall back to unknownCode with the code param
+      return {
+        message: t("title"),
+        details: t("unknownCode", { code: errorCode }),
+      };
+    }
+
+    // Fallback to hardcoded messages
     const errorMap = context
       ? ERROR_MESSAGES_BY_CONTEXT[context]
       : undefined;
@@ -100,7 +131,7 @@ export function extractContractError(
 
   // Generic error response if no specific error code found
   return {
-    message: "Contract Error",
+    message: t ? t("title") : "Contract Error",
     details: errorString,
   };
 }

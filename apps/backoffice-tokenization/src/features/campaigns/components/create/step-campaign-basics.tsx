@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { UseFormReturn } from "react-hook-form";
 import {
   Form,
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export function StepCampaignBasics({ form }: Props) {
+  const t = useTranslations("createCampaign");
+
   return (
     <Form {...form}>
       <div className="flex flex-col gap-5">
@@ -27,12 +30,12 @@ export function StepCampaignBasics({ form }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Nombre de la Campaña
+                {t("nameLabel")}
                 <span className="text-destructive ml-1">*</span>
               </FormLabel>
               <FormControl>
                 <Input
-                  placeholder="ej. Micro-Préstamos para Mujeres Emprendedoras"
+                  placeholder={t("namePlaceholder")}
                   {...field}
                 />
               </FormControl>
@@ -47,12 +50,12 @@ export function StepCampaignBasics({ form }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Descripción
+                {t("descriptionLabel")}
                 <span className="text-destructive ml-1">*</span>
               </FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Describe brevemente el propósito de este fondo..."
+                  placeholder={t("descriptionPlaceholder")}
                   className="resize-none min-h-28"
                   {...field}
                 />
@@ -68,11 +71,11 @@ export function StepCampaignBasics({ form }: Props) {
           render={({ field }) => (
             <FormItem>
               <FormLabel>
-                Nombre del Token
+                {t("tokenNameLabel")}
                 <span className="text-destructive ml-1">*</span>
               </FormLabel>
               <FormControl>
-                <Input placeholder="ej. AgriGrowth Bond" {...field} />
+                <Input placeholder={t("tokenNamePlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -86,7 +89,7 @@ export function StepCampaignBasics({ form }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Pool Size (USD)
+                  {t("poolSizeLabel")}
                   <span className="text-destructive ml-1">*</span>
                 </FormLabel>
                 <FormControl>
@@ -107,7 +110,7 @@ export function StepCampaignBasics({ form }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Tamaño del Préstamo (USD)
+                  {t("loanSizeLabel")}
                   <span className="text-destructive ml-1">*</span>
                 </FormLabel>
                 <FormControl>
@@ -128,7 +131,7 @@ export function StepCampaignBasics({ form }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Duración del Préstamo (meses)
+                  {t("loanDurationLabel")}
                   <span className="text-destructive ml-1">*</span>
                 </FormLabel>
                 <FormControl>
@@ -149,7 +152,7 @@ export function StepCampaignBasics({ form }: Props) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Retorno Esperado (%)
+                  {t("expectedReturnLabel")}
                   <span className="text-destructive ml-1">*</span>
                 </FormLabel>
                 <FormControl>

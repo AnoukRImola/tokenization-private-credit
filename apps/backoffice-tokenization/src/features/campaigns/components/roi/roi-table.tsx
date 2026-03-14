@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   Table,
   TableBody,
@@ -16,6 +17,7 @@ import type { RoiTableProps } from "./types";
 const PAGE_SIZE = 4;
 
 export function RoiTable({ campaigns, onAddFunds }: RoiTableProps) {
+  const t = useTranslations("roi");
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const escrowIds = campaigns.map((c) => c.escrowId).filter(Boolean);
@@ -35,16 +37,16 @@ export function RoiTable({ campaigns, onAddFunds }: RoiTableProps) {
         <TableHeader>
           <TableRow className="border-border">
             <TableHead className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-              Nombre del Proyecto
+              {t("projectName")}
             </TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-              Invertido
+              {t("invested")}
             </TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-widest text-text-muted">
-              Estado
+              {t("statusHeader")}
             </TableHead>
             <TableHead className="text-xs font-semibold uppercase tracking-widest text-text-muted text-right">
-              Acciones
+              {t("actions")}
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -68,7 +70,7 @@ export function RoiTable({ campaigns, onAddFunds }: RoiTableProps) {
             size="sm"
             onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
           >
-            Load More
+            {t("loadMore")}
           </Button>
         </div>
       )}

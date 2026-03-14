@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -28,14 +29,15 @@ export function CreateRoiDialog({
   onClose,
   onSubmit,
 }: CreateRoiDialogProps) {
+  const t = useTranslations("roi");
+  const tc = useTranslations("common");
   return (
     <Dialog open={!!campaign} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Crear ROI</DialogTitle>
+          <DialogTitle>{t("createRoi.title")}</DialogTitle>
           <DialogDescription>
-            Establezca el multiplicador para el seguimiento del rendimiento de
-            sus activos.
+            {t("createRoi.description")}
           </DialogDescription>
         </DialogHeader>
 
@@ -45,13 +47,13 @@ export function CreateRoiDialog({
               control={form.control}
               name="roiPercentage"
               rules={{
-                required: "El precio es obligatorio",
-                min: { value: 0, message: "Debe ser mayor o igual a 0" },
-                max: { value: 100, message: "No puede ser mayor a 100%" },
+                required: t("createRoi.validation.priceRequired"),
+                min: { value: 0, message: t("createRoi.validation.minPrice") },
+                max: { value: 100, message: t("createRoi.validation.maxPrice") },
               }}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Precio (%)</FormLabel>
+                  <FormLabel>{t("createRoi.priceLabel")}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Input
@@ -78,18 +80,16 @@ export function CreateRoiDialog({
               <Info className="size-5 text-primary shrink-0 mt-0.5" />
               <div className="flex flex-col gap-1.5">
                 <span className="text-sm font-semibold text-foreground">
-                  Cómo funciona
+                  {t("createRoi.howItWorks")}
                 </span>
                 <p className="text-sm text-text-secondary leading-relaxed">
-                  El multiplicador ajusta el seguimiento en tiempo real
-                  basándose en el porcentaje de precio establecido para
-                  optimizar el rendimiento de sus activos en el Vault.
+                  {t("createRoi.howItWorksDesc")}
                 </p>
                 <button
                   type="button"
                   className="text-sm font-semibold text-primary hover:text-primary/80 transition-colors text-left w-fit cursor-pointer"
                 >
-                  Leer más →
+                  {t("createRoi.readMore")}
                 </button>
               </div>
             </div>
@@ -101,10 +101,10 @@ export function CreateRoiDialog({
                 onClick={onClose}
                 className="cursor-pointer"
               >
-                Cancelar
+                {tc("cancel")}
               </Button>
               <Button type="submit" className="cursor-pointer gap-1.5">
-                Crear Vault
+                {t("createRoi.createVault")}
                 <ArrowRight className="size-4" />
               </Button>
             </DialogFooter>

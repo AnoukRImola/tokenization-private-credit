@@ -22,10 +22,12 @@ import { useCreateVault } from "./useCreateVault";
 import { numericInputKeyDown, parseNumericInput } from "@/lib/numeric-input";
 import { useWatch } from "react-hook-form";
 import { VaultDeploySuccessDialog } from "./VaultDeploySuccessDialog";
+import { useTranslations } from "next-intl";
 
 export const CreateVaultDialog = () => {
   const [open, setOpen] = React.useState(false);
   const [openSuccess, setOpenSuccess] = React.useState(false);
+  const t = useTranslations("vaults");
 
   const { form, isSubmitting, error, response, setResponse, handleSubmit } =
     useCreateVault({
@@ -48,12 +50,12 @@ export const CreateVaultDialog = () => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" type="button" className="cursor-pointer">
-            Create Vault
+            {t("createVault")}
           </Button>
         </DialogTrigger>
         <DialogContent className="w-full! sm:max-w-lg! max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create Vault</DialogTitle>
+            <DialogTitle>{t("title")}</DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
@@ -61,24 +63,22 @@ export const CreateVaultDialog = () => {
                 control={form.control}
                 name="price"
                 rules={{
-                  required: "Price is required",
-                  max: { value: 100, message: "Cannot exceed 100%" },
+                  required: t("validation.priceRequired"),
+                  max: { value: 100, message: t("validation.maxPrice") },
                 }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Price<span className="text-destructive ml-1">*</span>
+                      {t("priceLabel")}<span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormDescription>
-                      The percentage you enter becomes a multiplier on the base
-                      price. 6% → 1.06, 20% → 1.20. That multiplier is the final
-                      price per token.
+                      {t("priceDesc")}
                     </FormDescription>
                     <FormControl>
                       <Input
                         type="text"
                         inputMode="decimal"
-                        placeholder="Enter price"
+                        placeholder={t("pricePlaceholder")}
                         autoComplete="off"
                         {...field}
                         onKeyDown={numericInputKeyDown}
@@ -86,7 +86,7 @@ export const CreateVaultDialog = () => {
                       />
                     </FormControl>
                     <div className="text-xs text-muted-foreground mt-1">
-                      Multiplier:{" "}
+                      {t("multiplier")}:{" "}
                       <span className="font-medium">
                         {Number.isFinite(multiplier)
                           ? multiplier.toFixed(4)
@@ -94,7 +94,7 @@ export const CreateVaultDialog = () => {
                       </span>
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      Price per token (base 1):{" "}
+                      {t("pricePerToken")}:{" "}
                       <span className="font-medium">
                         {Number.isFinite(finalPricePerToken)
                           ? finalPricePerToken.toFixed(4)
@@ -109,21 +109,20 @@ export const CreateVaultDialog = () => {
               <FormField
                 control={form.control}
                 name="factoryAddress"
-                rules={{ required: "Factory address is required" }}
+                rules={{ required: t("validation.factoryRequired") }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Factory Address
+                      {t("factoryAddressLabel")}
                       <span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormDescription>
-                      The factory address of the token you want to deploy the
-                      vault for.
+                      {t("factoryAddressDesc")}
                     </FormDescription>
                     <FormControl>
                       <Input
                         type="text"
-                        placeholder="Enter factory address"
+                        placeholder={t("factoryAddressPlaceholder")}
                         autoComplete="off"
                         {...field}
                       />
@@ -147,10 +146,10 @@ export const CreateVaultDialog = () => {
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="ml-2">Creating...</span>
+                    <span className="ml-2">{t("creating")}</span>
                   </div>
                 ) : (
-                  "Create Vault"
+                  t("createVault")
                 )}
               </Button>
             </form>

@@ -13,6 +13,7 @@ import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/E
 import { useEscrowAmountContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowAmountProvider";
 import { CircleCheckBig } from "lucide-react";
 import { MultiReleaseMilestone } from "@trustless-work/escrow";
+import { useSharedTranslation } from "../../../i18n/TranslationProvider";
 
 interface SuccessReleaseDialogProps {
   isOpen: boolean;
@@ -24,6 +25,7 @@ export const SuccessReleaseDialog = ({
   onOpenChange,
 }: SuccessReleaseDialogProps) => {
   const { selectedEscrow } = useEscrowContext();
+  const { t } = useSharedTranslation();
   const {
     receiverAmount,
     platformFeeAmount,
@@ -121,10 +123,10 @@ export const SuccessReleaseDialog = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CircleCheckBig className="h-5 w-5 text-green-600" />
-            Release Successful
+            {t("escrow.successRelease.title")}
           </DialogTitle>
           <DialogDescription>
-            Funds were distributed successfully to the corresponding parties.
+            {t("escrow.successRelease.description")}
           </DialogDescription>
         </DialogHeader>
 

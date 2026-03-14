@@ -13,6 +13,7 @@ import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/w
 import { SendTransactionService } from "@/lib/sendTransactionService";
 import { toastSuccessWithTx } from "@/lib/toastWithTx";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 function toCampaign(inv: InvestmentFromApi): Campaign {
   return {
@@ -43,6 +44,8 @@ function aggregateByCampaign(investments: InvestmentFromApi[]): Campaign[] {
 }
 
 export default function MyInvestmentsPage() {
+  const t = useTranslations("investments");
+  const tClaimRoi = useTranslations("claimRoi");
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<CampaignStatus | "all">("all");
   const { data: investments, isLoading } = useUserInvestments();
@@ -69,12 +72,12 @@ export default function MyInvestmentsPage() {
       const campaign = campaigns.find((c) => c.id === campaignId);
 
       if (!campaign?.vaultId) {
-        toast.error("Vault contract not available for this campaign.");
+        toast.error(tClaimRoi("noVaultAvailable"));
         return;
       }
 
       if (!walletAddress) {
-        toast.error("Please connect your wallet to claim ROI.");
+        toast.error(tClaimRoi("connectToClaim"));
         return;
       }
 
@@ -87,7 +90,7 @@ export default function MyInvestmentsPage() {
 
         if (!claimResponse?.success || !claimResponse?.xdr) {
           throw new Error(
-            claimResponse?.message ?? "Failed to build claim transaction.",
+            claimResponse?.message ?? tClaimRoi("buildFailed"),
           );
         }
 
@@ -103,24 +106,24 @@ export default function MyInvestmentsPage() {
 
         if (submitResponse.status !== "SUCCESS") {
           throw new Error(
-            submitResponse.message ?? "Transaction submission failed.",
+            submitResponse.message ?? tClaimRoi("claimFailed"),
           );
         }
 
-        toastSuccessWithTx("ROI claimed successfully!", submitResponse.hash);
+        toastSuccessWithTx(tClaimRoi("claimSuccess"), submitResponse.hash);
       } catch (e) {
-        const msg = e instanceof Error ? e.message : "Unexpected error while claiming ROI.";
+        const msg = e instanceof Error ? e.message : tClaimRoi("unexpectedError");
         toast.error(msg);
       }
     },
-    [campaigns, walletAddress],
+    [campaigns, walletAddress, tClaimRoi],
   );
 
   return (
     <div className="flex flex-col gap-6">
       <SectionTitle
-        title="My Investments"
-        description="Track your active investments and claim your returns."
+        title={t("title")}
+        description={t("trackDescription")}
       />
       <CampaignToolbar
         onSearchChange={setSearch}
@@ -128,7 +131,7 @@ export default function MyInvestmentsPage() {
       />
       {isLoading ? (
         <p className="text-sm text-muted-foreground text-center py-8">
-          Loading your investments...
+          {t("loadingYourInvestments")}
         </p>
       ) : (
         <CampaignList campaigns={filteredCampaigns} onClaimRoi={handleClaimRoi} />

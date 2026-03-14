@@ -18,8 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@tokenization/ui/select";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 export const ApproveMilestoneForm = () => {
+  const { t } = useSharedTranslation();
   const { form, handleSubmit, isSubmitting } = useApproveMilestone();
   const { selectedEscrow } = useEscrowContext();
 
@@ -67,10 +69,10 @@ export const ApproveMilestoneForm = () => {
             {isSubmitting ? (
               <div className="flex items-center">
                 <Loader2 className="h-5 w-5 animate-spin" />
-                <span className="ml-2">Approving...</span>
+                <span className="ml-2">{t("escrow.approve.approving")}</span>
               </div>
             ) : (
-              "Approve"
+              t("escrow.approve.approve")
             )}
           </Button>
         </div>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import type { Campaign } from "../types/campaign.types";
 import { CampaignCard } from "./campaign-card";
 
@@ -7,10 +10,12 @@ type CampaignListProps = {
 };
 
 export function CampaignList({ campaigns, onClaimRoi }: CampaignListProps) {
+  const t = useTranslations("campaigns");
+
   if (campaigns.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-text-muted">
-        <p className="text-sm">No campaigns available.</p>
+        <p className="text-sm">{t("empty")}</p>
       </div>
     );
   }

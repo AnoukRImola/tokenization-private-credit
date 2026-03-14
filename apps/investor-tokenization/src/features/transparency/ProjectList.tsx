@@ -7,6 +7,7 @@ import type { GetEscrowsFromIndexerResponse } from "@trustless-work/escrow/types
 import { ProjectCard } from "./ProjectCard";
 import { fetchCampaigns } from "./services/campaign.service";
 import type { CampaignFromApi, CampaignStatus } from "./types";
+import { useTranslations } from "next-intl";
 
 const HIDDEN_STATUSES: CampaignStatus[] = ["DRAFT", "PAUSED"];
 
@@ -16,6 +17,7 @@ interface ProjectListProps {
 }
 
 export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) => {
+  const t = useTranslations("campaigns");
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
 
   const { data: campaigns = [], isLoading: isCampaignsLoading } = useQuery({
@@ -81,7 +83,7 @@ export const ProjectList = ({ search = "", filter = "all" }: ProjectListProps) =
   if (!isLoading && filteredCampaigns.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-text-muted">
-        <p className="text-sm">No campaigns available.</p>
+        <p className="text-sm">{t("empty")}</p>
       </div>
     );
   }

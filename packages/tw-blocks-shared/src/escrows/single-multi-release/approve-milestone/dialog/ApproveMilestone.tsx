@@ -25,8 +25,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@tokenization/ui/select";
+import { useSharedTranslation } from "../../../../i18n/TranslationProvider";
 
 export const ApproveMilestoneDialog = () => {
+  const { t } = useSharedTranslation();
   const [open, setOpen] = React.useState(false);
   const { form, handleSubmit, isSubmitting } = useApproveMilestone({
     onSuccess: () => setOpen(false),
@@ -37,12 +39,12 @@ export const ApproveMilestoneDialog = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button type="button" className="cursor-pointer w-full">
-          Approve Milestone
+          {t("escrow.approve.trigger")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Approve Milestone</DialogTitle>
+          <DialogTitle>{t("escrow.approve.trigger")}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -90,10 +92,10 @@ export const ApproveMilestoneDialog = () => {
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="ml-2">Approving...</span>
+                    <span className="ml-2">{t("escrow.approve.approving")}</span>
                   </div>
                 ) : (
-                  "Approve"
+                  t("escrow.approve.approve")
                 )}
               </Button>
             </div>

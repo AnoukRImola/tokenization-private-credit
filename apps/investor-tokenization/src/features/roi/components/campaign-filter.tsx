@@ -1,15 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { CampaignStatus } from "../types/campaign.types";
-
-const STATUS_OPTIONS: { value: CampaignStatus | "all"; label: string }[] = [
-  { value: "all", label: "All" },
-  { value: "FUNDRAISING", label: "Fundraising" },
-  { value: "ACTIVE", label: "Active" },
-  { value: "REPAYMENT", label: "Repayment" },
-  { value: "CLAIMABLE", label: "Claimable" },
-  { value: "CLOSED", label: "Closed" },
-];
 
 interface CampaignFilterProps {
   value: CampaignStatus | "all";
@@ -17,6 +9,17 @@ interface CampaignFilterProps {
 }
 
 export function CampaignFilter({ value, onChange }: CampaignFilterProps) {
+  const t = useTranslations("campaigns");
+
+  const STATUS_OPTIONS: { value: CampaignStatus | "all"; labelKey: string }[] = [
+    { value: "all", labelKey: "filterAll" },
+    { value: "FUNDRAISING", labelKey: "filterFundraising" },
+    { value: "ACTIVE", labelKey: "filterActive" },
+    { value: "REPAYMENT", labelKey: "filterRepayment" },
+    { value: "CLAIMABLE", labelKey: "filterClaimable" },
+    { value: "CLOSED", labelKey: "filterClosed" },
+  ];
+
   return (
     <div className="flex gap-2 flex-wrap">
       {STATUS_OPTIONS.map((option) => (
@@ -30,7 +33,7 @@ export function CampaignFilter({ value, onChange }: CampaignFilterProps) {
               : "bg-secondary text-secondary-foreground hover:bg-secondary/70"
           }`}
         >
-          {option.label}
+          {t(option.labelKey)}
         </button>
       ))}
     </div>

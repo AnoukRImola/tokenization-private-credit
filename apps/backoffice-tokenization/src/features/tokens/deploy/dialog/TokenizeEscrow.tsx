@@ -20,10 +20,12 @@ import {
 import { Loader2 } from "lucide-react";
 import { TokenizeEscrowSuccessDialog } from "./TokenizeEscrowSuccessDialog";
 import { useTokenizeEscrow } from "./useTokenizeEscrow";
+import { useTranslations } from "next-intl";
 
 export const TokenizeEscrowDialog = () => {
   const [open, setOpen] = React.useState(false);
   const [openSuccess, setOpenSuccess] = React.useState(false);
+  const t = useTranslations("tokens");
 
   const { form, isSubmitting, error, response, setResponse, handleSubmit } =
     useTokenizeEscrow({
@@ -38,27 +40,27 @@ export const TokenizeEscrowDialog = () => {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button variant="outline" type="button" className="cursor-pointer">
-            Tokenize Escrow
+            {t("tokenizeEscrow")}
           </Button>
         </DialogTrigger>
         <DialogContent className="!w-full sm:!max-w-lg max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Tokenize Escrow</DialogTitle>
+            <DialogTitle>{t("title")}</DialogTitle>
           </DialogHeader>
           <Form {...form}>
             <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
               <FormField
                 control={form.control}
                 name="escrowId"
-                rules={{ required: "Escrow ID is required" }}
+                rules={{ required: t("validation.escrowIdRequired") }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Escrow ID<span className="text-destructive ml-1">*</span>
+                      {t("escrowIdLabel")}<span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Enter escrow contract ID"
+                        placeholder={t("escrowIdPlaceholder")}
                         autoComplete="off"
                         {...field}
                       />
@@ -71,15 +73,15 @@ export const TokenizeEscrowDialog = () => {
               <FormField
                 control={form.control}
                 name="tokenName"
-                rules={{ required: "Token name is required" }}
+                rules={{ required: t("validation.tokenNameRequired") }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Token Name<span className="text-destructive ml-1">*</span>
+                      {t("tokenNameLabel")}<span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g., Trustless Work Token"
+                        placeholder={t("tokenNamePlaceholder")}
                         autoComplete="off"
                         {...field}
                       />
@@ -92,25 +94,25 @@ export const TokenizeEscrowDialog = () => {
               <FormField
                 control={form.control}
                 name="tokenSymbol"
-                rules={{ 
-                  required: "Token symbol is required",
+                rules={{
+                  required: t("validation.tokenSymbolRequired"),
                   maxLength: {
                     value: 12,
-                    message: "Symbol must be 12 characters or less"
+                    message: t("validation.symbolMaxLength")
                   },
                   pattern: {
                     value: /^[A-Z0-9]+$/,
-                    message: "Symbol must contain only uppercase letters and numbers"
+                    message: t("validation.symbolPattern")
                   }
                 }}
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel className="flex items-center">
-                      Token Symbol/Ticker<span className="text-destructive ml-1">*</span>
+                      {t("tokenSymbolLabel")}<span className="text-destructive ml-1">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g., TRUST"
+                        placeholder={t("tokenSymbolPlaceholder")}
                         autoComplete="off"
                         maxLength={12}
                         {...field}
@@ -121,7 +123,7 @@ export const TokenizeEscrowDialog = () => {
                       />
                     </FormControl>
                     <FormDescription>
-                      Maximum 12 characters. Uppercase letters and numbers only.
+                      {t("tokenSymbolDesc")}
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -130,11 +132,8 @@ export const TokenizeEscrowDialog = () => {
 
               <div className="rounded-lg border bg-muted/50 p-4">
                 <p className="text-sm text-muted-foreground">
-                  <strong>Note:</strong> This token represents Escrow{" "}
-                  <span className="font-mono text-xs">
-                    {form.watch("escrowId") || "[Escrow ID]"}
-                  </span>{" "}
-                  and can only be minted by its Token Sale contract.
+                  <strong>Note:</strong>{" "}
+                  {t("tokenNote", { escrowId: form.watch("escrowId") || "[Escrow ID]" })}
                 </p>
               </div>
 
@@ -152,10 +151,10 @@ export const TokenizeEscrowDialog = () => {
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
                     <Loader2 className="h-5 w-5 animate-spin" />
-                    <span className="ml-2">Deploying...</span>
+                    <span className="ml-2">{t("deploying")}</span>
                   </div>
                 ) : (
-                  "Deploy Token"
+                  t("deployToken")
                 )}
               </Button>
             </form>

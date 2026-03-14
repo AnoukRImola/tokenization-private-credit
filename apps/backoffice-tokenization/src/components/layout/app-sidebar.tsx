@@ -8,6 +8,7 @@ import {
   type AppSidebarLogoConfig,
 } from "@tokenization/ui/app-sidebar";
 import { SidebarWalletButton } from "@tokenization/ui/sidebar-wallet-button";
+import { useTranslations } from "next-intl";
 
 const logo: AppSidebarLogoConfig = {
   element: (
@@ -23,20 +24,22 @@ const logo: AppSidebarLogoConfig = {
   href: "/",
 };
 
-const navItems: AppSidebarNavItem[] = [
-  {
-    label: "Campañas",
-    href: "/campaigns",
-    icon: Wallet,
-  },
-  {
-    label: "Retorno de Inversión",
-    href: "/roi",
-    icon: TrendingUp,
-  },
-];
-
 export function AppSidebar() {
+  const t = useTranslations("nav");
+
+  const navItems: AppSidebarNavItem[] = [
+    {
+      label: t("campaigns"),
+      href: "/campaigns",
+      icon: Wallet,
+    },
+    {
+      label: t("roi"),
+      href: "/roi",
+      icon: TrendingUp,
+    },
+  ];
+
   return (
     <SharedAppSidebar
       navItems={navItems}

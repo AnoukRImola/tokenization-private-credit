@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@tokenization/ui/button";
 import { PhaseStatusRow } from "./phase-status-row";
 import type { PhaseState } from "@/features/campaigns/types/campaign.types";
@@ -20,6 +21,8 @@ export function StepCreateToken({
   onRun,
   onRetry,
 }: Props) {
+  const t = useTranslations("createCampaign");
+  const tCommon = useTranslations("common");
   const hasTriggered = useRef(false);
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export function StepCreateToken({
   return (
     <div className="flex flex-col items-center gap-8 py-12">
       <h2 className="text-xl font-semibold">
-        Desplegando contratos y creando campaña
+        {t("deployingTitle")}
       </h2>
       <div className="flex flex-col gap-3 w-full max-w-md">
         {phases.map((phase, index) => (
@@ -51,7 +54,7 @@ export function StepCreateToken({
           }}
           className="cursor-pointer"
         >
-          Reintentar
+          {tCommon("retry")}
         </Button>
       )}
     </div>
