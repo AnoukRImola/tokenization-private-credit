@@ -16,7 +16,7 @@ import { cn } from "@tokenization/shared/lib/utils";
 import { ArrowUpCircle, Landmark, MoreHorizontal, Percent } from "lucide-react";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/campaigns/constants/campaign-status";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import { getVaultIsEnabled } from "@/features/campaigns/services/campaigns.api";
 import { useVaultUsdcBalance } from "@/features/campaigns/hooks/useVaultUsdcBalance";
 import { ToggleVaultButton } from "@/features/campaigns/components/roi/ToggleVaultButton";
@@ -54,7 +54,7 @@ export function RoiTableRow({ campaign, onAddFunds, onUpdateRoi }: RoiTableRowPr
 
       <TableCell>
         <span className="text-sm font-semibold text-foreground">
-          ${formatCurrency(Number(balance) / 10_000_000, 2)}
+          {formatCurrency(Number(balance) / 10_000_000, "USDC")}
         </span>
       </TableCell>
 
