@@ -25,12 +25,6 @@ export class DeployAllDto {
   @IsNotEmpty()
   maxPerInvestor: number;
 
-  @IsBoolean()
-  vaultEnabled: boolean;
-
-  @IsString()
-  usdc: string;
-
   @IsString()
   @IsNotEmpty()
   callerPublicKey: string;
