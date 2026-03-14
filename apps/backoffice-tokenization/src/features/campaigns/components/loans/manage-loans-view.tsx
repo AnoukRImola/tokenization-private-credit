@@ -39,7 +39,7 @@ import {
 import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
 import { useChangeMilestoneStatus } from "@tokenization/tw-blocks-shared/src/escrows/single-multi-release/change-milestone-status/dialog/useChangeMilestoneStatus";
 import { numericInputKeyDown, parseNumericInput } from "@/lib/numeric-input";
-import { formatCurrency, fromStroops } from "@/lib/utils";
+import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 
 const addMilestoneSchema = z.object({
   description: z.string().min(1, "La descripción es obligatoria"),
@@ -253,8 +253,8 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
               <div
                 key={index}
                 className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-colors ${isReleased
-                    ? "border-border bg-secondary/20 opacity-60"
-                    : "border-border bg-card"
+                  ? "border-border bg-secondary/20 opacity-60"
+                  : "border-border bg-card"
                   }`}
               >
                 <div className="flex flex-col gap-0.5">
@@ -271,7 +271,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                   <span
                     className={`text-xs font-semibold ${isReleased ? "text-text-muted" : "text-primary"}`}
                   >
-                    USDC {formatCurrency(milestoneAmount)}
+                    {formatCurrency(milestoneAmount, "USDC")}
                   </span>
                 </div>
 
