@@ -65,8 +65,8 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
 
   return (
     <SharedCampaignCard
-      title={`#${id.slice(0, 3).toUpperCase()} ${title}`}
-      description={description || tCommon("noDescription")}
+      title={title}
+      description={description || "No description"}
       statusBadge={
         <>
           <div className="flex items-center gap-2">

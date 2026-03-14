@@ -57,7 +57,7 @@ export function RoiTableRow({ campaign, onAddFunds, onUpdateRoi }: RoiTableRowPr
 
       <TableCell>
         <span className="text-sm font-semibold text-foreground">
-          ${formatCurrency(Number(balance) / 10_000_000, 2)}
+          {formatCurrency(Number(balance) / 10_000_000, "USDC")}
         </span>
       </TableCell>
 

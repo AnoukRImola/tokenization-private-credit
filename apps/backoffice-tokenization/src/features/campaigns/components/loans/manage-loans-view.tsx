@@ -257,8 +257,8 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
               <div
                 key={index}
                 className={`flex items-center justify-between rounded-xl border px-4 py-3 transition-colors ${isReleased
-                    ? "border-border bg-secondary/20 opacity-60"
-                    : "border-border bg-card"
+                  ? "border-border bg-secondary/20 opacity-60"
+                  : "border-border bg-card"
                   }`}
               >
                 <div className="flex flex-col gap-0.5">
@@ -275,7 +275,7 @@ export function ManageLoansView({ contractId }: ManageLoansViewProps) {
                   <span
                     className={`text-xs font-semibold ${isReleased ? "text-text-muted" : "text-primary"}`}
                   >
-                    USDC {formatCurrency(milestoneAmount)}
+                    {formatCurrency(milestoneAmount, "USDC")}
                   </span>
                 </div>
 

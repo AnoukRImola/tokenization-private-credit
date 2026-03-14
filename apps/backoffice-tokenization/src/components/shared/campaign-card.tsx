@@ -48,7 +48,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
 
   return (
     <SharedCampaignCard
-      title={`#${id.slice(0, 3).toUpperCase()} ${name}`}
+      title={name}
       description={description ?? ""}
       statusBadge={
         <div className="flex items-center gap-2">
