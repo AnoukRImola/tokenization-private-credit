@@ -22,7 +22,9 @@
   },
   "nav": {
     "campaigns": "Campaigns",
-    "roi": "Return on Investment"
+    "roi": "Return on Investment",
+    "documentation": "Documentation",
+    "documentationTooltip": "View documentation"
   },
   "home": {
     "heroTitle": "Entrepreneur Support",

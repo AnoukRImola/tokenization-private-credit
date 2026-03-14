@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -67,6 +67,7 @@ function createCampaignSchema(t: (key: string) => string) {
 // --- LocalStorage persistence ---
 
 interface FlowState {
+  step: number;
   campaign: CreateCampaignFormValues | null;
   escrowContractId: string | null;
   escrowEngagementId: string | null;
@@ -78,6 +79,7 @@ interface FlowState {
 
 function emptyFlowState(): FlowState {
   return {
+    step: 1,
     campaign: null,
     escrowContractId: null,
     escrowEngagementId: null,
@@ -118,7 +120,9 @@ export function useCreateCampaign() {
   const queryClient = useQueryClient();
   const { walletAddress } = useWalletContext();
   const { deployEscrow } = useEscrowsMutations();
-  const [step, setStep] = useState(1);
+
+  const savedFlow = useMemo(() => loadFlowState(), []);
+  const [step, setStep] = useState(() => savedFlow.step ?? 1);
 
   const deployPhaseLabels = useMemo(() => [
     t("deployPhase1"),
@@ -127,9 +131,11 @@ export function useCreateCampaign() {
 
   const campaignSchema = useMemo(() => createCampaignSchema(t), [t]);
 
-  // --- Escrow state (Step 2) ---
-  const [escrowStatus, setEscrowStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
-  const [escrowContractId, setEscrowContractId] = useState<string | null>(null);
+  // --- Escrow state (Step 2) — restored from localStorage ---
+  const [escrowStatus, setEscrowStatus] = useState<"idle" | "loading" | "success" | "error">(
+    savedFlow.escrowContractId ? "success" : "idle",
+  );
+  const [escrowContractId, setEscrowContractId] = useState<string | null>(savedFlow.escrowContractId);
   const [escrowError, setEscrowError] = useState<string | null>(null);
 
   // --- Deploy state (Step 3) ---
@@ -138,10 +144,10 @@ export function useCreateCampaign() {
   );
   const [deployFailedAt, setDeployFailedAt] = useState<number | null>(null);
 
-  // --- Form ---
+  // --- Form — default values restored from localStorage ---
   const form = useForm<CreateCampaignFormValues>({
     resolver: zodResolver(campaignSchema),
-    defaultValues: {
+    defaultValues: savedFlow.campaign ?? {
       name: "",
       description: "",
       poolSize: "" as unknown as number,
@@ -152,6 +158,18 @@ export function useCreateCampaign() {
     },
     mode: "onChange",
   });
+
+  // Persist form values and step to localStorage continuously
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      saveFlowState({ campaign: values as CreateCampaignFormValues });
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
+
+  useEffect(() => {
+    saveFlowState({ step });
+  }, [step]);
 
   // --- Step navigation ---
   const nextStep = async () => {
