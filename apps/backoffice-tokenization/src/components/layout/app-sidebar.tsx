@@ -25,17 +25,17 @@ const logo: AppSidebarLogoConfig = {
   href: "/",
 };
 
-const footerItems: AppSidebarFooterItem[] = [
-  {
-    label: "Documentation",
-    icon: BookOpen,
-    href: "https://interactuar.gitbook.io/interactuar-x-trustless/",
-    tooltip: "View documentation",
-  },
-];
-
 export function AppSidebar() {
   const t = useTranslations("nav");
+
+  const footerItems: AppSidebarFooterItem[] = [
+    {
+      label: t("documentation"),
+      icon: BookOpen,
+      href: "https://interactuar.gitbook.io/interactuar-x-trustless/",
+      tooltip: t("documentationTooltip"),
+    },
+  ];
 
   const navItems: AppSidebarNavItem[] = [
     {

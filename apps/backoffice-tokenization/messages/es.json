@@ -22,7 +22,9 @@
   },
   "nav": {
     "campaigns": "Campañas",
-    "roi": "Retorno de Inversión"
+    "roi": "Retorno de Inversión",
+    "documentation": "Documentación",
+    "documentationTooltip": "Ver documentación"
   },
   "home": {
     "heroTitle": "Apoyo al emprendedor",
