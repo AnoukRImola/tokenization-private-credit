@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { Megaphone, TrendingUp } from "lucide-react";
+import { BookOpen, Megaphone, TrendingUp } from "lucide-react";
 import {
   AppSidebar as SharedAppSidebar,
   type AppSidebarNavItem,
+  type AppSidebarFooterItem,
   type AppSidebarLogoConfig,
 } from "@tokenization/ui/app-sidebar";
 import { SidebarWalletButton } from "@tokenization/ui/sidebar-wallet-button";
@@ -24,6 +25,15 @@ const logo: AppSidebarLogoConfig = {
   ),
   href: "/",
 };
+
+const footerItems: AppSidebarFooterItem[] = [
+  {
+    label: "Documentation",
+    icon: BookOpen,
+    href: "https://interactuar.gitbook.io/interactuar-x-trustless/",
+    tooltip: "View documentation",
+  },
+];
 
 export function AppSidebar() {
   const t = useTranslations("nav");
@@ -45,6 +55,7 @@ export function AppSidebar() {
     <SharedAppSidebar
       navItems={navItems}
       logo={logo}
+      footerItems={footerItems}
       footerContent={<SidebarWalletButton />}
     />
   );

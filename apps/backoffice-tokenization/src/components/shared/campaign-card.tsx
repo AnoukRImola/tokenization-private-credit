@@ -7,12 +7,12 @@ import { Badge } from "@tokenization/ui/badge";
 import { Button } from "@tokenization/ui/button";
 import { CampaignCard as SharedCampaignCard } from "@tokenization/ui/campaign-card";
 import { cn } from "@tokenization/shared/lib/utils";
-import { Banknote, CheckCircle, Circle, Landmark } from "lucide-react";
+import { Banknote, CheckCircle, Circle, ExternalLink, Landmark } from "lucide-react";
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
 import { getCampaignStatusConfig } from "@/features/campaigns/constants/campaign-status";
-import { formatCurrency, fromStroops } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -24,6 +24,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
 
   const statusCfg = getCampaignStatusConfig(t)[status];
   const isDraft = status === "DRAFT";
+  const escrowExplorerUrl = `https://viewer.trustlesswork.com/${escrowId}`;
 
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
 
@@ -43,22 +44,34 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
 
   const allMilestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
   const visibleMilestones = allMilestones.slice(1);
-  const assigned = allMilestones.reduce((sum, m) => sum + fromStroops(m.amount ?? 0), 0);
-  const loansCompleted = visibleMilestones.filter((m) => m.status === "Approved").length;
   const totalLoans = visibleMilestones.length;
-  const progressValue = totalLoans > 0 ? Math.min(100, (loansCompleted / totalLoans) * 100) : 0;
 
   return (
     <SharedCampaignCard
       title={`#${id.slice(0, 3).toUpperCase()} ${name}`}
       description={description ?? ""}
       statusBadge={
-        <Badge
-          variant="outline"
-          className={cn("text-xs font-semibold uppercase tracking-wide", statusCfg.className)}
-        >
-          {statusCfg.label}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge
+            variant="outline"
+            className={cn("text-xs font-semibold uppercase tracking-wide", statusCfg.className)}
+          >
+            {statusCfg.label}
+          </Badge>
+          <Button
+            variant="ghost"
+            className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer p-2 h-auto"
+            asChild
+          >
+            <Link
+              href={escrowExplorerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ExternalLink className="size-3" />
+            </Link>
+          </Button>
+        </div>
       }
       actions={
         !isDraft ? (
@@ -73,11 +86,11 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">{t("poolSize")}:</span> USDC {formatCurrency(assigned)} / USDC {formatCurrency(campaign.poolSize)}
+            <span className="font-bold">{t("poolSize")}:</span> USDC {formatCurrency(escrowData?.balance ?? 0)} / USDC {formatCurrency(campaign.poolSize)}
           </span>
         </div>
       }
-      progress={{ label: t("loansCompleted"), value: progressValue }}
+      stat={{ label: t("loans"), value: totalLoans }}
     >
       {visibleMilestones.length > 0 ? (
         <>

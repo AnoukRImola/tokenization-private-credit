@@ -81,6 +81,8 @@
     "totalAtMaturity": "Total at maturity",
     "disclaimer": "Please review your investment amount carefully. Once confirmed, these amounts are not editable and the transaction is final.",
     "processing": "Processing...",
+    "addingToken": "Adding token to wallet...",
+    "completingInvestment": "Completing investment...",
     "confirmInvestment": "Confirm Investment",
     "termsAgreement": "By clicking confirm, you agree to the Terms of Service and Investment Agreement.",
     "success": "Investment completed successfully.",

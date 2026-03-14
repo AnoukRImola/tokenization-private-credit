@@ -31,7 +31,7 @@ export class DeployService {
       {
         name: dto.name,
         symbol: dto.symbol,
-        escrow_id: dto.escrowContractId,
+        escrow_contract: dto.escrowContractId,
         decimal: TOKEN_DECIMAL,
         mint_authority: dto.mintAuthority,
       },
@@ -75,7 +75,6 @@ export class DeployService {
         params: {
           decimal: TOKEN_DECIMAL,
           escrow_contract: dto.escrowContract,
-          escrow_id: dto.escrowId,
           hard_cap: toMicroUSDC(dto.hardCap),
           max_per_investor: toMicroUSDC(dto.maxPerInvestor),
           participation_salt: randomBytes(32),

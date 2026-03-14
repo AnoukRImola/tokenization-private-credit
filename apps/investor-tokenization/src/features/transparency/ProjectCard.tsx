@@ -28,16 +28,16 @@ function getVisibleMilestones(escrow: Escrow | undefined): MultiReleaseMilestone
   return (escrow.milestones as MultiReleaseMilestone[]).slice(1);
 }
 
+function getTotalLoans(escrow: Escrow | undefined): number {
+  return getVisibleMilestones(escrow).length;
+}
+
 function getLoansCompleted(escrow: Escrow | undefined): number {
   return getVisibleMilestones(escrow).filter((m) => m.status === "Approved").length;
 }
 
-function getTotalMilestones(escrow: Escrow | undefined): number {
-  return getVisibleMilestones(escrow).length;
-}
-
 function getProgress(escrow: Escrow | undefined): number {
-  const total = getTotalMilestones(escrow);
+  const total = getTotalLoans(escrow);
   if (total === 0) return 0;
   return Math.min((getLoansCompleted(escrow) / total) * 100, 100);
 }
@@ -71,15 +71,17 @@ export const ProjectCard = ({
 }: ProjectCardProps) => {
   const t = useTranslations("campaigns");
   const tCommon = useTranslations("common");
-  const { name, description, status, escrowId, tokenSaleId } = campaign;
+  const { name, description, status, escrowId, tokenSaleId, tokenFactoryId } =
+    campaign;
   const progress = getProgress(escrow);
+  const totalLoans = getTotalLoans(escrow);
   const statusCfg = getCampaignStatusConfig(t)[status];
   const escrowExplorerUrl = `https://stellar.expert/explorer/testnet/contract/${escrowId}`;
   const milestones = (escrow?.milestones ?? []) as MultiReleaseMilestone[];
   const assigned = milestones.reduce((sum, m) => sum + fromStroops(m.amount ?? 0), 0);
   const poolSize = campaign.poolSize ?? 0;
 
-  if (isLoading) {
+  if (isLoading && !escrow && !name) {
     return <LoadingSkeleton />;
   }
 
@@ -116,6 +118,7 @@ export const ProjectCard = ({
               escrow,
               escrowId,
               tokenSaleContractId: tokenSaleId,
+              tokenFactoryId: tokenFactoryId ?? undefined,
               campaignId: campaign.id,
             }}
           >
@@ -140,9 +143,15 @@ export const ProjectCard = ({
           </span>
         </div>
       }
-      progress={{ label: t("loansCompleted"), value: progress }}
+      stat={{ label: t("loans"), value: totalLoans }}
     >
-      {milestones.slice(1).length > 0 ? (
+      {isLoading && !escrow ? (
+        <div className="flex flex-col gap-2">
+          <div className="h-4 w-16 animate-pulse rounded bg-muted" />
+          <div className="h-3 w-full animate-pulse rounded bg-muted" />
+          <div className="h-3 w-3/4 animate-pulse rounded bg-muted" />
+        </div>
+      ) : milestones.slice(1).length > 0 ? (
         <>
           <p className="text-xs font-semibold uppercase tracking-widest text-text-muted">
             {t("loans")}

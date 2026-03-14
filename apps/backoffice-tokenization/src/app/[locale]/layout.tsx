@@ -21,7 +21,7 @@ const sharedMessages: Record<string, Record<string, unknown>> = { en: sharedEn, 
 const appMessages: Record<string, Record<string, unknown>> = { en: appEn, es: appEs };
 
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   display: "swap",
   variable: "--font-inter",
 });
@@ -43,6 +43,9 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body className={cn(inter.variable, "antialiased font-sans")}>
         <NextIntlClientProvider messages={messages} locale={locale} formats={{}} now={new Date()} timeZone={Intl.DateTimeFormat().resolvedOptions().timeZone}>
           <SharedTranslationProvider messages={sharedMessages[locale] ?? sharedMessages.es} locale={locale}>

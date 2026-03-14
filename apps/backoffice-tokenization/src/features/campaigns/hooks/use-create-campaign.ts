@@ -254,7 +254,6 @@ export function useCreateCampaign() {
         const { unsignedXdr } = await deployAll({
           tokenName: campaign.tokenName,
           tokenSymbol: slugToSymbol(campaign.tokenName),
-          escrowId: escrowEngagementId,
           escrowContract,
           roiPercentage: Number(campaign.expectedReturn),
           hardCap: Number(campaign.poolSize),

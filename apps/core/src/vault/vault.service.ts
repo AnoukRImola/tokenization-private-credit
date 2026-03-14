@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SorobanService } from '../soroban/soroban.service';
 import { AvailabilityForExchangeDto } from './dto/availability-for-exchange.dto';
 import { ClaimDto } from './dto/claim.dto';
+import { UpdateRoiPorcentageDto } from './dto/update-roi-porcentage.dto';
 
 @Injectable()
 export class VaultService {
@@ -28,6 +29,16 @@ export class VaultService {
     }
 
     return unsignedXdr;
+  }
+
+  updateRoiPorcentage(dto: UpdateRoiPorcentageDto): Promise<string> {
+    return this.soroban.buildContractCallTransaction(
+      dto.contractId,
+      'update_roi_porcentage',
+      { new_roi_porcentage: dto.newRoiPorcentage },
+      dto.callerPublicKey,
+      'vault',
+    );
   }
 
   claim(dto: ClaimDto): Promise<string> {

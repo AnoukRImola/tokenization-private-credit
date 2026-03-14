@@ -19,6 +19,7 @@ import type { Campaign } from "../types/campaign.types";
 import { getCampaignStatusConfig } from "../constants/campaign-status";
 import { fromStroops } from "@/utils/adjustedAmounts";
 import { useTranslations } from "next-intl";
+import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -31,7 +32,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
   const tClaimRoi = useTranslations("claimRoi");
   const { title, description, status, id, escrowId, poolSize } = campaign;
   const statusCfg = getCampaignStatusConfig(t)[status];
-  const escrowExplorerUrl = `https://stellar.expert/explorer/testnet/contract/${escrowId}`;
+  const escrowExplorerUrl = `https://viewer.trustlesswork.com/${escrowId}`;
 
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
 
@@ -60,16 +61,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
 
   const allMilestones = (escrowData?.milestones ?? []) as MultiReleaseMilestone[];
   const visibleMilestones = allMilestones.slice(1);
-  const assigned = allMilestones.reduce(
-    (sum, m) => sum + fromStroops((m.amount as number) ?? 0),
-    0,
-  );
-  const loansCompleted = visibleMilestones.filter(
-    (m) => m.status === "Approved",
-  ).length;
   const totalLoans = visibleMilestones.length;
-  const progressValue =
-    totalLoans > 0 ? Math.min(100, (loansCompleted / totalLoans) * 100) : 0;
 
   return (
     <SharedCampaignCard
@@ -119,16 +111,11 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">{t("poolSize")}:</span> USDC{" "}
-            {assigned.toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-            })}{" "}
-            / USDC{" "}
-            {poolSize.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            <span className="font-bold">{t("poolSize")}:</span> USDC {formatCurrency((escrowData?.balance as number) ?? 0, "USDC")} / USDC {formatCurrency(campaign.poolSize, "USDC")}
           </span>
         </div>
       }
-      progress={{ label: t("loansCompleted"), value: progressValue }}
+      stat={{ label: t("loans"), value: totalLoans }}
     >
       {visibleMilestones.length > 0 ? (
         <>

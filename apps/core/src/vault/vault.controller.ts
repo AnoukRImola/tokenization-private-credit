@@ -2,6 +2,7 @@ import { Controller, Post, Get, Body, Query } from '@nestjs/common';
 import { VaultService } from './vault.service';
 import { AvailabilityForExchangeDto } from './dto/availability-for-exchange.dto';
 import { ClaimDto } from './dto/claim.dto';
+import { UpdateRoiPorcentageDto } from './dto/update-roi-porcentage.dto';
 
 @Controller('vault')
 export class VaultController {
@@ -10,6 +11,12 @@ export class VaultController {
   @Post('availability-for-exchange')
   async availabilityForExchange(@Body() dto: AvailabilityForExchangeDto) {
     const unsignedXdr = await this.vaultService.availabilityForExchange(dto);
+    return { unsignedXdr };
+  }
+
+  @Post('update-roi-porcentage')
+  async updateRoiPorcentage(@Body() dto: UpdateRoiPorcentageDto) {
+    const unsignedXdr = await this.vaultService.updateRoiPorcentage(dto);
     return { unsignedXdr };
   }
 

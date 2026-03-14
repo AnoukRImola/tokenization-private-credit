@@ -99,7 +99,7 @@ export function AppSidebar({
       </SidebarContent>
 
       {(footerContent || (footerItems && footerItems.length > 0)) && (
-        <SidebarFooter className="px-2 py-3 border-t border-sidebar-border">
+        <SidebarFooter className="px-2 py-3 border-sidebar-border">
           {footerItems && footerItems.length > 0 && (
             <SidebarMenu>
               {footerItems.map((item, index) => (
@@ -109,7 +109,7 @@ export function AppSidebar({
                     size="lg"
                     tooltip={item.tooltip ?? item.label}
                     onClick={item.href ? undefined : item.onClick}
-                    className="rounded-xl px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 items-center"
+                    className="rounded-xl px-3 bg-secondary text-secondary-foreground items-center"
                   >
                     {item.href ? (
                       <Link href={item.href}>

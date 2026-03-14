@@ -81,6 +81,8 @@
     "totalAtMaturity": "Total al vencimiento",
     "disclaimer": "Por favor revisa el monto de tu inversión cuidadosamente. Una vez confirmado, estos montos no son editables y la transacción es final.",
     "processing": "Procesando...",
+    "addingToken": "Agregando token a la billetera...",
+    "completingInvestment": "Completando inversión...",
     "confirmInvestment": "Confirmar Inversión",
     "termsAgreement": "Al hacer clic en confirmar, aceptas los Términos de Servicio y el Acuerdo de Inversión.",
     "success": "Inversión completada exitosamente.",

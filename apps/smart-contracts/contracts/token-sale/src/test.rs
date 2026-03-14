@@ -59,7 +59,6 @@ struct TestSetup<'a> {
     #[allow(dead_code)]
     admin: Address,
     payer: Address,
-    beneficiary: Address,
     usdc_client: TokenClient<'a>,
     usdc_admin: TokenAdminClient<'a>,
     sale_token: FactoryTokenClient<'a>,
@@ -72,7 +71,6 @@ fn setup_test(hard_cap: i128, max_per_investor: i128) -> TestSetup<'static> {
 
     let admin = Address::generate(&env);
     let payer = Address::generate(&env);
-    let beneficiary = Address::generate(&env);
 
     let (usdc_client, usdc_admin) = create_usdc_token(&env, &admin);
 
@@ -81,7 +79,7 @@ fn setup_test(hard_cap: i128, max_per_investor: i128) -> TestSetup<'static> {
 
     let roles = Roles {
         approver: payer.clone(),
-        service_provider: beneficiary.clone(),
+        service_provider: admin.clone(),
         platform_address: admin.clone(),
         release_signer: payer.clone(),
         dispute_resolver: admin.clone(),
@@ -106,7 +104,7 @@ fn setup_test(hard_cap: i128, max_per_investor: i128) -> TestSetup<'static> {
             evidence: String::from_str(&env, ""),
             amount: hard_cap,
             flags: flags.clone(),
-            receiver: beneficiary.clone(),
+            receiver: admin.clone(),
         },
     ];
 
@@ -142,7 +140,6 @@ fn setup_test(hard_cap: i128, max_per_investor: i128) -> TestSetup<'static> {
         env,
         admin,
         payer,
-        beneficiary,
         usdc_client,
         usdc_admin,
         sale_token,
@@ -153,14 +150,13 @@ fn setup_test(hard_cap: i128, max_per_investor: i128) -> TestSetup<'static> {
 #[test]
 fn test_buy_transfers_usdc_and_mints_sale_token() {
     let amount: i128 = 100;
-    let t = setup_test(1_000, 0); // hard_cap=1000, no per-investor limit
+    let t = setup_test(1_000, 0);
 
     t.usdc_admin.mint(&t.payer, &amount);
-    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &amount);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &amount);
 
-    // Verify beneficiary got sale tokens
-    let sale_token_balance = t.sale_token.balance(&t.beneficiary);
-    assert_eq!(sale_token_balance, amount);
+    // Payer receives the sale tokens
+    assert_eq!(t.sale_token.balance(&t.payer), amount);
 }
 
 // ─── Security audit: AmountMustBePositive ────────────────────────────────────
@@ -173,7 +169,6 @@ fn test_buy_rejects_zero_amount() {
     let result = t.token_sale_client.try_buy(
         &t.usdc_client.address,
         &t.payer,
-        &t.beneficiary,
         &0,
     );
     assert_eq!(result, Err(Ok(ContractError::AmountMustBePositive)));
@@ -187,7 +182,6 @@ fn test_buy_rejects_negative_amount() {
     let result = t.token_sale_client.try_buy(
         &t.usdc_client.address,
         &t.payer,
-        &t.beneficiary,
         &(-50),
     );
     assert_eq!(result, Err(Ok(ContractError::AmountMustBePositive)));
@@ -201,10 +195,9 @@ fn test_buy_exact_hard_cap() {
     let t = setup_test(hard_cap, 0);
 
     t.usdc_admin.mint(&t.payer, &hard_cap);
-    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &hard_cap);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &hard_cap);
 
-    let sale_token_balance = t.sale_token.balance(&t.beneficiary);
-    assert_eq!(sale_token_balance, hard_cap);
+    assert_eq!(t.sale_token.balance(&t.payer), hard_cap);
 }
 
 #[test]
@@ -218,7 +211,6 @@ fn test_buy_exceeds_hard_cap() {
     let result = t.token_sale_client.try_buy(
         &t.usdc_client.address,
         &t.payer,
-        &t.beneficiary,
         &over_amount,
     );
 
@@ -234,24 +226,22 @@ fn test_buy_exceeds_hard_cap_across_buyers() {
 
     // First buyer takes 400
     t.usdc_admin.mint(&t.payer, &400);
-    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &400);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &400);
 
     // Second buyer tries to take 200 (total would be 600 > 500)
     t.usdc_admin.mint(&buyer2, &200);
     let result = t.token_sale_client.try_buy(
         &t.usdc_client.address,
         &buyer2,
-        &buyer2,
         &200,
     );
-
     assert_eq!(result, Err(Ok(ContractError::HardCapExceeded)));
 
     // But 100 should still work (total = 500 = hard_cap)
     t.usdc_admin.mint(&buyer2, &100);
-    t.token_sale_client.buy(&t.usdc_client.address, &buyer2, &buyer2, &100);
+    t.token_sale_client.buy(&t.usdc_client.address, &buyer2, &100);
 
-    assert_eq!(t.sale_token.balance(&t.beneficiary), 400);
+    assert_eq!(t.sale_token.balance(&t.payer), 400);
     assert_eq!(t.sale_token.balance(&buyer2), 100);
 }
 
@@ -269,7 +259,6 @@ fn test_buy_exceeds_per_investor_cap() {
     let result = t.token_sale_client.try_buy(
         &t.usdc_client.address,
         &t.payer,
-        &t.beneficiary,
         &over_amount,
     );
 
@@ -284,20 +273,19 @@ fn test_buy_exact_per_investor_cap() {
 
     // First buy: 150
     t.usdc_admin.mint(&t.payer, &150);
-    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &150);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &150);
 
     // Second buy: 50 (total = 200 = max_per_investor) — should work
     t.usdc_admin.mint(&t.payer, &50);
-    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &50);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &50);
 
-    assert_eq!(t.sale_token.balance(&t.beneficiary), 200);
+    assert_eq!(t.sale_token.balance(&t.payer), 200);
 
     // Third buy: 1 more — should fail
     t.usdc_admin.mint(&t.payer, &1);
     let result = t.token_sale_client.try_buy(
         &t.usdc_client.address,
         &t.payer,
-        &t.beneficiary,
         &1,
     );
 
@@ -311,9 +299,9 @@ fn test_buy_no_per_investor_cap() {
 
     // One investor can buy the entire hard_cap
     t.usdc_admin.mint(&t.payer, &hard_cap);
-    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &hard_cap);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &hard_cap);
 
-    assert_eq!(t.sale_token.balance(&t.beneficiary), hard_cap);
+    assert_eq!(t.sale_token.balance(&t.payer), hard_cap);
 }
 
 // ─── get_admin tests ─────────────────────────────────────────────────────────
@@ -339,15 +327,14 @@ fn test_update_caps_by_admin_changes_hard_cap() {
     let result = t.token_sale_client.try_buy(
         &t.usdc_client.address,
         &t.payer,
-        &t.beneficiary,
         &201,
     );
     assert_eq!(result, Err(Ok(ContractError::HardCapExceeded)));
 
     // Buying exactly 200 should succeed
     t.usdc_admin.mint(&t.payer, &200);
-    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &200);
-    assert_eq!(t.sale_token.balance(&t.beneficiary), 200);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &200);
+    assert_eq!(t.sale_token.balance(&t.payer), 200);
 }
 
 #[test]
@@ -362,13 +349,12 @@ fn test_update_caps_by_admin_changes_max_per_investor() {
     let result = t.token_sale_client.try_buy(
         &t.usdc_client.address,
         &t.payer,
-        &t.beneficiary,
         &101,
     );
     assert_eq!(result, Err(Ok(ContractError::InvestorCapExceeded)));
 
     // Buying exactly 100 should succeed
     t.usdc_admin.mint(&t.payer, &100);
-    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &t.beneficiary, &100);
-    assert_eq!(t.sale_token.balance(&t.beneficiary), 100);
+    t.token_sale_client.buy(&t.usdc_client.address, &t.payer, &100);
+    assert_eq!(t.sale_token.balance(&t.payer), 100);
 }

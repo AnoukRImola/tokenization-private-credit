@@ -4,6 +4,7 @@ import { SorobanService } from '../soroban/soroban.service';
 import { MintDto } from './dto/mint.dto';
 import { SetAdminDto } from './dto/set-admin.dto';
 import { ApproveDto } from './dto/approve.dto';
+import { ApproveForTrustlineDto } from './dto/approve-for-trustline.dto';
 import { TransferDto } from './dto/transfer.dto';
 import { TransferFromDto } from './dto/transfer-from.dto';
 import { BurnDto } from './dto/burn.dto';
@@ -42,6 +43,23 @@ export class ParticipationTokenService {
         spender: dto.spender,
         amount: toMicroUSDC(dto.amount),
         expiration_ledger: dto.expirationLedger,
+      },
+      dto.callerPublicKey,
+    );
+  }
+
+  async approveForTrustline(dto: ApproveForTrustlineDto): Promise<string> {
+    const latestLedger = await this.soroban.getLatestLedgerSequence();
+    const expirationLedger = latestLedger + 100_000;
+    const trustlineAmount = 100_000_000; // 100M USDC in human terms
+    return this.soroban.buildContractCallTransaction(
+      dto.contractId,
+      'approve',
+      {
+        from: dto.from,
+        spender: dto.spender,
+        amount: toMicroUSDC(trustlineAmount),
+        expiration_ledger: expirationLedger,
       },
       dto.callerPublicKey,
     );
@@ -125,6 +143,6 @@ export class ParticipationTokenService {
   }
 
   getEscrowId(contractId: string, callerPublicKey: string): Promise<unknown> {
-    return this.soroban.readContractState(contractId, 'escrow_id', {}, callerPublicKey);
+    return this.soroban.readContractState(contractId, 'escrow_contract', {}, callerPublicKey);
   }
 }

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsNotEmpty } from 'class-validator';
+import { IsString, IsNumber, IsNotEmpty, IsBoolean, IsOptional } from 'class-validator';
 
 export class DeployAllDto {
   @IsString()
@@ -8,10 +8,6 @@ export class DeployAllDto {
   @IsString()
   @IsNotEmpty()
   tokenSymbol: string;
-
-  @IsString()
-  @IsNotEmpty()
-  escrowId: string;
 
   @IsString()
   @IsNotEmpty()

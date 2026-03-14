@@ -14,7 +14,6 @@ export async function getCampaignById(id: string): Promise<Campaign> {
 export async function deployAll(params: {
   tokenName: string;
   tokenSymbol: string;
-  escrowId: string;
   escrowContract: string;
   roiPercentage: number;
   hardCap: number;
@@ -99,5 +98,27 @@ export async function updateCampaignVaultId(
   const { data } = await httpClient.patch(`/campaigns/${campaignId}`, {
     vaultId,
   });
+  return data;
+}
+
+export async function getRoiPercentage(
+  contractId: string,
+  callerPublicKey: string,
+): Promise<{ roiPercentage: string }> {
+  const { data } = await httpClient.get<{ roiPercentage: string }>(
+    `/vault/roi-percentage?contractId=${contractId}&callerPublicKey=${callerPublicKey}`,
+  );
+  return data;
+}
+
+export async function updateRoiPorcentage(params: {
+  contractId: string;
+  newRoiPorcentage: number;
+  callerPublicKey: string;
+}): Promise<{ unsignedXdr: string }> {
+  const { data } = await httpClient.post<{ unsignedXdr: string }>(
+    "/vault/update-roi-porcentage",
+    params,
+  );
   return data;
 }

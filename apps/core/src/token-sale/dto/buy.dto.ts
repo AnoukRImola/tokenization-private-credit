@@ -13,10 +13,6 @@ export class BuyDto {
   @IsNotEmpty()
   payer: string;
 
-  @IsString()
-  @IsNotEmpty()
-  beneficiary: string;
-
   @IsInt()
   @IsPositive()
   amount: number;

@@ -99,7 +99,10 @@ export default function MyInvestmentsPage() {
           address: walletAddress,
         });
 
-        const sender = new SendTransactionService();
+        const sender = new SendTransactionService({
+          baseURL: process.env.NEXT_PUBLIC_CORE_API_URL,
+          apiKey: process.env.NEXT_PUBLIC_INVESTORS_API_KEY,
+        });
         const submitResponse = await sender.sendTransaction({
           signedXdr: signedTxXdr,
         });
