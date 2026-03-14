@@ -14,7 +14,6 @@ export async function getCampaignById(id: string): Promise<Campaign> {
 export async function deployAll(params: {
   tokenName: string;
   tokenSymbol: string;
-  escrowId: string;
   escrowContract: string;
   roiPercentage: number;
   hardCap: number;
