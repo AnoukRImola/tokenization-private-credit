@@ -84,7 +84,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">Pool Size:</span> {formatCurrency(escrowData?.balance ?? 0, "USDC")} / {formatCurrency(campaign.poolSize, "USDC")}
+            <span className="font-bold">Pool Size:</span> {formatCurrency(Number(escrowData?.balance ?? 0), "USDC")} / {formatCurrency(Number(campaign.poolSize), "USDC")}
           </span>
         </div>
       }
