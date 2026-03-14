@@ -65,7 +65,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
 
   return (
     <SharedCampaignCard
-      title={`#${id.slice(0, 3).toUpperCase()} ${title}`}
+      title={title}
       description={description || "No description"}
       statusBadge={
         <>
