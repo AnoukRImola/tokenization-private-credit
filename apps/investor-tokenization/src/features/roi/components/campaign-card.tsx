@@ -110,7 +110,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
       }
       footer={
         <div className="flex flex-col gap-1">
-          <span className="font-bold">Pool Size:</span> USDC {formatCurrency((escrowData?.balance as number) ?? 0, "USDC")} / USDC {formatCurrency(campaign.poolSize, "USDC")}
+          <span className="font-bold">Pool Size:</span> {formatCurrency((escrowData?.balance as number) ?? 0, "USDC")} / {formatCurrency(campaign.poolSize, "USDC")}
         </div>
       }
       stat={{ label: "Loans", value: totalLoans }}

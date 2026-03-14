@@ -15,6 +15,7 @@ import { SelectedEscrowProvider } from "@/features/tokens/context/SelectedEscrow
 import { CAMPAIGN_STATUS_CONFIG } from "@/features/roi/constants/campaign-status";
 import type { CampaignFromApi } from "./types";
 import { fromStroops } from "@/utils/adjustedAmounts";
+import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 
 export type ProjectCardProps = {
   campaign: CampaignFromApi;
@@ -136,7 +137,7 @@ export const ProjectCard = ({
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">Pool Size:</span> USDC {assigned.toLocaleString("en-US", { minimumFractionDigits: 2 })} / USDC {poolSize.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            <span className="font-bold">Pool Size:</span> {formatCurrency(assigned, "USDC")} / {formatCurrency(poolSize, "USDC")}
           </span>
         </div>
       }
