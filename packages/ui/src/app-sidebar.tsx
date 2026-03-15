@@ -47,6 +47,8 @@ export interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {
   logo: AppSidebarLogoConfig
   footerItems?: AppSidebarFooterItem[]
   footerContent?: React.ReactNode
+  /** Pathname for active state (e.g. from next-intl usePathname). If not set, uses next/navigation usePathname(). */
+  pathname?: string
 }
 
 export function AppSidebar({
@@ -54,9 +56,11 @@ export function AppSidebar({
   logo,
   footerItems,
   footerContent,
+  pathname: pathnameProp,
   ...sidebarProps
 }: AppSidebarProps) {
-  const pathname = usePathname()
+  const nextPathname = usePathname()
+  const pathname = pathnameProp ?? nextPathname
   const logoHref = logo.href ?? "/"
 
   return (

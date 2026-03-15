@@ -10,7 +10,7 @@ import {
 } from "@tokenization/ui/app-sidebar";
 import { SidebarWalletButton } from "@tokenization/ui/sidebar-wallet-button";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 
 const logo: AppSidebarLogoConfig = {
   element: (
@@ -37,6 +37,7 @@ const footerItems: AppSidebarFooterItem[] = [
 
 export function AppSidebar() {
   const t = useTranslations("nav");
+  const pathname = usePathname();
 
   const navItems: AppSidebarNavItem[] = [
     {
@@ -53,6 +54,7 @@ export function AppSidebar() {
 
   return (
     <SharedAppSidebar
+      pathname={pathname}
       navItems={navItems}
       logo={logo}
       footerItems={footerItems}
