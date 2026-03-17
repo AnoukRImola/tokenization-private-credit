@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
+import { cn } from "@tokenization/shared/lib/utils";
 
 const locales = [
   { code: "es" as const, label: "ES" },

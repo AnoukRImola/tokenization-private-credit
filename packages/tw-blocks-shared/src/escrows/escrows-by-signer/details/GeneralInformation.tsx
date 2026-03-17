@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import { Card } from "@tokenization/ui/card";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@tokenization/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { cn } from "@tokenization/shared/lib/utils";
 import { MultiReleaseMilestone } from "@trustless-work/escrow";
 import {
   Ban,

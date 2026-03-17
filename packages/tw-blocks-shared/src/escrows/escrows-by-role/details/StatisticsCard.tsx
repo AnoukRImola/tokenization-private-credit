@@ -3,7 +3,7 @@
 import React from "react";
 import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@tokenization/shared/lib/utils";
 import { Button } from "@tokenization/ui/button";
 import { Card, CardContent } from "@tokenization/ui/card";
 import { Badge } from "@tokenization/ui/badge";

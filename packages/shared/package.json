@@ -9,7 +9,9 @@
     "./lib/sendTransactionService": "./src/lib/sendTransactionService.ts",
     "./lib/httpClient": "./src/lib/httpClient.ts",
     "./lib/sorobanClient": "./src/lib/sorobanClient.ts",
-    "./lib/sorobanSubmitAndWait": "./src/lib/sorobanSubmitAndWait.ts"
+    "./lib/sorobanSubmitAndWait": "./src/lib/sorobanSubmitAndWait.ts",
+    "./lib/contractErrorHandler": "./src/lib/contractErrorHandler.ts",
+    "./lib/vaultDeploymentService": "./src/lib/vaultDeploymentService.ts"
   },
   "dependencies": {
     "@stellar/stellar-sdk": "^14.3.3"

@@ -1,10 +1,8 @@
 "use client";
-import { cn } from "@/lib/utils";
-import React from "react";
+import { cn } from "@tokenization/shared/lib/utils";
 import { BentoGrid, BentoGridItem } from "@tokenization/ui/bento-grid";
 import {
   IconBoxAlignRightFilled,
-  IconClipboardCopy,
   IconFileBroken,
   IconSignature,
   IconTableColumn,

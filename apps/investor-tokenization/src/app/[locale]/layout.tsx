@@ -9,7 +9,7 @@ import { Toaster } from "@tokenization/ui/sonner";
 import { WalletProvider } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import type { ReactNode } from "react";
 import { Inter } from "next/font/google";
-import { cn } from "@/lib/utils";
+import { cn } from "@tokenization/shared/lib/utils";
 import { NextIntlClientProvider } from "next-intl";
 import { SharedTranslationProvider } from "@tokenization/tw-blocks-shared/src/i18n/TranslationProvider";
 import sharedEn from "@tokenization/tw-blocks-shared/src/i18n/messages/en.json";

@@ -4,8 +4,8 @@ import { useState, useCallback, useMemo } from "react";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { ClaimROIService } from "@/features/claim-roi/services/claim.service";
-import { SendTransactionService } from "@/lib/sendTransactionService";
-import { toastSuccessWithTx } from "@/lib/toastWithTx";
+import { SendTransactionService } from "@tokenization/shared/lib/sendTransactionService";
+import { toastSuccessWithTx } from "@tokenization/ui/toast-with-tx";
 import { toast } from "sonner";
 
 export type ClaimROIMessages = {

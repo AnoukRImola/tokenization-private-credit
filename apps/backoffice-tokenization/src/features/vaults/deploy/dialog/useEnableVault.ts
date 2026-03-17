@@ -6,8 +6,8 @@ import {
 } from "@/features/vaults/services/vault.service";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
-import { SendTransactionService } from "@/lib/sendTransactionService";
-import { toastSuccessWithTx } from "@/lib/toastWithTx";
+import { SendTransactionService } from "@tokenization/shared/lib/sendTransactionService";
+import { toastSuccessWithTx } from "@tokenization/ui/toast-with-tx";
 import { updateCampaignStatusByVaultId } from "@/features/campaigns/services/campaigns.api";
 import { useQueryClient } from "@tanstack/react-query";
 

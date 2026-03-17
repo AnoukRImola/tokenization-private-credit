@@ -1,9 +1,9 @@
 import * as StellarSDK from "@stellar/stellar-sdk";
 import fs from "fs";
 import path from "path";
-import { SorobanClient } from "@tokenization/shared/lib/sorobanClient";
+import { SorobanClient } from "./sorobanClient";
 
-const vaultContractPath = path.join(
+const DEFAULT_VAULT_WASM_PATH = path.join(
   process.cwd(),
   "services/wasm/vault_contract.wasm",
 );
@@ -20,10 +20,17 @@ export type VaultDeploymentResult = {
   vaultContractAddress: string;
 };
 
+export type DeployVaultOptions = {
+  /** Path to vault_contract.wasm. Defaults to services/wasm/vault_contract.wasm relative to cwd. */
+  wasmPath?: string;
+};
+
 export const deployVaultContract = async (
   client: SorobanClient,
   { admin, enabled, price, token, usdc }: VaultDeploymentParams,
+  options: DeployVaultOptions = {},
 ): Promise<VaultDeploymentResult> => {
+  const vaultContractPath = options.wasmPath ?? DEFAULT_VAULT_WASM_PATH;
   const vaultWasm = fs.readFileSync(vaultContractPath);
 
   const vaultWasmHash = await client.uploadContractWasm(

@@ -17,7 +17,6 @@ import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "../types/campaign.types";
 import { getCampaignStatusConfig } from "../constants/campaign-status";
-import { fromStroops } from "@/utils/adjustedAmounts";
 import { useTranslations } from "next-intl";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 

@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@tokenization/ui/avatar";
-import { cn } from "@/lib/utils";
+import { cn } from "@tokenization/shared/lib/utils";
 
 type InvestorProfileCardProps = {
   name?: string;

@@ -21,7 +21,7 @@ import { Input } from "@tokenization/ui/input";
 import { Button } from "@tokenization/ui/button";
 import { ArrowRight, Info } from "lucide-react";
 import { numericInputKeyDown, parseNumericInput } from "@/lib/numeric-input";
-import type { CreateRoiDialogProps, RoiFormValues } from "./types";
+import type { CreateRoiDialogProps } from "./types";
 
 export function CreateRoiDialog({
   campaign,

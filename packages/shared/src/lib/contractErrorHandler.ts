@@ -66,6 +66,11 @@ const CONTEXT_TO_TRANSLATION_KEY: Record<string, string> = {
   "token-sale": "tokenSale",
 };
 
+export type ContractErrorTranslationFn = (
+  key: string,
+  values?: Record<string, unknown>,
+) => string;
+
 /**
  * Extracts and maps contract error codes to user-friendly messages.
  *
@@ -80,7 +85,7 @@ const CONTEXT_TO_TRANSLATION_KEY: Record<string, string> = {
 export function extractContractError(
   error: unknown,
   context?: "vault" | "token-sale",
-  t?: (key: string, values?: Record<string, unknown>) => string,
+  t?: ContractErrorTranslationFn,
 ): {
   message: string;
   details: string;
