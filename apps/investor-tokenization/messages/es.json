@@ -34,6 +34,7 @@
     "filterClaimable": "Reclamable",
     "filterClosed": "Cerrada",
     "empty": "No se encontraron campañas.",
+    "loading": "Cargando campañas...",
     "loadingCampaigns": "Cargando campañas...",
     "status": {
       "DRAFT": "Borrador",

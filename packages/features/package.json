@@ -8,8 +8,8 @@
     "./campaign": "./src/campaign/index.ts"
   },
   "dependencies": {
-    "@tokenization/shared": "workspace:*",
-    "@tokenization/ui": "workspace:*",
+    "@tokenization/shared": "*",
+    "@tokenization/ui": "*",
     "react": "19.2.0"
   },
   "devDependencies": {

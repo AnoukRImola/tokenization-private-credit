@@ -1,8 +1,15 @@
-import type { CampaignStatus } from "@/features/campaigns/types/campaign.types";
+import type { SharedCampaignStatus } from "../types/campaign";
 
+export type CampaignStatusConfig = { label: string; className: string };
+
+/**
+ * Returns a consistent status config for campaign badges (labels + Tailwind classes).
+ * Pass your campaigns namespace translator, e.g. useTranslations("campaigns").
+ * Translation keys: status.DRAFT, status.FUNDRAISING, status.ACTIVE, etc.
+ */
 export function getCampaignStatusConfig(
   t: (key: string) => string,
-): Record<CampaignStatus, { label: string; className: string }> {
+): Record<SharedCampaignStatus, CampaignStatusConfig> {
   return {
     DRAFT: { label: t("status.DRAFT"), className: "bg-secondary text-text-muted border-border" },
     FUNDRAISING: { label: t("status.FUNDRAISING"), className: "bg-blue-50 text-blue-600 border-blue-200" },

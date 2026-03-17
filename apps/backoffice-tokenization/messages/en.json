@@ -76,6 +76,8 @@
     "filterAll": "All",
     "filterFundraising": "Fundraising",
     "filterActive": "Active",
+    "filterRepayment": "Repayment",
+    "filterClaimable": "Claimable",
     "filterClosed": "Closed",
     "searchPlaceholder": "Search campaigns...",
     "status": {

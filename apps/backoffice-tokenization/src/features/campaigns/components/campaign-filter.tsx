@@ -15,6 +15,8 @@ export function CampaignFilter({ value, onChange }: CampaignFilterProps) {
     { value: "all", label: t("filterAll") },
     { value: "FUNDRAISING", label: t("filterFundraising") },
     { value: "ACTIVE", label: t("filterActive") },
+    { value: "REPAYMENT", label: t("filterRepayment") },
+    { value: "CLAIMABLE", label: t("filterClaimable") },
     { value: "CLOSED", label: t("filterClosed") },
   ];
 

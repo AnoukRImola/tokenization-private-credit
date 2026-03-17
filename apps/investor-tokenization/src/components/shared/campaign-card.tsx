@@ -16,7 +16,7 @@ import {
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { GetEscrowsFromIndexerResponse, MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "../../features/roi/types/campaign.types";
-import { getCampaignStatusConfig } from "../../features/roi/constants/campaign-status";
+import { getCampaignStatusConfig } from "@tokenization/shared";
 import { useTranslations } from "next-intl";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import { ESCROW_EXPLORER_URL } from "@tokenization/shared/lib/constants";

@@ -11,7 +11,7 @@ import { Banknote, CheckCircle, Circle, ExternalLink, Landmark } from "lucide-re
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
-import { getCampaignStatusConfig } from "@/features/campaigns/constants/campaign-status";
+import { getCampaignStatusConfig } from "@tokenization/shared";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import { GetEscrowsFromIndexerResponse } from "@trustless-work/escrow/types";
 import { ESCROW_EXPLORER_URL } from "@tokenization/shared/lib/constants";

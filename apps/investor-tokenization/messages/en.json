@@ -34,6 +34,7 @@
     "filterClaimable": "Claimable",
     "filterClosed": "Closed",
     "empty": "No campaigns found.",
+    "loading": "Loading campaigns...",
     "loadingCampaigns": "Loading campaigns...",
     "status": {
       "DRAFT": "Draft",

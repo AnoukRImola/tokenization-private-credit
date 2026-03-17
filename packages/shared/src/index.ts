@@ -4,5 +4,5 @@ export * from "./lib/httpClient";
 export * from "./lib/sorobanClient";
 export * from "./lib/sorobanSubmitAndWait";
 export * from "./lib/contractErrorHandler";
-export * from "./lib/vaultDeploymentService";
 export * from "./lib/constants";
+export * from "./lib/campaignStatus";

@@ -76,6 +76,8 @@
     "filterAll": "Todas",
     "filterFundraising": "Recaudando",
     "filterActive": "Activa",
+    "filterRepayment": "En Pago",
+    "filterClaimable": "Reclamable",
     "filterClosed": "Cerrada",
     "searchPlaceholder": "Buscar campañas...",
     "status": {

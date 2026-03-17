@@ -17,7 +17,7 @@ import { cn } from "@tokenization/shared/lib/utils";
 import { getContractExplorerUrl } from "@tokenization/shared/lib/constants";
 import { ArrowUpCircle, Landmark, MoreHorizontal, Percent, Vault } from "lucide-react";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
-import { getCampaignStatusConfig } from "@/features/campaigns/constants/campaign-status";
+import { getCampaignStatusConfig } from "@tokenization/shared";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import { getVaultIsEnabled } from "@/features/campaigns/services/campaigns.api";
 import { useVaultUsdcBalance } from "@/features/campaigns/hooks/useVaultUsdcBalance";
