@@ -20,13 +20,7 @@ import { Entities } from "./Entities";
 import { GeneralInformation } from "./GeneralInformation";
 import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
 import { SuccessReleaseDialog } from "./SuccessReleaseDialog";
-
-/**
- * Based on the provided roles -> https://docs.trustlesswork.com/trustless-work/technology-overview/roles-in-trustless-work
- *
- * The roles that the user assigns in the escrow initialization are in the userRolesInEscrow state. Based on these roles, you'll have different actions buttons.
- *
- */
+import { ESCROW_EXPLORER_URL } from "@tokenization/shared/lib/constants";
 
 interface EscrowDetailDialogProps {
   isDialogOpen: boolean;
@@ -55,7 +49,7 @@ export const EscrowDetailDialog = ({
     selectedEscrow,
   });
 
-  const viewerUrl = `https://viewer.trustlesswork.com/${selectedEscrow?.contractId}`;
+  const viewerUrl = `${ESCROW_EXPLORER_URL}${selectedEscrow?.contractId}`;
 
   if (!isDialogOpen || !selectedEscrow) return null;
   return (

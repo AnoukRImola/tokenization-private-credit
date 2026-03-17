@@ -19,6 +19,7 @@ import type { Campaign } from "../../features/roi/types/campaign.types";
 import { getCampaignStatusConfig } from "../../features/roi/constants/campaign-status";
 import { useTranslations } from "next-intl";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
+import { ESCROW_EXPLORER_URL } from "@tokenization/shared/lib/constants";
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -30,7 +31,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
   const tClaimRoi = useTranslations("claimRoi");
   const { title, description, status, id, escrowId } = campaign;
   const statusCfg = getCampaignStatusConfig(t)[status];
-  const escrowExplorerUrl = `https://viewer.trustlesswork.com/${escrowId}`;
+  const escrowExplorerUrl = `${ESCROW_EXPLORER_URL}${escrowId}`;
 
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
 

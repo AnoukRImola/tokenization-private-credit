@@ -14,6 +14,7 @@ import type { Campaign } from "@/features/campaigns/types/campaign.types";
 import { getCampaignStatusConfig } from "@/features/campaigns/constants/campaign-status";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import { GetEscrowsFromIndexerResponse } from "@trustless-work/escrow/types";
+import { ESCROW_EXPLORER_URL } from "@tokenization/shared/lib/constants";
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -25,7 +26,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
 
   const statusCfg = getCampaignStatusConfig(t)[status];
   const isDraft = status === "DRAFT";
-  const escrowExplorerUrl = `https://viewer.trustlesswork.com/${escrowId}`;
+  const escrowExplorerUrl = `${ESCROW_EXPLORER_URL}${escrowId}`;
 
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
 
