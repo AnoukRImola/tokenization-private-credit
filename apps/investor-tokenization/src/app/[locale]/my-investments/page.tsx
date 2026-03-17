@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
-import { SectionTitle } from "@tokenization/ui/section-title";
-import { CampaignToolbar } from "@/features/roi/components/campaign-toolbar";
+import { useMemo, useCallback } from "react";
+import { useTranslations } from "next-intl";
+import { SharedCampaignsView } from "@tokenization/features/campaign";
 import { CampaignList } from "@/features/roi/components/campaign-list";
 import type { Campaign, CampaignStatus } from "@/features/roi/types/campaign.types";
 import { useUserInvestments } from "@/features/investments/hooks/useUserInvestments.hook";
 import type { InvestmentFromApi } from "@/features/investments/services/investment.service";
 import { useClaimROI } from "@/features/claim-roi/hooks/useClaimROI";
-import { useTranslations } from "next-intl";
 
 function toCampaign(inv: InvestmentFromApi): Campaign {
   return {
@@ -40,10 +39,14 @@ function aggregateByCampaign(investments: InvestmentFromApi[]): Campaign[] {
 
 export default function MyInvestmentsPage() {
   const t = useTranslations("investments");
+  const tCampaigns = useTranslations("campaigns");
   const tClaimRoi = useTranslations("claimRoi");
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<CampaignStatus | "all">("all");
+
   const { data: investments, isLoading } = useUserInvestments();
+  const campaigns = useMemo(
+    () => aggregateByCampaign(investments ?? []),
+    [investments],
+  );
 
   const { claimROI } = useClaimROI({
     noVault: tClaimRoi("noVaultAvailable"),
@@ -54,22 +57,6 @@ export default function MyInvestmentsPage() {
     unexpectedError: tClaimRoi("unexpectedError"),
   });
 
-  const campaigns = useMemo(
-    () => aggregateByCampaign(investments ?? []),
-    [investments],
-  );
-
-  const filteredCampaigns = useMemo(() => {
-    return campaigns.filter((c) => {
-      const matchesStatus = filter === "all" || c.status === filter;
-      const matchesSearch =
-        search.trim() === "" ||
-        c.title.toLowerCase().includes(search.toLowerCase()) ||
-        c.description.toLowerCase().includes(search.toLowerCase());
-      return matchesStatus && matchesSearch;
-    });
-  }, [campaigns, search, filter]);
-
   const handleClaimRoi = useCallback(
     async (campaignId: string) => {
       const campaign = campaigns.find((c) => c.id === campaignId);
@@ -79,23 +66,32 @@ export default function MyInvestmentsPage() {
     [campaigns, claimROI],
   );
 
+  const toolbarLabels = {
+    searchPlaceholder: tCampaigns("searchPlaceholder"),
+    filterAll: tCampaigns("filterAll"),
+    filterFundraising: tCampaigns("filterFundraising"),
+    filterActive: tCampaigns("filterActive"),
+    filterRepayment: tCampaigns("filterRepayment"),
+    filterClaimable: tCampaigns("filterClaimable"),
+    filterClosed: tCampaigns("filterClosed"),
+  };
+
   return (
-    <div className="flex flex-col gap-6">
-      <SectionTitle
-        title={t("title")}
-        description={t("trackDescription")}
-      />
-      <CampaignToolbar
-        onSearchChange={setSearch}
-        onFilterChange={setFilter}
-      />
-      {isLoading ? (
-        <p className="text-sm text-muted-foreground text-center py-8">
-          {t("loadingYourInvestments")}
-        </p>
-      ) : (
-        <CampaignList campaigns={filteredCampaigns} onClaimRoi={handleClaimRoi} />
+    <SharedCampaignsView
+      title={t("title")}
+      description={t("trackDescription")}
+      campaigns={campaigns}
+      isLoading={isLoading}
+      loadingMessage={t("loadingYourInvestments")}
+      emptyMessage={tCampaigns("empty")}
+      toolbarLabels={toolbarLabels}
+    >
+      {(filteredCampaigns) => (
+        <CampaignList
+          campaigns={filteredCampaigns}
+          onClaimRoi={handleClaimRoi}
+        />
       )}
-    </div>
+    </SharedCampaignsView>
   );
 }

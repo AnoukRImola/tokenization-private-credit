@@ -44,6 +44,7 @@
     "./section-title": "./src/section-title.tsx"
   },
   "dependencies": {
-    "@radix-ui/react-dropdown-menu": "^2.1.16"
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@tokenization/shared": "workspace:*"
   }
 }

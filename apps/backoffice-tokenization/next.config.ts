@@ -5,7 +5,12 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
-  transpilePackages: ["@tokenization/shared", "@tokenization/ui", "@tokenization/tw-blocks-shared"],
+  transpilePackages: [
+    "@tokenization/shared",
+    "@tokenization/ui",
+    "@tokenization/features",
+    "@tokenization/tw-blocks-shared",
+  ],
   turbopack: {
     root: "../../",
   },
