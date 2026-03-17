@@ -1,7 +1,7 @@
 import * as StellarSDK from "@stellar/stellar-sdk";
 import fs from "fs";
 import path from "path";
-import { SorobanClient } from "./sorobanClient";
+import { SorobanClient } from "@tokenization/shared/lib/sorobanClient";
 
 const vaultContractPath = path.join(
   process.cwd(),

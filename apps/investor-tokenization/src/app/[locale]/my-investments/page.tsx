@@ -7,12 +7,7 @@ import { CampaignList } from "@/features/roi/components/campaign-list";
 import type { Campaign, CampaignStatus } from "@/features/roi/types/campaign.types";
 import { useUserInvestments } from "@/features/investments/hooks/useUserInvestments.hook";
 import type { InvestmentFromApi } from "@/features/investments/services/investment.service";
-import { ClaimROIService } from "@/features/claim-roi/services/claim.service";
-import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
-import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
-import { SendTransactionService } from "@/lib/sendTransactionService";
-import { toastSuccessWithTx } from "@/lib/toastWithTx";
-import { toast } from "sonner";
+import { useClaimROI } from "@/features/claim-roi/hooks/useClaimROI";
 import { useTranslations } from "next-intl";
 
 function toCampaign(inv: InvestmentFromApi): Campaign {
@@ -49,7 +44,15 @@ export default function MyInvestmentsPage() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<CampaignStatus | "all">("all");
   const { data: investments, isLoading } = useUserInvestments();
-  const { walletAddress } = useWalletContext();
+
+  const { claimROI } = useClaimROI({
+    noVault: tClaimRoi("noVaultAvailable"),
+    connectWallet: tClaimRoi("connectToClaim"),
+    buildFailed: tClaimRoi("buildFailed"),
+    claimFailed: tClaimRoi("claimFailed"),
+    success: tClaimRoi("claimSuccess"),
+    unexpectedError: tClaimRoi("unexpectedError"),
+  });
 
   const campaigns = useMemo(
     () => aggregateByCampaign(investments ?? []),
@@ -70,56 +73,10 @@ export default function MyInvestmentsPage() {
   const handleClaimRoi = useCallback(
     async (campaignId: string) => {
       const campaign = campaigns.find((c) => c.id === campaignId);
-
-      if (!campaign?.vaultId) {
-        toast.error(tClaimRoi("noVaultAvailable"));
-        return;
-      }
-
-      if (!walletAddress) {
-        toast.error(tClaimRoi("connectToClaim"));
-        return;
-      }
-
-      try {
-        const svc = new ClaimROIService();
-        const claimResponse = await svc.claimROI({
-          vaultContractId: campaign.vaultId,
-          beneficiaryAddress: walletAddress,
-        });
-
-        if (!claimResponse?.success || !claimResponse?.xdr) {
-          throw new Error(
-            claimResponse?.message ?? tClaimRoi("buildFailed"),
-          );
-        }
-
-        const signedTxXdr = await signTransaction({
-          unsignedTransaction: claimResponse.xdr,
-          address: walletAddress,
-        });
-
-        const sender = new SendTransactionService({
-          baseURL: process.env.NEXT_PUBLIC_CORE_API_URL,
-          apiKey: process.env.NEXT_PUBLIC_INVESTORS_API_KEY,
-        });
-        const submitResponse = await sender.sendTransaction({
-          signedXdr: signedTxXdr,
-        });
-
-        if (submitResponse.status !== "SUCCESS") {
-          throw new Error(
-            submitResponse.message ?? tClaimRoi("claimFailed"),
-          );
-        }
-
-        toastSuccessWithTx(tClaimRoi("claimSuccess"), submitResponse.hash);
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : tClaimRoi("unexpectedError");
-        toast.error(msg);
-      }
+      if (!campaign?.vaultId) return;
+      await claimROI({ vaultContractId: campaign.vaultId });
     },
-    [campaigns, walletAddress, tClaimRoi],
+    [campaigns, claimROI],
   );
 
   return (

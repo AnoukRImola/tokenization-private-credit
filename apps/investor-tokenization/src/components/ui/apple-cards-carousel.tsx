@@ -20,14 +20,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import { GetEscrowsFromIndexerResponse as Escrow } from "@trustless-work/escrow/types";
 import { RainbowButton } from "@tokenization/ui/rainbow-button";
-import { ClaimROIService } from "@/features/claim-roi/services/claim.service";
-import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
-import { toast } from "sonner";
 import { InvestDialog } from "@/features/tokens/components/InvestDialog";
 import { SelectedEscrowProvider } from "@/features/tokens/context/SelectedEscrowContext";
-import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
-import { SendTransactionService } from "@/lib/sendTransactionService";
-import { toastSuccessWithTx } from "@/lib/toastWithTx";
+import { useClaimROI } from "@/features/claim-roi/hooks/useClaimROI";
 
 interface CarouselProps {
   items: ReactNode[];
@@ -259,7 +254,6 @@ export const Card = ({
   layout?: boolean;
 }) => {
   const [open, setOpen] = useState(false);
-  const [isClaiming, setIsClaiming] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const {
     onCardClose,
@@ -270,7 +264,7 @@ export const Card = ({
     showClaimAction,
   } = useContext(CarouselContext);
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
-  const { walletAddress } = useWalletContext();
+  const { claimROI, isClaiming } = useClaimROI();
 
   const handleOpen = useCallback(() => {
     setOpen(true);
@@ -321,59 +315,10 @@ export const Card = ({
 
   useOutsideClick(containerRef as React.RefObject<HTMLDivElement>, handleClose);
 
-  const handleClaim = async () => {
-    try {
-      if (!card.vaultContractId) {
-        toast.error("Vault contract ID not available for this card");
-        return;
-      }
-
-      if (!walletAddress) {
-        toast.error("Connect your wallet to claim");
-        return;
-      }
-
-      setIsClaiming(true);
-
-      const svc = new ClaimROIService();
-      const claimResponse = await svc.claimROI({
-        vaultContractId: card.vaultContractId,
-        beneficiaryAddress: walletAddress,
-      });
-
-      if (!claimResponse?.success || !claimResponse?.xdr) {
-        throw new Error(
-          claimResponse?.message ?? "Failed to build claim transaction."
-        );
-      }
-
-      const signedTxXdr = await signTransaction({
-        unsignedTransaction: claimResponse.xdr ?? "",
-        address: walletAddress ?? "",
-      });
-
-      const sender = new SendTransactionService({
-        baseURL: process.env.NEXT_PUBLIC_CORE_API_URL,
-        apiKey: process.env.NEXT_PUBLIC_INVESTORS_API_KEY,
-      });
-      const submitResponse = await sender.sendTransaction({
-        signedXdr: signedTxXdr,
-      });
-
-      if (submitResponse.status !== "SUCCESS") {
-        throw new Error(
-          submitResponse.message ?? "Transaction submission failed."
-        );
-      }
-
-      toastSuccessWithTx("ROI claimed successfully", submitResponse.hash);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Unexpected error";
-      toast.error(msg);
-    } finally {
-      setIsClaiming(false);
-    }
-  };
+  const handleClaim = useCallback(() => {
+    if (!card.vaultContractId) return;
+    claimROI({ vaultContractId: card.vaultContractId });
+  }, [card.vaultContractId, claimROI]);
 
   return (
     <>

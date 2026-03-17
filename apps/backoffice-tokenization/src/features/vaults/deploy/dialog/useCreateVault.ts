@@ -15,7 +15,9 @@ type UseCreateVaultParams = {
   onSuccess?: (response: DeployVaultResponse) => void;
 };
 
-const USDC_ADDRESS = "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
+const USDC_ADDRESS =
+  process.env.NEXT_PUBLIC_USDC_CONTRACT_ID ??
+  "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
 
 export function useCreateVault(params?: UseCreateVaultParams) {
   const { walletAddress } = useWalletContext();

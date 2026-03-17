@@ -7,6 +7,11 @@
     ".": "./src/index.ts",
     "./lib/utils": "./src/lib/utils.ts",
     "./lib/sendTransactionService": "./src/lib/sendTransactionService.ts",
-    "./lib/httpClient": "./src/lib/httpClient.ts"
+    "./lib/httpClient": "./src/lib/httpClient.ts",
+    "./lib/sorobanClient": "./src/lib/sorobanClient.ts",
+    "./lib/sorobanSubmitAndWait": "./src/lib/sorobanSubmitAndWait.ts"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^14.3.3"
   }
 }

@@ -78,5 +78,5 @@ Four Soroban contracts sharing `soroban-sdk 23.1.1`. Build with `cargo build --r
 ## Environment Variables
 
 Each app has a `.env.example`. Key vars:
-- **Frontend apps**: `NEXT_PUBLIC_API_KEY`, `NEXT_PUBLIC_API_URL`, `SOURCE_SECRET`
-- **Core**: `DATABASE_URL`, `PORT`, `SOURCE_SECRET`, `SOROBAN_RPC_URL`, `*_WASM_HASH` (contract hashes)
+- **Frontend apps**: `NEXT_PUBLIC_API_KEY`, `NEXT_PUBLIC_API_URL`, `SOURCE_SECRET`, `NEXT_PUBLIC_SOROBAN_RPC_URL`, `NEXT_PUBLIC_USDC_CONTRACT_ID`
+- **Core**: `DATABASE_URL`, `PORT`, `SOURCE_SECRET`, `SOROBAN_RPC_URL`, `USDC_CONTRACT_ID`, `*_WASM_HASH` (contract hashes)

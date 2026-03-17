@@ -8,8 +8,12 @@ import {
   BASE_FEE,
 } from "@stellar/stellar-sdk";
 
-const SOROBAN_RPC_URL = "https://soroban-testnet.stellar.org";
-const USDC_CONTRACT = "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
+const SOROBAN_RPC_URL =
+  process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ??
+  "https://soroban-testnet.stellar.org";
+const USDC_CONTRACT =
+  process.env.NEXT_PUBLIC_USDC_CONTRACT_ID ??
+  "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
 
 export async function buildUsdcTransferXdr(params: {
   from: string;
