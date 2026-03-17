@@ -11,7 +11,8 @@
     "./lib/sorobanClient": "./src/lib/sorobanClient.ts",
     "./lib/sorobanSubmitAndWait": "./src/lib/sorobanSubmitAndWait.ts",
     "./lib/contractErrorHandler": "./src/lib/contractErrorHandler.ts",
-    "./lib/vaultDeploymentService": "./src/lib/vaultDeploymentService.ts"
+    "./lib/vaultDeploymentService": "./src/lib/vaultDeploymentService.ts",
+    "./lib/constants": "./src/lib/constants.ts"
   },
   "dependencies": {
     "@stellar/stellar-sdk": "^14.3.3"

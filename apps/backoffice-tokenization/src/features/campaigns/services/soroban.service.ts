@@ -3,10 +3,8 @@ import {
   scValToNative,
   Address,
 } from "@stellar/stellar-sdk";
+import { SOROBAN_RPC_URL } from "@tokenization/shared/lib/constants";
 import { submitSignedTransactionAndWait } from "@tokenization/shared/lib/sorobanSubmitAndWait";
-
-const DEFAULT_RPC_URL =
-  "https://soroban-testnet.stellar.org";
 
 export interface DeployedContracts {
   participation_token: string;
@@ -17,11 +15,9 @@ export interface DeployedContracts {
 export async function submitAndExtractDeployedContracts(
   signedXdr: string,
 ): Promise<DeployedContracts> {
-  const rpcUrl =
-    process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ?? DEFAULT_RPC_URL;
 
   const result = await submitSignedTransactionAndWait(signedXdr, {
-    rpcUrl,
+    rpcUrl: SOROBAN_RPC_URL,
     pollAttempts: 30,
     pollDelayMs: 2000,
   });
@@ -43,11 +39,9 @@ export async function submitAndExtractDeployedContracts(
 export async function submitAndExtractAddress(
   signedXdr: string,
 ): Promise<string | null> {
-  const rpcUrl =
-    process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ?? DEFAULT_RPC_URL;
 
   const result = await submitSignedTransactionAndWait(signedXdr, {
-    rpcUrl,
+    rpcUrl: SOROBAN_RPC_URL,
     pollAttempts: 30,
     pollDelayMs: 2000,
   });

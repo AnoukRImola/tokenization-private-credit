@@ -24,14 +24,6 @@ import {
   type BuyTokenPayload,
 } from "@/features/tokens/services/token.service";
 import { addToken } from "@stellar/freighter-api";
-
-const SOROBAN_RPC_URL =
-  process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ??
-  "https://soroban-testnet.stellar.org";
-const NETWORK_PASSPHRASE =
-  process.env.NEXT_PUBLIC_STELLAR_NETWORK_PASSPHRASE ??
-  "Test SDF Network ; September 2015";
-
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { useSelectedEscrow } from "@/features/tokens/context/SelectedEscrowContext";
@@ -39,9 +31,10 @@ import { createInvestment } from "@/features/investments/services/investment.ser
 import { MultiReleaseMilestone } from "@trustless-work/escrow";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { fromStroops } from "@/utils/adjustedAmounts";
+import { fromStroops } from "@tokenization/shared/lib/utils";
 import { Networks, rpc, TransactionBuilder } from "@stellar/stellar-sdk";
 import { useTranslations } from "next-intl";
+import { USDC_ADDRESS, SOROBAN_RPC_URL, NETWORK_PASSPHRASE } from "@tokenization/shared/lib/constants";
 
 type InvestFormValues = {
   amount: number;
@@ -53,8 +46,6 @@ interface InvestDialogProps {
   expectedReturn?: number;
   loanDuration?: number;
 }
-
-const DEFAULT_USDC_ADDRESS = process.env.NEXT_PUBLIC_DEFAULT_USDC_ADDRESS ?? "";
 
 export function InvestDialog({
   tokenSaleContractId,
@@ -121,7 +112,7 @@ export function InvestDialog({
       setSubmitStep("buy");
       const payload: BuyTokenPayload = {
         tokenSaleContractId,
-        usdcAddress: DEFAULT_USDC_ADDRESS,
+        usdcAddress: USDC_ADDRESS,
         payerAddress: walletAddress,
         beneficiaryAddress: walletAddress,
         amount: values.amount,
@@ -363,10 +354,6 @@ export function InvestDialog({
             >
               {getSubmitButtonText()}
             </Button>
-
-            {/* <p className="text-center text-xs text-muted-foreground">
-              {t("termsAgreement")}
-            </p> */}
           </form>
         </Form>
       </DialogContent>

@@ -1,0 +1,13 @@
+const USDC_ADDRESS =
+    process.env.NEXT_PUBLIC_DEFAULT_USDC_ADDRESS ||
+    "";
+
+const SOROBAN_RPC_URL =
+    process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ||
+    "";
+
+const NETWORK_PASSPHRASE =
+    process.env.NEXT_PUBLIC_STELLAR_NETWORK_PASSPHRASE ||
+    "";
+
+export { USDC_ADDRESS, SOROBAN_RPC_URL, NETWORK_PASSPHRASE };

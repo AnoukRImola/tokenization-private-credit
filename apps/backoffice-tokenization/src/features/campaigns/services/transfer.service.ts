@@ -7,13 +7,7 @@ import {
   Operation,
   BASE_FEE,
 } from "@stellar/stellar-sdk";
-
-const SOROBAN_RPC_URL =
-  process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ??
-  "https://soroban-testnet.stellar.org";
-const USDC_CONTRACT =
-  process.env.NEXT_PUBLIC_USDC_CONTRACT_ID ??
-  "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
+import { SOROBAN_RPC_URL, USDC_ADDRESS } from "@tokenization/shared/lib/constants";
 
 export async function buildUsdcTransferXdr(params: {
   from: string;
@@ -26,7 +20,7 @@ export async function buildUsdcTransferXdr(params: {
   const stroops = BigInt(Math.round(params.amount * 10_000_000));
 
   const transferOp = Operation.invokeContractFunction({
-    contract: USDC_CONTRACT,
+    contract: USDC_ADDRESS,
     function: "transfer",
     args: [
       new Address(params.from).toScVal(),

@@ -5,6 +5,7 @@ import {
   type DeployVaultResponse,
 } from "@/features/vaults/services/vault.service";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
+import { USDC_ADDRESS } from "@tokenization/shared/lib/constants";
 
 export type CreateVaultFormValues = {
   price: number;
@@ -14,10 +15,6 @@ export type CreateVaultFormValues = {
 type UseCreateVaultParams = {
   onSuccess?: (response: DeployVaultResponse) => void;
 };
-
-const USDC_ADDRESS =
-  process.env.NEXT_PUBLIC_USDC_CONTRACT_ID ??
-  "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
 
 export function useCreateVault(params?: UseCreateVaultParams) {
   const { walletAddress } = useWalletContext();
