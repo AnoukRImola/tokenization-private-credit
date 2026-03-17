@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { SectionTitle } from "@/components/shared/section-title";
+import { SectionTitle } from "@tokenization/ui/section-title";
 import { CampaignsView } from "@/features/campaigns/components/campaigns-view";
 import { Button } from "@tokenization/ui/button";
 import { Plus } from "lucide-react";

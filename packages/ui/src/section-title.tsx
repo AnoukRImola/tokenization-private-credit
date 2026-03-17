@@ -13,3 +13,4 @@ export function SectionTitle({ title, description }: SectionTitleProps) {
     </div>
   );
 }
+

@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import type { Campaign } from "../types/campaign.types";
-import { CampaignCard } from "./campaign-card";
+import { CampaignCard } from "@/components/shared/campaign-card";
 
 type CampaignListProps = {
   campaigns: Campaign[];

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { SectionTitle } from "@/components/shared/section-title";
+import { SectionTitle } from "@tokenization/ui/section-title";
 import { CampaignToolbar } from "@/features/roi/components/campaign-toolbar";
 import { CampaignList } from "@/features/roi/components/campaign-list";
 import type { Campaign, CampaignStatus } from "@/features/roi/types/campaign.types";

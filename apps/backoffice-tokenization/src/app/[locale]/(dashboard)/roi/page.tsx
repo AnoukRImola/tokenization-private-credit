@@ -1,6 +1,6 @@
 "use client";
 
-import { SectionTitle } from "@/components/shared/section-title";
+import { SectionTitle } from "@tokenization/ui/section-title";
 import { RoiView } from "@/features/campaigns/components/roi/roi-view";
 import { useTranslations } from "next-intl";
 

@@ -14,9 +14,9 @@ import {
   FileText,
 } from "lucide-react";
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
-import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
-import type { Campaign } from "../types/campaign.types";
-import { getCampaignStatusConfig } from "../constants/campaign-status";
+import type { GetEscrowsFromIndexerResponse, MultiReleaseMilestone } from "@trustless-work/escrow/types";
+import type { Campaign } from "../../features/roi/types/campaign.types";
+import { getCampaignStatusConfig } from "../../features/roi/constants/campaign-status";
 import { useTranslations } from "next-intl";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 
@@ -27,9 +27,8 @@ interface CampaignCardProps {
 
 export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
   const t = useTranslations("campaigns");
-  const tCommon = useTranslations("common");
   const tClaimRoi = useTranslations("claimRoi");
-  const { title, description, status, id, escrowId, poolSize } = campaign;
+  const { title, description, status, id, escrowId } = campaign;
   const statusCfg = getCampaignStatusConfig(t)[status];
   const escrowExplorerUrl = `https://viewer.trustlesswork.com/${escrowId}`;
 
@@ -46,7 +45,7 @@ export function CampaignCard({ campaign, onClaimRoi }: CampaignCardProps) {
       const data = (await getEscrowByContractIds({
         contractIds: [escrowId],
         validateOnChain: true,
-      })) as unknown;
+      })) as unknown as GetEscrowsFromIndexerResponse[];
 
       if (!Array.isArray(data) || data.length === 0) {
         return null;

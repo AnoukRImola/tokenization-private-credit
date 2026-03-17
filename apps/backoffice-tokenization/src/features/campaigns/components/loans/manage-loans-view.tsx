@@ -39,7 +39,8 @@ import {
 import { useEscrowContext } from "@tokenization/tw-blocks-shared/src/providers/EscrowProvider";
 import { useChangeMilestoneStatus } from "@tokenization/tw-blocks-shared/src/escrows/single-multi-release/change-milestone-status/dialog/useChangeMilestoneStatus";
 import { numericInputKeyDown, parseNumericInput } from "@/lib/numeric-input";
-import { formatCurrency, fromStroops } from "@/lib/utils";
+import { fromStroops } from "@tokenization/shared/lib/utils";
+import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import { useTranslations } from "next-intl";
 
 interface ManageLoansViewProps {

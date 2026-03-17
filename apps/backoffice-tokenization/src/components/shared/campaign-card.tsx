@@ -13,6 +13,7 @@ import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
 import { getCampaignStatusConfig } from "@/features/campaigns/constants/campaign-status";
 import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
+import { GetEscrowsFromIndexerResponse } from "@trustless-work/escrow/types";
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -20,7 +21,7 @@ interface CampaignCardProps {
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
   const t = useTranslations("campaigns");
-  const { id, name, description, status, escrowId } = campaign;
+  const { name, description, status, escrowId } = campaign;
 
   const statusCfg = getCampaignStatusConfig(t)[status];
   const isDraft = status === "DRAFT";
@@ -30,12 +31,11 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
 
   const { data: escrowData } = useQuery({
     queryKey: ["escrow", escrowId],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     queryFn: async () => {
       const data = (await getEscrowByContractIds({
         contractIds: [escrowId],
         validateOnChain: true,
-      })) as any;
+      })) as unknown as GetEscrowsFromIndexerResponse[];
       return data?.[0] ?? null;
     },
     enabled: !isDraft && !!escrowId,

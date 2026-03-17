@@ -21,11 +21,10 @@ All paths below are relative to `apps/investor-tokenization/`.
 
 3. **Hooks** (`src/features/investments/hooks/`)
    - `useUserInvestments` — Fetches user's investments with balance > 0
-   - `useProjectTokenBalances` — Fetches balances for all projects (used by carousel/home)
 
 4. **Components**
-   - `src/features/investments/components/` — `InvestmentCard`, `InvestmentsView`
-   - `src/features/transparency/` — `ProjectList`, `Carousel` (use `useProjectTokenBalances` for balances on cards)
+   - `src/features/investments/components/` — `InvestmentCard`
+   - `src/features/transparency/` — `ProjectList` (no dedicated carousel component)
 
 ## How Token Balance Reading Works
 
@@ -226,37 +225,6 @@ Fetches all investments where the user has a token balance > 0.
 - Includes token metadata
 - Caches results for 2 minutes
 
-### useProjectTokenBalances
-
-Fetches token balances for all projects (used in carousel/home page).
-
-**Returns:**
-```typescript
-{
-  data: Record<string, ProjectTokenBalanceInfo>,
-  isLoading: boolean,
-  isError: boolean
-}
-```
-
-**ProjectTokenBalanceInfo Type:**
-```typescript
-{
-  escrowId: string,
-  tokenFactory: string,
-  balance: string,
-  tokenName?: string,
-  tokenSymbol?: string,
-  tokenDecimals?: number
-}
-```
-
-**Features:**
-- Fetches balances for all projects in parallel
-- Returns a map of `escrowId -> balance info`
-- Includes token metadata
-- Used to display balances on project cards
-
 ## Balance Formatting
 
 ### Raw vs Formatted Balance
@@ -286,12 +254,9 @@ formattedBalance.toLocaleString(undefined, {
 
 ## Project Data Structure
 
-The list of projects used for **balance checks** is defined in the hooks (duplicated in each hook that needs it):
+The list of projects used for **balance checks** is defined in the hooks:
 
-- `useProjectTokenBalances.hook.ts` — `PROJECT_DATA` (used for carousel/home balances)
-- `useUserInvestments.hook.ts` — same `PROJECT_DATA` (used for investments view)
-
-The **carousel UI** gets project cards from `ProjectList.tsx` (`data` array with `escrowId`, `tokenSale`, `tokenFactory`, and optional `src`/`content`). The balances shown on each card come from `useProjectTokenBalances()`, which calls the token-balance API for each project in `PROJECT_DATA`.
+- `useUserInvestments.hook.ts` — `PROJECT_DATA`
 
 **Example PROJECT_DATA (in hooks):**
 

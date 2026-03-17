@@ -1,22 +1,32 @@
 "use client";
 
 import { useLocale } from "next-intl";
-import { useRouter, usePathname } from "@/i18n/navigation";
 import { cn } from "@tokenization/shared/lib/utils";
 
-const locales = [
-  { code: "es" as const, label: "ES" },
-  { code: "en" as const, label: "EN" },
-];
+export type LanguageSwitcherLocale = "es" | "en";
 
-export function LanguageSwitcher() {
+export interface LanguageSwitcherProps {
+  pathname: string;
+  onSwitchLocale: (next: LanguageSwitcherLocale) => void;
+  locales?: ReadonlyArray<{ code: LanguageSwitcherLocale; label: string }>;
+}
+
+const defaultLocales: ReadonlyArray<{ code: LanguageSwitcherLocale; label: string }> =
+  [
+    { code: "es", label: "ES" },
+    { code: "en", label: "EN" },
+  ];
+
+export function LanguageSwitcher({
+  pathname: _pathname,
+  onSwitchLocale,
+  locales = defaultLocales,
+}: LanguageSwitcherProps) {
   const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
 
-  function switchLocale(next: "es" | "en") {
+  function switchLocale(next: LanguageSwitcherLocale) {
     if (next === locale) return;
-    router.replace(pathname, { locale: next });
+    onSwitchLocale(next);
   }
 
   return (
@@ -38,3 +48,4 @@ export function LanguageSwitcher() {
     </div>
   );
 }
+

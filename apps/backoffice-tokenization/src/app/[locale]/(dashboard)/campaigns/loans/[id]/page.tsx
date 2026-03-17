@@ -1,4 +1,4 @@
-import { SectionTitle } from "@/components/shared/section-title";
+import { SectionTitle } from "@tokenization/ui/section-title";
 import { ManageLoansView } from "@/features/campaigns/components/loans/manage-loans-view";
 
 interface Props {

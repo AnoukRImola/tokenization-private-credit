@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SectionTitle } from "@/components/shared/section-title";
+import { SectionTitle } from "@tokenization/ui/section-title";
 import { CampaignToolbar } from "@/features/roi/components/campaign-toolbar";
 import { ProjectList } from "@/features/transparency/ProjectList";
 import type { CampaignStatus } from "@/features/roi/types/campaign.types";
