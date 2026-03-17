@@ -12,7 +12,7 @@ import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
 import { getCampaignStatusConfig } from "@/features/campaigns/constants/campaign-status";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -86,7 +86,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">{t("poolSize")}:</span> USDC {formatCurrency(escrowData?.balance ?? 0)} / USDC {formatCurrency(campaign.poolSize)}
+            <span className="font-bold">{t("poolSize")}:</span> {formatCurrency(escrowData?.balance ?? 0, "USDC")} / {formatCurrency(campaign.poolSize, "USDC")}
           </span>
         </div>
       }
