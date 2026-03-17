@@ -16,6 +16,8 @@ import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/
 import { useUpdateRoiPercentage } from "@/features/campaigns/hooks/useUpdateRoiPercentage";
 import { getRoiPercentage } from "@/features/campaigns/services/campaigns.api";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { getContractExplorerUrl } from "@tokenization/shared/lib/constants";
 
 interface UpdateRoiDialogProps {
   open: boolean;
@@ -32,6 +34,7 @@ export function UpdateRoiDialog({
   vaultId,
   onUpdated,
 }: UpdateRoiDialogProps) {
+  const t = useTranslations("roi");
   const [percentage, setPercentage] = useState("");
   const [isLoadingCurrent, setIsLoadingCurrent] = useState(false);
   const { walletAddress } = useWalletContext();
@@ -87,11 +90,6 @@ export function UpdateRoiDialog({
               autoComplete="off"
             />
           </div>
-
-          <p className="text-xs text-muted-foreground">
-            Vault:{" "}
-            <span className="font-mono text-foreground">{vaultId}</span>
-          </p>
 
           {error ? (
             <p className="text-sm text-destructive">{error}</p>
