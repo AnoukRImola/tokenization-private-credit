@@ -35,7 +35,8 @@ export class VaultService {
     return this.soroban.buildContractCallTransaction(
       dto.contractId,
       'update_roi_porcentage',
-      { new_roi_porcentage: dto.newRoiPorcentage },
+      // The contract expects `new_roi_percentage` (with "c"), even though the method name is spelled "porcentage".
+      { new_roi_percentage: dto.newRoiPorcentage },
       dto.callerPublicKey,
       'vault',
     );
