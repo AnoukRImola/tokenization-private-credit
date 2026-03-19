@@ -80,6 +80,7 @@
     "yourInvestment": "Tu inversión",
     "estimatedReturn": "Retorno estimado ({rate}% x {duration}mo)",
     "totalAtMaturity": "Total al vencimiento",
+    "disclaimerLabel": "Aviso",
     "disclaimer": "Por favor revisa el monto de tu inversión cuidadosamente. Una vez confirmado, estos montos no son editables y la transacción es final.",
     "processing": "Procesando...",
     "addingToken": "Agregando acción a la billetera...",
@@ -93,7 +94,9 @@
       "invalidAmount": "Ingresa un monto válido mayor a 0.",
       "unexpectedError": "Error inesperado al procesar tu inversión.",
       "insufficientBalance": "Balance insuficiente de USDC. Asegúrate de que tu billetera tenga suficiente USDC para completar esta transacción. Puedes obtener USDC de testnet en un faucet de Stellar testnet.",
-      "failedBuild": "No se pudo construir la transacción de compra."
+      "failedBuild": "No se pudo construir la transacción de compra.",
+      "failedAddToken": "No se pudo agregar la acción a Freighter.",
+      "sorobanErrorPrefix": "Error de Soroban"
     }
   },
   "claimRoi": {

@@ -6,12 +6,14 @@ import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { submitAndExtractAddress } from "@/features/campaigns/services/soroban.service";
 import { updateRoiPorcentage } from "@/features/campaigns/services/campaigns.api";
+import { useTranslations } from "next-intl";
 
 interface UseUpdateRoiPercentageParams {
   onSuccess?: () => void;
 }
 
 export function useUpdateRoiPercentage({ onSuccess }: UseUpdateRoiPercentageParams = {}) {
+  const t = useTranslations("roi");
   const { walletAddress } = useWalletContext();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,7 +21,7 @@ export function useUpdateRoiPercentage({ onSuccess }: UseUpdateRoiPercentagePara
 
   const execute = async (vaultContractId: string, newRoiPorcentage: number) => {
     if (!walletAddress) {
-      setError("Wallet not connected");
+      setError(t("errors.walletNotConnected"));
       return;
     }
 
@@ -44,8 +46,7 @@ export function useUpdateRoiPercentage({ onSuccess }: UseUpdateRoiPercentagePara
 
       onSuccess?.();
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Unexpected error";
-      setError(message);
+      setError(t("errors.unexpectedError"));
     } finally {
       setIsSubmitting(false);
     }

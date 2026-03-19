@@ -80,6 +80,7 @@
     "yourInvestment": "Your investment",
     "estimatedReturn": "Estimated return ({rate}% x {duration}mo)",
     "totalAtMaturity": "Total at maturity",
+    "disclaimerLabel": "Disclaimer",
     "disclaimer": "Please review your investment amount carefully. Once confirmed, these amounts are not editable and the transaction is final.",
     "processing": "Processing...",
     "addingToken": "Adding share to wallet...",
@@ -93,7 +94,9 @@
       "invalidAmount": "Enter a valid amount greater than 0.",
       "unexpectedError": "Unexpected error while processing your investment.",
       "insufficientBalance": "Insufficient USDC balance. Please ensure your wallet has enough USDC to complete this transaction. You can get testnet USDC from a Stellar testnet faucet.",
-      "failedBuild": "Failed to build buy transaction."
+      "failedBuild": "Failed to build buy transaction.",
+      "failedAddToken": "Failed to add share to Freighter.",
+      "sorobanErrorPrefix": "Soroban error"
     }
   },
   "claimRoi": {

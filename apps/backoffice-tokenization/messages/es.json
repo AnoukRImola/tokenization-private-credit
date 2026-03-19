@@ -192,6 +192,19 @@
       "disable": "Deshabilitar",
       "enabled": "Vault habilitado",
       "disabled": "Vault deshabilitado"
+    },
+    "updateRoiDialog": {
+      "title": "Actualizar porcentaje de ROI — {campaignName}",
+      "description": "Establezca un nuevo porcentaje de ROI para el vault de esta campaña. El valor debe estar entre 0 y 100.",
+      "fieldLabel": "Porcentaje de ROI (%)",
+      "placeholder": "ej. 12",
+      "updatingLabel": "Actualizando ROI...",
+      "submitLabel": "Actualizar porcentaje de ROI",
+      "successToast": "El porcentaje de ROI se actualizó correctamente"
+    },
+    "errors": {
+      "walletNotConnected": "Wallet no conectada",
+      "unexpectedError": "Error inesperado"
     }
   },
   "tokens": {
@@ -241,6 +254,13 @@
     "vaultContractAddress": "Dirección del Contrato Vault",
     "copied": "¡Copiado!",
     "copy": "Copiar",
+    "enableVaultSuccessToast": "Vault habilitado exitosamente",
+    "errors": {
+      "failedBuildEnableTx": "No se pudo construir la transacción para habilitar el vault.",
+      "transactionSubmissionFailed": "Falló el envío de la transacción.",
+      "enableVaultRequestFailed": "La solicitud para habilitar el vault no fue exitosa",
+      "unexpectedError": "Error inesperado"
+    },
     "validation": {
       "priceRequired": "El precio es requerido",
       "maxPrice": "No puede exceder 100%",
