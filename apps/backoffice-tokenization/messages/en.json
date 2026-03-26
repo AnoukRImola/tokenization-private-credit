@@ -76,6 +76,8 @@
     "filterAll": "All",
     "filterFundraising": "Fundraising",
     "filterActive": "Active",
+    "filterRepayment": "Repayment",
+    "filterClaimable": "Claimable",
     "filterClosed": "Closed",
     "searchPlaceholder": "Search campaigns...",
     "status": {
@@ -157,6 +159,7 @@
     "statusHeader": "Status",
     "actions": "Actions",
     "manageLoans": "Manage Loans",
+    "viewVault": "View Vault",
     "uploadFunds": "Upload Funds",
     "updateRoi": "Update ROI",
     "loadMore": "Load More",
@@ -189,6 +192,19 @@
       "disable": "Disable",
       "enabled": "Vault enabled",
       "disabled": "Vault disabled"
+    },
+    "updateRoiDialog": {
+      "title": "Update ROI Percentage — {campaignName}",
+      "description": "Set a new ROI percentage for this campaign's vault. Value must be between 0 and 100.",
+      "fieldLabel": "ROI Percentage (%)",
+      "placeholder": "e.g. 12",
+      "updatingLabel": "Updating ROI...",
+      "submitLabel": "Update ROI Percentage",
+      "successToast": "ROI percentage updated successfully"
+    },
+    "errors": {
+      "walletNotConnected": "Wallet not connected",
+      "unexpectedError": "Unexpected error"
     }
   },
   "tokens": {
@@ -238,6 +254,13 @@
     "vaultContractAddress": "Vault Contract Address",
     "copied": "Copied!",
     "copy": "Copy",
+    "enableVaultSuccessToast": "Vault enabled successfully",
+    "errors": {
+      "failedBuildEnableTx": "Failed to build enable transaction.",
+      "transactionSubmissionFailed": "Transaction submission failed.",
+      "enableVaultRequestFailed": "Enable vault request did not succeed",
+      "unexpectedError": "Unexpected error"
+    },
     "validation": {
       "priceRequired": "Price is required",
       "maxPrice": "Cannot exceed 100%",

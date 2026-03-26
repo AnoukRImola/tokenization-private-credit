@@ -1,6 +1,6 @@
 "use client";
 
-import { SectionTitle } from "@/components/shared/section-title";
+import { SectionTitle } from "@tokenization/ui/section-title";
 import { CreateCampaignStepper } from "@/features/campaigns/components/create/create-campaign-stepper";
 import { useTranslations } from "next-intl";
 

@@ -11,9 +11,7 @@ export type SendTransactionResponse = {
 };
 
 export type SendTransactionServiceOptions = {
-  /** Core API base URL (e.g. http://localhost:4000). When not set, uses NEXT_PUBLIC_CORE_API_URL or fallback "/api". */
   baseURL?: string;
-  /** API key for core API (x-api-key). Required when baseURL points to core. */
   apiKey?: string;
 };
 
@@ -31,17 +29,13 @@ export class SendTransactionService {
     const env =
       typeof process !== "undefined" ? process.env : ({} as NodeJS.ProcessEnv);
 
-    // Prefer explicit option, then server-side secrets, then public envs
     let apiKey =
       options.apiKey?.trim() ||
-      // When running on the server (Next.js SSR / route handlers), prefer
-      // the same secrets that the Core API uses in its ApiKeyGuard
       (typeof window === "undefined"
         ? env.BACKOFFICE_API_KEY?.trim() ||
-          env.INVESTORS_API_KEY?.trim() ||
-          ""
+        env.INVESTORS_API_KEY?.trim() ||
+        ""
         : "") ||
-      // Fallback to public envs for purely browser-side usage
       env.NEXT_PUBLIC_API_KEY?.trim() ||
       env.NEXT_PUBLIC_INVESTORS_API_KEY?.trim() ||
       env.NEXT_PUBLIC_BACKOFFICE_API_KEY?.trim() ||

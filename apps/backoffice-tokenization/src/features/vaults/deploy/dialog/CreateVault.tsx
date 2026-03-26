@@ -19,7 +19,7 @@ import {
 } from "@tokenization/ui/dialog";
 import { Loader2 } from "lucide-react";
 import { useCreateVault } from "./useCreateVault";
-import { numericInputKeyDown, parseNumericInput } from "@/lib/numeric-input";
+import { numericInputKeyDown, parseNumericInput } from "@tokenization/shared/lib/utils";
 import { useWatch } from "react-hook-form";
 import { VaultDeploySuccessDialog } from "./VaultDeploySuccessDialog";
 import { useTranslations } from "next-intl";

@@ -6,10 +6,11 @@ import {
 } from "@/features/vaults/services/vault.service";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
-import { SendTransactionService } from "@/lib/sendTransactionService";
-import { toastSuccessWithTx } from "@/lib/toastWithTx";
+import { SendTransactionService } from "@tokenization/shared/lib/sendTransactionService";
+import { toastSuccessWithTx } from "@tokenization/ui/toast-with-tx";
 import { updateCampaignStatusByVaultId } from "@/features/campaigns/services/campaigns.api";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslations } from "next-intl";
 
 export type EnableVaultFormValues = {
   vaultContractAddress: string;
@@ -20,6 +21,7 @@ type UseEnableVaultParams = {
 };
 
 export function useEnableVault(params?: UseEnableVaultParams) {
+  const t = useTranslations("vaults");
   const { walletAddress } = useWalletContext();
   const queryClient = useQueryClient();
 
@@ -47,9 +49,7 @@ export function useEnableVault(params?: UseEnableVaultParams) {
       });
 
       if (!enableResponse?.success || !enableResponse?.xdr) {
-        throw new Error(
-          enableResponse?.message ?? "Failed to build enable transaction."
-        );
+        throw new Error(t("errors.failedBuildEnableTx"));
       }
 
       const signedTxXdr = await signTransaction({
@@ -63,12 +63,10 @@ export function useEnableVault(params?: UseEnableVaultParams) {
       });
 
       if (submitResponse.status !== "SUCCESS") {
-        throw new Error(
-          submitResponse.message ?? "Transaction submission failed."
-        );
+        throw new Error(t("errors.transactionSubmissionFailed"));
       }
 
-      toastSuccessWithTx("Vault enabled successfully", submitResponse.hash);
+      toastSuccessWithTx(t("enableVaultSuccessToast"), submitResponse.hash);
 
       try {
         await updateCampaignStatusByVaultId(
@@ -85,11 +83,28 @@ export function useEnableVault(params?: UseEnableVaultParams) {
       if (enableResponse?.success) {
         params?.onSuccess?.(enableResponse);
       } else {
-        setError("Enable vault request did not succeed");
+        setError(t("errors.enableVaultRequestFailed"));
       }
     } catch (e) {
-      const message = e instanceof Error ? e.message : "Unexpected error";
-      setError(message);
+      if (!(e instanceof Error)) {
+        setError(t("errors.unexpectedError"));
+        return;
+      }
+
+      const failedBuildEnableTxMessage = t("errors.failedBuildEnableTx");
+      const transactionSubmissionFailedMessage = t("errors.transactionSubmissionFailed");
+      const enableVaultRequestFailedMessage = t("errors.enableVaultRequestFailed");
+
+      if (
+        e.message === failedBuildEnableTxMessage ||
+        e.message === transactionSubmissionFailedMessage ||
+        e.message === enableVaultRequestFailedMessage
+      ) {
+        setError(e.message);
+        return;
+      }
+
+      setError(t("errors.unexpectedError"));
     } finally {
       setIsSubmitting(false);
     }

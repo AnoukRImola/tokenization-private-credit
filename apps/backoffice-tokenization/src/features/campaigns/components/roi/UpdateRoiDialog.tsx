@@ -16,6 +16,8 @@ import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/
 import { useUpdateRoiPercentage } from "@/features/campaigns/hooks/useUpdateRoiPercentage";
 import { getRoiPercentage } from "@/features/campaigns/services/campaigns.api";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { getContractExplorerUrl } from "@tokenization/shared/lib/constants";
 
 interface UpdateRoiDialogProps {
   open: boolean;
@@ -32,6 +34,7 @@ export function UpdateRoiDialog({
   vaultId,
   onUpdated,
 }: UpdateRoiDialogProps) {
+  const t = useTranslations("roi");
   const [percentage, setPercentage] = useState("");
   const [isLoadingCurrent, setIsLoadingCurrent] = useState(false);
   const { walletAddress } = useWalletContext();
@@ -47,7 +50,7 @@ export function UpdateRoiDialog({
 
   const { execute, isSubmitting, error } = useUpdateRoiPercentage({
     onSuccess: () => {
-      toast.success("ROI percentage updated successfully");
+      toast.success(t("updateRoiDialog.successToast"));
       onUpdated();
       onOpenChange(false);
       setPercentage("");
@@ -65,33 +68,30 @@ export function UpdateRoiDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full! sm:max-w-lg!">
         <DialogHeader>
-          <DialogTitle>Update ROI Percentage — {campaignName}</DialogTitle>
-          <DialogDescription>
-            Set a new ROI percentage for this campaign&apos;s vault. Value must be between 0 and 100.
-          </DialogDescription>
+          <DialogTitle>
+            {t("updateRoiDialog.title", {
+              campaignName,
+            })}
+          </DialogTitle>
+          <DialogDescription>{t("updateRoiDialog.description")}</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="space-y-2">
-            <Label htmlFor="roiPercentage">ROI Percentage (%)</Label>
+            <Label htmlFor="roiPercentage">{t("updateRoiDialog.fieldLabel")}</Label>
             <Input
               id="roiPercentage"
               type="number"
               step="0.01"
               min="0"
               max="100"
-              placeholder="e.g. 12"
+              placeholder={t("updateRoiDialog.placeholder")}
               value={percentage}
               onChange={(e) => setPercentage(e.target.value)}
               disabled={isSubmitting || isLoadingCurrent}
               autoComplete="off"
             />
           </div>
-
-          <p className="text-xs text-muted-foreground">
-            Vault:{" "}
-            <span className="font-mono text-foreground">{vaultId}</span>
-          </p>
 
           {error ? (
             <p className="text-sm text-destructive">{error}</p>
@@ -105,10 +105,10 @@ export function UpdateRoiDialog({
             {isSubmitting ? (
               <div className="flex items-center justify-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Updating ROI...</span>
+                <span>{t("updateRoiDialog.updatingLabel")}</span>
               </div>
             ) : (
-              "Update ROI Percentage"
+              t("updateRoiDialog.submitLabel")
             )}
           </Button>
         </form>

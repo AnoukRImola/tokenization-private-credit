@@ -12,9 +12,9 @@ import type {
 } from "@trustless-work/escrow/types";
 import { InvestDialog } from "@/features/tokens/components/InvestDialog";
 import { SelectedEscrowProvider } from "@/features/tokens/context/SelectedEscrowContext";
-import { getCampaignStatusConfig } from "@/features/roi/constants/campaign-status";
+import { getCampaignStatusConfig } from "@tokenization/shared";
 import type { CampaignFromApi } from "./types";
-import { fromStroops } from "@/utils/adjustedAmounts";
+import { fromStroops } from "@tokenization/shared/lib/utils";
 import { useTranslations } from "next-intl";
 
 export type ProjectCardProps = {

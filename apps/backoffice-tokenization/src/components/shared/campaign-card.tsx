@@ -11,8 +11,10 @@ import { Banknote, CheckCircle, Circle, ExternalLink, Landmark } from "lucide-re
 import { useGetEscrowFromIndexerByContractIds } from "@trustless-work/escrow";
 import type { MultiReleaseMilestone } from "@trustless-work/escrow/types";
 import type { Campaign } from "@/features/campaigns/types/campaign.types";
-import { getCampaignStatusConfig } from "@/features/campaigns/constants/campaign-status";
-import { formatCurrency } from "@/lib/utils";
+import { getCampaignStatusConfig } from "@tokenization/shared";
+import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
+import { GetEscrowsFromIndexerResponse } from "@trustless-work/escrow/types";
+import { ESCROW_EXPLORER_URL } from "@tokenization/shared/lib/constants";
 
 interface CampaignCardProps {
   campaign: Campaign;
@@ -20,22 +22,21 @@ interface CampaignCardProps {
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
   const t = useTranslations("campaigns");
-  const { id, name, description, status, escrowId } = campaign;
+  const { name, description, status, escrowId } = campaign;
 
   const statusCfg = getCampaignStatusConfig(t)[status];
   const isDraft = status === "DRAFT";
-  const escrowExplorerUrl = `https://viewer.trustlesswork.com/${escrowId}`;
+  const escrowExplorerUrl = `${ESCROW_EXPLORER_URL}${escrowId}`;
 
   const { getEscrowByContractIds } = useGetEscrowFromIndexerByContractIds();
 
   const { data: escrowData } = useQuery({
     queryKey: ["escrow", escrowId],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     queryFn: async () => {
       const data = (await getEscrowByContractIds({
         contractIds: [escrowId],
         validateOnChain: true,
-      })) as any;
+      })) as unknown as GetEscrowsFromIndexerResponse[];
       return data?.[0] ?? null;
     },
     enabled: !isDraft && !!escrowId,
@@ -86,7 +87,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
       footer={
         <div className="flex flex-col gap-1">
           <span className="text-xs font-bold text-foreground">
-            <span className="font-bold">{t("poolSize")}:</span> USDC {formatCurrency(escrowData?.balance ?? 0)} / USDC {formatCurrency(campaign.poolSize)}
+            <span className="font-bold">{t("poolSize")}:</span> {formatCurrency(escrowData?.balance ?? 0, "USDC")} / {formatCurrency(campaign.poolSize, "USDC")}
           </span>
         </div>
       }

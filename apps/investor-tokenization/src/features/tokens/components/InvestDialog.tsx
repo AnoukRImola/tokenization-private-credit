@@ -24,14 +24,6 @@ import {
   type BuyTokenPayload,
 } from "@/features/tokens/services/token.service";
 import { addToken } from "@stellar/freighter-api";
-
-const SOROBAN_RPC_URL =
-  process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ??
-  "https://soroban-testnet.stellar.org";
-const NETWORK_PASSPHRASE =
-  process.env.NEXT_PUBLIC_STELLAR_NETWORK_PASSPHRASE ??
-  "Test SDF Network ; September 2015";
-
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
 import { signTransaction } from "@tokenization/tw-blocks-shared/src/wallet-kit/wallet-kit";
 import { useSelectedEscrow } from "@/features/tokens/context/SelectedEscrowContext";
@@ -39,9 +31,10 @@ import { createInvestment } from "@/features/investments/services/investment.ser
 import { MultiReleaseMilestone } from "@trustless-work/escrow";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { fromStroops } from "@/utils/adjustedAmounts";
+import { fromStroops } from "@tokenization/shared/lib/utils";
 import { Networks, rpc, TransactionBuilder } from "@stellar/stellar-sdk";
 import { useTranslations } from "next-intl";
+import { USDC_ADDRESS, SOROBAN_RPC_URL, NETWORK_PASSPHRASE } from "@tokenization/shared/lib/constants";
 
 type InvestFormValues = {
   amount: number;
@@ -53,8 +46,6 @@ interface InvestDialogProps {
   expectedReturn?: number;
   loanDuration?: number;
 }
-
-const DEFAULT_USDC_ADDRESS = process.env.NEXT_PUBLIC_DEFAULT_USDC_ADDRESS ?? "";
 
 export function InvestDialog({
   tokenSaleContractId,
@@ -112,7 +103,7 @@ export function InvestDialog({
 
         if (addTokenResult.error) {
           throw new Error(
-            addTokenResult.error ?? "Failed to add token to Freighter.",
+            addTokenResult.error ?? t("errors.failedAddToken"),
           );
         }
       }
@@ -121,7 +112,7 @@ export function InvestDialog({
       setSubmitStep("buy");
       const payload: BuyTokenPayload = {
         tokenSaleContractId,
-        usdcAddress: DEFAULT_USDC_ADDRESS,
+        usdcAddress: USDC_ADDRESS,
         payerAddress: walletAddress,
         beneficiaryAddress: walletAddress,
         amount: values.amount,
@@ -145,7 +136,7 @@ export function InvestDialog({
       const send = await server.sendTransaction(tx);
       if (send.status === "ERROR") {
         throw new Error(
-          `Soroban error: ${JSON.stringify(send.errorResult)}`,
+          `${t("errors.sorobanErrorPrefix")}: ${JSON.stringify(send.errorResult)}`,
         );
       }
 
@@ -183,18 +174,20 @@ export function InvestDialog({
       form.reset({ amount: 0 });
       setOpen(false);
     } catch (err) {
-      let message =
-        err instanceof Error
-          ? err.message
-          : t("errors.unexpectedError");
+      const rawMessage = err instanceof Error ? err.message : "";
+      let message = t("errors.unexpectedError");
 
       // Check if error is due to insufficient USDC balance
       if (
-        message.includes("resulting balance is not within the allowed range") ||
-        message.includes("balance is not within") ||
-        message.includes("insufficient balance")
+        rawMessage.includes("resulting balance is not within the allowed range") ||
+        rawMessage.includes("balance is not within") ||
+        rawMessage.includes("insufficient balance")
       ) {
         message = t("errors.insufficientBalance");
+      } else if (rawMessage.includes(t("errors.failedAddToken"))) {
+        message = t("errors.failedAddToken");
+      } else if (rawMessage.includes(t("errors.failedBuild"))) {
+        message = t("errors.failedBuild");
       }
 
       setErrorMessage(message);
@@ -346,7 +339,8 @@ export function InvestDialog({
             <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
               <Info className="mt-0.5 h-5 w-5 shrink-0 text-amber-500" />
               <p className="text-sm text-amber-800">
-                <span className="font-semibold">Disclaimer:</span> {t("disclaimer")}
+                <span className="font-semibold">{t("disclaimerLabel")}:</span>{" "}
+                {t("disclaimer")}
               </p>
             </div>
 
@@ -363,10 +357,6 @@ export function InvestDialog({
             >
               {getSubmitButtonText()}
             </Button>
-
-            {/* <p className="text-center text-xs text-muted-foreground">
-              {t("termsAgreement")}
-            </p> */}
           </form>
         </Form>
       </DialogContent>

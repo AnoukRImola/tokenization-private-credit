@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   transpilePackages: [
     "@tokenization/shared",
     "@tokenization/ui",
+    "@tokenization/features",
     "@tokenization/tw-blocks-shared",
   ],
   async rewrites() {

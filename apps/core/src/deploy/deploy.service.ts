@@ -9,7 +9,15 @@ import { DeployVaultDto } from './dto/deploy-vault.dto';
 import { SetAdminDto } from './dto/set-admin.dto';
 
 const TOKEN_DECIMAL = 7;
-const USDC_CONTRACT_ID = 'CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA';
+const DEFAULT_USDC_CONTRACT_ID =
+  'CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA';
+
+function getUsdcContractId(): string {
+  return (
+    process.env.USDC_CONTRACT_ID?.trim() ||
+    DEFAULT_USDC_CONTRACT_ID
+  );
+}
 
 @Injectable()
 export class DeployService {
@@ -83,7 +91,7 @@ export class DeployService {
           token_sale_admin: dto.callerPublicKey,
           token_sale_salt: randomBytes(32),
           token_symbol: dto.tokenSymbol,
-          usdc: USDC_CONTRACT_ID,
+          usdc: getUsdcContractId(),
           vault_admin: dto.callerPublicKey,
           vault_enabled: false,
           vault_salt: randomBytes(32),

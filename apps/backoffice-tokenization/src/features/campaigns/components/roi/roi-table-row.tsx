@@ -14,10 +14,11 @@ import {
   DropdownMenuSeparator,
 } from "@tokenization/ui/dropdown-menu";
 import { cn } from "@tokenization/shared/lib/utils";
-import { ArrowUpCircle, Landmark, MoreHorizontal, Percent } from "lucide-react";
+import { getContractExplorerUrl } from "@tokenization/shared/lib/constants";
+import { ArrowUpCircle, Landmark, MoreHorizontal, Percent, Vault } from "lucide-react";
 import { useWalletContext } from "@tokenization/tw-blocks-shared/src/wallet-kit/WalletProvider";
-import { getCampaignStatusConfig } from "@/features/campaigns/constants/campaign-status";
-import { formatCurrency } from "@/lib/utils";
+import { getCampaignStatusConfig } from "@tokenization/shared";
+import { formatCurrency } from "@tokenization/tw-blocks-shared/src/helpers/format.helper";
 import { getVaultIsEnabled } from "@/features/campaigns/services/campaigns.api";
 import { useVaultUsdcBalance } from "@/features/campaigns/hooks/useVaultUsdcBalance";
 import { ToggleVaultButton } from "@/features/campaigns/components/roi/ToggleVaultButton";
@@ -96,6 +97,19 @@ export function RoiTableRow({ campaign, onAddFunds, onUpdateRoi }: RoiTableRowPr
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
+              {campaign.vaultId && (
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link
+                    href={getContractExplorerUrl(campaign.vaultId)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2"
+                  >
+                    <Vault className="size-3.5" />
+                    {t("viewVault")}
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem asChild className="cursor-pointer">
                 <Link href={`/campaigns/loans/${campaign.escrowId}`}>
                   <Landmark className="size-3.5" />

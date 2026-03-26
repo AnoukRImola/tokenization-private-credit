@@ -7,6 +7,15 @@
     ".": "./src/index.ts",
     "./lib/utils": "./src/lib/utils.ts",
     "./lib/sendTransactionService": "./src/lib/sendTransactionService.ts",
-    "./lib/httpClient": "./src/lib/httpClient.ts"
+    "./lib/httpClient": "./src/lib/httpClient.ts",
+    "./lib/sorobanClient": "./src/lib/sorobanClient.ts",
+    "./lib/sorobanSubmitAndWait": "./src/lib/sorobanSubmitAndWait.ts",
+    "./lib/contractErrorHandler": "./src/lib/contractErrorHandler.ts",
+    "./lib/vaultDeploymentService": "./src/lib/vaultDeploymentService.ts",
+    "./lib/constants": "./src/lib/constants.ts",
+    "./src/types/campaign": "./src/types/campaign.ts"
+  },
+  "dependencies": {
+    "@stellar/stellar-sdk": "^14.3.3"
   }
 }

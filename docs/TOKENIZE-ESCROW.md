@@ -6,8 +6,7 @@ This document maps the current tokenize escrow flow, identifying all components,
 ## File Paths
 
 ### Backoffice UI Components
-- **Route/Page**: `apps/backoffice-tokenization/src/app/manage-escrows/page.tsx`
-- **View Component**: `apps/backoffice-tokenization/src/features/manage-escrows/ManageEscrowsView.tsx`
+- **UI Route/Page**: _Not currently wired in `apps/backoffice-tokenization/src/app`_
 - **Dialog Component**: `apps/backoffice-tokenization/src/features/tokens/deploy/dialog/TokenizeEscrow.tsx`
 - **Hook**: `apps/backoffice-tokenization/src/features/tokens/deploy/dialog/useTokenizeEscrow.ts`
 - **Service**: `apps/backoffice-tokenization/src/features/tokens/services/token.service.ts`
@@ -44,9 +43,8 @@ Form values are typed in `useTokenizeEscrow.ts` as `TokenizeEscrowFormValues` an
 ```
 User (Browser)
     │
-    ├─> [1] Navigate to /manage-escrows
-    │   └─> ManageEscrowsView.tsx
-    │       └─> TokenizeEscrowDialog (Button trigger)
+    ├─> [1] Navigate to the UI entry point (TBD)
+    │   └─> TokenizeEscrowDialog (Button trigger)
     │
     ├─> [2] User clicks "Tokenize Escrow" button
     │   └─> Opens TokenizeEscrowDialog
